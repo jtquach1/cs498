@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.codehaus.jackson.map.ObjectMapper;
 
 public class FSA {
     protected Alphabet alphabet;
