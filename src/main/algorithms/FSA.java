@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +38,19 @@ public class FSA {
         this.finalStates.add(state);
     }
 
-    public void addMove(State state, Transition transition) {
-        this.moves.put(state, transition);
+    public void addMove(State from, Character consumed, State to) {
+        Transition transition = this.moves.get(from);
+        if (transition == null) {
+            transition = new Transition();
+            List<State> others = new ArrayList<>();
+            others.add(to);
+            transition.put(consumed, others);
+            this.moves.put(from,  transition);
+        }
+        else {
+            List<State> others = transition.get(consumed);
+            others.add(to);
+        }
     }
 }
 
