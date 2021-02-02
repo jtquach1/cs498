@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 public class NFA extends FSA {
     private NFA nfa;
     public static final char EPSILON = '\u025B';
@@ -5,6 +7,10 @@ public class NFA extends FSA {
 
     public static NFA regularExpressionToNFA(String regularExpression) {
         NFA nfa = new NFA();
+        int regexLength = regularExpression.length();
+        Stack<Integer> operatorIndices = new Stack<>();
+
+
         return nfa;
     }
 
