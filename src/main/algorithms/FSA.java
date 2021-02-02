@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.HashSet;
 
-
 public class FSA {
     protected Alphabet alphabet;
     protected HashSet<State> states;
@@ -24,7 +23,6 @@ public class FSA {
     public void addSymbol(Character newSymbol) {
         this.alphabet.addSymbol(newSymbol);
     }
-
 
 }
 
