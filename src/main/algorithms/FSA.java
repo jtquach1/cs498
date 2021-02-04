@@ -9,11 +9,12 @@ public class FSA {
     private State start;
     private HashSet<State> finalStates;
     private HashMap<State, Transition> moves;
+    protected int idCounter;
 
     public FSA() {
         alphabet = new Alphabet();
         states = new HashSet<>();
-        start = new State();
+        start = new State(idCounter++);
         finalStates = new HashSet<>();
         moves = new HashMap<>();
     }
