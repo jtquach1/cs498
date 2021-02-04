@@ -4,53 +4,76 @@ import java.util.HashSet;
 import java.util.List;
 
 public class FSA {
-    protected Alphabet alphabet;
-    protected HashSet<State> states;
-    protected State start;
-    protected HashSet<State> finalStates;
-    protected HashMap<State, Transition> moves;
+    private Alphabet alphabet;
+    private HashSet<State> states;
+    private State start;
+    private HashSet<State> finalStates;
+    private HashMap<State, Transition> moves;
 
     public FSA() {
-        this.alphabet = new Alphabet();
-        this.states = new HashSet<>();
-        this.start = new State();
-        this.finalStates = new HashSet<>();
-        this.moves = new HashMap<>();
+        alphabet = new Alphabet();
+        states = new HashSet<>();
+        start = new State();
+        finalStates = new HashSet<>();
+        moves = new HashMap<>();
     }
 
     public HashSet<Character> getSymbols() {
-        return this.alphabet.getSymbols();
+        return alphabet.getSymbols();
     }
 
     public void addSymbol(Character newSymbol) {
-        this.alphabet.addSymbol(newSymbol);
+        alphabet.addSymbol(newSymbol);
     }
 
     public void addState(State state) {
-        this.states.add(state);
-    }
-
-    public void setStart(State state) {
-        this.start = state;
+        states.add(state);
     }
 
     public void addFinalState(State state) {
-        this.finalStates.add(state);
+        finalStates.add(state);
+    }
+
+    public void removeFinalStates() {
+        finalStates.clear();
     }
 
     public void addMove(State from, Character consumed, State to) {
-        Transition transition = this.moves.get(from);
+        Transition transition = moves.get(from);
         if (transition == null) {
             transition = new Transition();
             List<State> others = new ArrayList<>();
             others.add(to);
             transition.put(consumed, others);
-            this.moves.put(from,  transition);
-        }
-        else {
+            moves.put(from, transition);
+        } else {
             List<State> others = transition.get(consumed);
             others.add(to);
         }
+    }
+
+    public Alphabet getAlphabet() {
+        return alphabet;
+    }
+
+    public HashSet<State> getStates() {
+        return states;
+    }
+
+    public State getStart() {
+        return start;
+    }
+
+    public void setStart(State state) {
+        start = state;
+    }
+
+    public HashSet<State> getFinalStates() {
+        return finalStates;
+    }
+
+    public HashMap<State, Transition> getMoves() {
+        return moves;
     }
 }
 
