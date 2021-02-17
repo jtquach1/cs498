@@ -5,7 +5,34 @@ import java.util.Stack;
 public class NFA extends FSA {
     public static final char EPSILON = '\u025B';
     public static final Character[] reservedCharacters = new Character[]{'|', '(', ')', '*', EPSILON};
-    private NFA nfa;
+
+    public NFA concatenate(NFA other) {
+        NFA result = this;
+        result.connectOriginalFinalStatesToOtherStart(other);
+        result.removeOriginalFinalStates();
+        result.copyStates(other);
+        result.copyAlphabet(other);
+        result.copyMoves(other);
+        result.copyFinalStates(other);
+        return result;
+    }
+
+    public NFA kleeneStar() {
+        NFA result = this;
+        result.connectOriginalFinalStatesToOriginalStart();
+        result.addNewFinal();
+        result.addNewStart();
+        result.connectNewStartToNewFinal();
+        return result;
+    }
+
+    public NFA alternate(NFA other) {
+        NFA result = this;
+        result.addNewStart();
+        result.addNewFinal();
+        NFA helperFinal = new NFA();
+        return result;
+    }
 
     public void regularExpressionToNFA(String regularExpression) {
         int regexLength = regularExpression.length();
@@ -13,42 +40,33 @@ public class NFA extends FSA {
 
     }
 
-    public void concatenate(NFA other) {
-        connectOriginalFinalStatesToOtherStart(other);
-        removeOriginalFinalStates();
-        copyStates(other);
-        copyAlphabet(other);
-        copyMoves(other);
-        copyFinalStates(other);
-    }
-
     private void copyFinalStates(NFA other) {
         for (State state : other.getFinalStates()) {
-            nfa.addFinalState(state);
+            this.addFinalState(state);
         }
     }
 
     private void removeOriginalFinalStates() {
-        nfa.removeFinalStates();
+        this.removeFinalStates();
     }
 
     private void copyAlphabet(NFA other) {
         for (Character consumed : other.getSymbols()) {
-            nfa.addSymbol(consumed);
+            this.addSymbol(consumed);
         }
     }
 
     private void copyStates(NFA other) {
         for (State state : other.getStates()) {
-            nfa.addState(state);
+            this.addState(state);
         }
     }
 
     private void connectOriginalFinalStatesToOtherStart(NFA other) {
-        HashSet<State> finalStates = nfa.getFinalStates();
+        HashSet<State> finalStates = this.getFinalStates();
         State otherStart = other.getStart();
         for (State finalState : finalStates) {
-            nfa.addMove(finalState, EPSILON, otherStart);
+            this.addMove(finalState, EPSILON, otherStart);
         }
     }
 
@@ -58,17 +76,10 @@ public class NFA extends FSA {
             Transition transition = otherMoves.get(from);
             for (Character consumed : transition.keySet()) {
                 for (State to : transition.get(consumed)) {
-                    nfa.addMove(from, consumed, to);
+                    this.addMove(from, consumed, to);
                 }
             }
         }
-    }
-
-    public void kleeneStar() {
-        connectOriginalFinalStatesToOriginalStart();
-        addNewFinal();
-        addNewStart();
-        connectNewStartToNewFinal();
     }
 
     private void connectNewStartToNewFinal() {
@@ -107,12 +118,6 @@ public class NFA extends FSA {
         addMove(newStart, EPSILON, oldStart);
         setStart(newStart);
 
-    }
-
-    public void alternate(NFA other) {
-        addNewStart();
-        addNewFinal();
-        NFA helperFinal = new NFA();
     }
 
 }
