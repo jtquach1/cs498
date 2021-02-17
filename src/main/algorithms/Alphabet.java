@@ -1,23 +1,26 @@
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
-public class Alphabet {
-    private HashSet<Character> symbols = new HashSet<>();
-
-    public HashSet<Character> getSymbols() {
-        return symbols;
-    }
-
+public class Alphabet extends HashSet<Character> {
     public void addSymbol(Character newSymbol) {
-        symbols.add(newSymbol);
+        this.add(newSymbol);
     }
 
     public void addSymbols(Character... newSymbols) {
-        symbols.addAll(Arrays.asList(newSymbols));
+        this.addAll(Arrays.asList(newSymbols));
+    }
+
+    public void addSymbols(List<Character> newSymbols) {
+        this.addAll(newSymbols);
     }
 
     public void toJSON(JSONElement json) {
-        json.addAttribute("Alphabet", symbols.toString());
+        json.addAttribute("Alphabet", this.toString());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
 }

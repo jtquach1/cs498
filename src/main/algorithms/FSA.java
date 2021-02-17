@@ -1,7 +1,5 @@
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
 
 public class FSA {
     private Alphabet alphabet;
@@ -9,7 +7,7 @@ public class FSA {
     private State start;
     private HashSet<State> finalStates;
     private HashSet<Move> moves;
-    private final JSONElement e = new JSONElement();
+    private JSONElement e;
 
     public FSA() {
         alphabet = new Alphabet();
@@ -17,10 +15,7 @@ public class FSA {
         start = new State();
         finalStates = new HashSet<>();
         moves = new HashSet<>();
-    }
-
-    public HashSet<Character> getSymbols() {
-        return alphabet.getSymbols();
+        states.add(start);
     }
 
     public void addSymbol(Character newSymbol) {
@@ -71,36 +66,58 @@ public class FSA {
         return moves;
     }
 
+    public void toJSON() {
+        JSONElement e = new JSONElement();
+        alphabet.toJSON(e);
+
+        JSONElement e1 = new JSONElement();
+        e.addChild("States", e1);
+        for (State state : states) {
+            state.toJSON(e1);
+        }
+
+        JSONElement e2 = new JSONElement();
+        e.addChild("Start", e2);
+        start.toJSON(e2);
+
+        JSONElement e3 = new JSONElement();
+        e.addChild("FinalStates", e3);
+        for (State state : finalStates) {
+            state.toJSON(e3);
+        }
+
+        JSONElement e4 = new JSONElement();
+        e.addChild("Moves", e4);
+        for (Move move : moves) {
+            move.toJSON(e4);
+        }
+
+        this.e = e;
+    }
+
     @Override
     public String toString() {
         toJSON();
         return e.toString();
     }
 
-    public void toJSON() {
-        alphabet.toJSON(e);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FSA fsa = (FSA) o;
+        boolean isAlphabetEqual = Objects.equals(alphabet, fsa.alphabet);
+        boolean areStatesEqual = Objects.equals(states, fsa.states);
+        boolean isStartEqual = Objects.equals(start, fsa.start);
+        boolean areFinalStatesEqual = Objects.equals(finalStates, fsa.finalStates);
+        boolean areMovesEqual = Objects.equals(moves, fsa.moves);
+        boolean isJSONEqual = Objects.equals(e, fsa.e);
+        return isAlphabetEqual && areStatesEqual && isStartEqual && areFinalStatesEqual && areMovesEqual && isJSONEqual;
+    }
 
-        JSONElement e1 = new JSONElement();
-        for (State state : states) {
-            state.toJSON(e1);
-        }
-        e.addChild("States", e1);
-
-        JSONElement e2 = new JSONElement();
-        start.toJSON(e2);
-        e.addChild("Start", e2);
-
-        JSONElement e3 = new JSONElement();
-        for (State state : finalStates) {
-            state.toJSON(e3);
-        }
-        e.addChild("FinalStates", e3);
-
-        JSONElement e4 = new JSONElement();
-        for (Move move : moves) {
-            move.toJSON(e4);
-        }
-        e.addChild("Moves", e4);
+    @Override
+    public int hashCode() {
+        return Objects.hash(alphabet, states, start, finalStates, moves, e);
     }
 }
 

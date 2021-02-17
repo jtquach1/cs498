@@ -1,4 +1,3 @@
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -51,7 +50,7 @@ public class NFA extends FSA {
     }
 
     private void copyAlphabet(NFA other) {
-        for (Character consumed : other.getSymbols()) {
+        for (Character consumed : other.getAlphabet()) {
             this.addSymbol(consumed);
         }
     }
