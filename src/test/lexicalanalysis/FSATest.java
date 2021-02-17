@@ -26,9 +26,19 @@ class FSATest {
     @Test
     public void testState() {
         State start = new State();
-        State other = new State(1);
+        State other = new State();
         assertEquals(0, start.getId());
         assertEquals(1, other.getId());
+    }
+
+    @Test void testFSA() {
+        State start = new State();
+        FSA fsa = new FSA();
+        fsa.addState(start);
+        fsa.addSymbol('a');
+        fsa.addMove(start, 'a', start);
+        fsa.addFinalState(start);
+        assertEquals("", fsa);
     }
 
 }

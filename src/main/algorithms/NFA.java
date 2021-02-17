@@ -71,14 +71,9 @@ public class NFA extends FSA {
     }
 
     private void copyMoves(NFA other) {
-        HashMap<State, Transition> otherMoves = other.getMoves();
-        for (State from : otherMoves.keySet()) {
-            Transition transition = otherMoves.get(from);
-            for (Character consumed : transition.keySet()) {
-                for (State to : transition.get(consumed)) {
-                    this.addMove(from, consumed, to);
-                }
-            }
+        HashSet<Move> otherMoves = other.getMoves();
+        for (Move move : otherMoves) {
+            this.addMove(move);
         }
     }
 
@@ -91,7 +86,7 @@ public class NFA extends FSA {
 
     private void addNewFinal() {
         HashSet<State> finalStates = getFinalStates();
-        State newFinal = new State(idCounter++);
+        State newFinal = new State();
         for (State finalState : finalStates) {
             addMove(finalState, EPSILON, newFinal);
         }
@@ -109,7 +104,7 @@ public class NFA extends FSA {
 
     private void addNewStart() {
         State oldStart = getStart();
-        State newStart = new State(oldStart.getId() - 1);
+        State newStart = new State();
         addNewStart(oldStart, newStart);
     }
 

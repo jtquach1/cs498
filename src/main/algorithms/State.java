@@ -1,12 +1,11 @@
 public class State {
-    private int id;
+    private final int id;
+    private static int idCounter;
+    private final JSONElement e = new JSONElement();
 
     public State() {
-        this.id = 0;
-    }
-
-    public State(int id) {
-        this.id = id;
+        this.id = idCounter++;
+        e.addAttribute("id", Integer.toString(id));
     }
 
     public int getId() {
@@ -15,8 +14,10 @@ public class State {
 
     @Override
     public String toString() {
-        return "State{" +
-                "id=" + id +
-                '}';
+        return Integer.toString(id);
+    }
+
+    public void toJSON(JSONElement json) {
+        json.addChild("State", e);
     }
 }

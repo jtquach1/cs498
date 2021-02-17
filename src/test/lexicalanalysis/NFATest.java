@@ -17,8 +17,8 @@ class NFATest {
     @Test
     public void testConcatenate() {
         NFA first = new NFA();
-        State s0 = new State(0);
-        State s1 = new State(1);
+        State s0 = new State();
+        State s1 = new State();
         first.addSymbol('a');
         first.addState(s0);
         first.addState(s1);
@@ -27,8 +27,8 @@ class NFATest {
         first.addMove(s0, 'a', s1);
 
         NFA second = new NFA();
-        State s2 = new State(2);
-        State s3 = new State(3);
+        State s2 = new State();
+        State s3 = new State();
         second.addSymbol('b');
         second.addState(s2);
         second.addState(s3);

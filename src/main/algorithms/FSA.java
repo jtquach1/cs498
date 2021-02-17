@@ -8,15 +8,15 @@ public class FSA {
     private HashSet<State> states;
     private State start;
     private HashSet<State> finalStates;
-    private HashMap<State, Transition> moves;
-    protected int idCounter;
+    private HashSet<Move> moves;
+    private final JSONElement e = new JSONElement();
 
     public FSA() {
         alphabet = new Alphabet();
         states = new HashSet<>();
-        start = new State(idCounter++);
+        start = new State();
         finalStates = new HashSet<>();
-        moves = new HashMap<>();
+        moves = new HashSet<>();
     }
 
     public HashSet<Character> getSymbols() {
@@ -40,17 +40,11 @@ public class FSA {
     }
 
     public void addMove(State from, Character consumed, State to) {
-        Transition transition = moves.get(from);
-        if (transition == null) {
-            transition = new Transition();
-            List<State> others = new ArrayList<>();
-            others.add(to);
-            transition.put(consumed, others);
-            moves.put(from, transition);
-        } else {
-            List<State> others = transition.get(consumed);
-            others.add(to);
-        }
+        moves.add(new Move(from, consumed, to));
+    }
+
+    public void addMove(Move move) {
+        moves.add(move);
     }
 
     public Alphabet getAlphabet() {
@@ -73,8 +67,40 @@ public class FSA {
         return finalStates;
     }
 
-    public HashMap<State, Transition> getMoves() {
+    public HashSet<Move> getMoves() {
         return moves;
+    }
+
+    @Override
+    public String toString() {
+        toJSON();
+        return e.toString();
+    }
+
+    public void toJSON() {
+        alphabet.toJSON(e);
+
+        JSONElement e1 = new JSONElement();
+        for (State state : states) {
+            state.toJSON(e1);
+        }
+        e.addChild("States", e1);
+
+        JSONElement e2 = new JSONElement();
+        start.toJSON(e2);
+        e.addChild("Start", e2);
+
+        JSONElement e3 = new JSONElement();
+        for (State state : finalStates) {
+            state.toJSON(e3);
+        }
+        e.addChild("FinalStates", e3);
+
+        JSONElement e4 = new JSONElement();
+        for (Move move : moves) {
+            move.toJSON(e4);
+        }
+        e.addChild("Moves", e4);
     }
 }
 

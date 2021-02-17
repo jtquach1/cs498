@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashSet;
 
 public class Alphabet {
@@ -11,8 +12,12 @@ public class Alphabet {
         symbols.add(newSymbol);
     }
 
-    @Override
-    public String toString() {
-        return symbols.toString();
+    public void addSymbols(Character... newSymbols) {
+        symbols.addAll(Arrays.asList(newSymbols));
     }
+
+    public void toJSON(JSONElement json) {
+        json.addAttribute("Alphabet", symbols.toString());
+    }
+
 }
