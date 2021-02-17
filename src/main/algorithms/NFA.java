@@ -99,13 +99,20 @@ public class NFA extends FSA {
     private void addNewStart() {
         State oldStart = getStart();
         State newStart = new State(oldStart.getId() - 1);
+        addNewStart(oldStart, newStart);
+    }
+
+    private void addNewStart(State oldStart, State newStart) {
         addState(newStart);
         addMove(newStart, EPSILON, oldStart);
         setStart(newStart);
+
     }
 
-    public void alternate(NFA... others) {
-        NFA nfa = new NFA();
+    public void alternate(NFA other) {
+        addNewStart();
+        addNewFinal();
+        NFA helperFinal = new NFA();
     }
 
 }
