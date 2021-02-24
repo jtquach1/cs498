@@ -18,6 +18,30 @@ public class FSA {
         states.add(start);
     }
 
+    public FSA(Alphabet alphabet, HashSet<State> states, State start,
+               HashSet<State> finalStates, HashSet<Move> moves) {
+        this.alphabet = alphabet;
+        this.states = states;
+        this.start = start;
+        this.finalStates = finalStates;
+        this.moves = moves;
+    }
+
+    public FSA clone() {
+        Alphabet alphabet = new Alphabet();
+        HashSet<State> states = new HashSet<>();
+        State start = this.getStart();
+        HashSet<State> finalStates = new HashSet<>();
+        HashSet<Move> moves = new HashSet<>();
+
+        alphabet.addAll(this.getAlphabet());
+        states.addAll(this.getStates());
+        finalStates.addAll(this.getFinalStates());
+        moves.addAll(this.getMoves());
+
+        return new FSA(alphabet, states, start, finalStates, moves);
+    }
+
     public void addSymbol(Character newSymbol) {
         alphabet.addSymbol(newSymbol);
     }

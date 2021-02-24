@@ -5,8 +5,32 @@ public class NFA extends FSA {
     public static final char EPSILON = '\u025B';
     public static final Character[] reservedCharacters = new Character[]{'|', '(', ')', '*', EPSILON};
 
+    public NFA() {
+        super();
+    }
+
+    public NFA(Alphabet alphabet, HashSet<State> states, State start,
+               HashSet<State> finalStates, HashSet<Move> moves) {
+        super(alphabet, states, start, finalStates, moves);
+    }
+
+    public NFA clone() {
+        Alphabet alphabet = new Alphabet();
+        HashSet<State> states = new HashSet<>();
+        State start = this.getStart();
+        HashSet<State> finalStates = new HashSet<>();
+        HashSet<Move> moves = new HashSet<>();
+
+        alphabet.addAll(this.getAlphabet());
+        states.addAll(this.getStates());
+        finalStates.addAll(this.getFinalStates());
+        moves.addAll(this.getMoves());
+
+        return new NFA(alphabet, states, start, finalStates, moves);
+    }
+
     public NFA concatenate(NFA other) {
-        NFA result = this;
+        NFA result = this.clone();
         result.connectOriginalFinalStatesToOtherStart(other);
         result.removeOriginalFinalStates();
         result.copyStates(other);

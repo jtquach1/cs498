@@ -9,5 +9,6 @@
         <module name="cs498" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="14" />
   </component>
 </project>
