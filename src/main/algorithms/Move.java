@@ -1,5 +1,3 @@
-import java.util.Objects;
-
 public class Move {
     private State from;
     private Character consumed;
@@ -11,27 +9,16 @@ public class Move {
         this.to = to;
     }
 
-    public void toJSON(JSONElement json) {
-        JSONElement e = new JSONElement();
-        json.addChild("Move", e);
-        e.addAttribute("From", from.toString());
-        e.addAttribute("Consumed", consumed.toString());
-        e.addAttribute("To", to.toString());
+    public State getFrom() {
+        return this.from;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Move move = (Move) o;
-        boolean isFromEqual = Objects.equals(from, move.from);
-        boolean isSameConsumed = Objects.equals(consumed, move.consumed);
-        boolean isSameTo = Objects.equals(to, move.to);
-        return isFromEqual && isSameConsumed && isSameTo;
+    public Character getConsumed() {
+        return this.consumed;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(from, consumed, to);
+    public State getTo() {
+        return this.to;
     }
+
 }

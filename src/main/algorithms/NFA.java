@@ -138,4 +138,49 @@ public class NFA extends FSA {
 
     }
 
+    public static void main(String[] args) {
+        NFA first;
+        {
+            Alphabet alphabet = new Alphabet();
+            alphabet.addSymbol('a');
+            HashSet<State> states = new HashSet<>();
+            State start = new State();
+            HashSet<State> finalStates = new HashSet<>();
+            State last = new State();
+            HashSet<Move> moves = new HashSet<>();
+            Move move = new Move(start, 'a', last);
+            moves.add(move);
+            states.add(start);
+            states.add(last);
+            finalStates.add(last);
+
+            first = new NFA(alphabet, states, start, finalStates, moves);
+        }
+
+        NFA second;
+        {
+            Alphabet alphabet = new Alphabet();
+            alphabet.addSymbol('b');
+            HashSet<State> states = new HashSet<>();
+            State start = new State();
+            HashSet<State> finalStates = new HashSet<>();
+            State last = new State();
+            HashSet<Move> moves = new HashSet<>();
+            Move move = new Move(start, 'b', last);
+            moves.add(move);
+            states.add(start);
+            states.add(last);
+            finalStates.add(last);
+
+            second = new NFA(alphabet, states, start, finalStates, moves);
+        }
+
+        NFA concatTest = first.concatenate(second);
+
+        String firstJson = first.toString();
+        String secondJson = second.toString();
+        String concatJson = concatTest.toString();
+
+    }
+
 }

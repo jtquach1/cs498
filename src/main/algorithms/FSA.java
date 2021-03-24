@@ -1,13 +1,13 @@
+import java.io.StringWriter;
 import java.util.HashSet;
-import java.util.Objects;
+import javax.json.*;
 
 public class FSA {
-    private Alphabet alphabet;
-    private HashSet<State> states;
+    private final Alphabet alphabet;
+    private final HashSet<State> states;
     private State start;
-    private HashSet<State> finalStates;
-    private HashSet<Move> moves;
-    private JSONElement e;
+    private final HashSet<State> finalStates;
+    private final HashSet<Move> moves;
 
     public FSA() {
         alphabet = new Alphabet();
@@ -90,58 +90,46 @@ public class FSA {
         return moves;
     }
 
-    public void toJSON() {
-        JSONElement e = new JSONElement();
-        alphabet.toJSON(e);
-
-        JSONElement e1 = new JSONElement();
-        e.addChild("States", e1);
-        for (State state : states) {
-            state.toJSON(e1);
-        }
-
-        JSONElement e2 = new JSONElement();
-        e.addChild("Start", e2);
-        start.toJSON(e2);
-
-        JSONElement e3 = new JSONElement();
-        e.addChild("FinalStates", e3);
-        for (State state : finalStates) {
-            state.toJSON(e3);
-        }
-
-        JSONElement e4 = new JSONElement();
-        e.addChild("Moves", e4);
-        for (Move move : moves) {
-            move.toJSON(e4);
-        }
-
-        this.e = e;
-    }
-
     @Override
     public String toString() {
-        toJSON();
-        return e.toString();
-    }
+        JsonArrayBuilder alphabet = Json.createArrayBuilder();
+        for (Character c : this.alphabet) {
+            alphabet.add(c.toString());
+        }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FSA fsa = (FSA) o;
-        boolean isAlphabetEqual = Objects.equals(alphabet, fsa.alphabet);
-        boolean areStatesEqual = Objects.equals(states, fsa.states);
-        boolean isStartEqual = Objects.equals(start, fsa.start);
-        boolean areFinalStatesEqual = Objects.equals(finalStates, fsa.finalStates);
-        boolean areMovesEqual = Objects.equals(moves, fsa.moves);
-        boolean isJSONEqual = Objects.equals(e, fsa.e);
-        return isAlphabetEqual && areStatesEqual && isStartEqual && areFinalStatesEqual && areMovesEqual && isJSONEqual;
-    }
+        JsonArrayBuilder states = Json.createArrayBuilder();
+        for (State s : this.states) {
+            states.add(s.getId());
+        }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(alphabet, states, start, finalStates, moves, e);
+        JsonArrayBuilder finalStates = Json.createArrayBuilder();
+        for (State s : this.finalStates) {
+            finalStates.add(s.getId());
+        }
+
+        JsonArrayBuilder moves = Json.createArrayBuilder();
+        for (Move m : this.moves) {
+            JsonObject move = Json.createObjectBuilder()
+                    .add("from", m.getFrom().getId())
+                    .add("consumed", m.getConsumed().toString())
+                    .add("to", m.getTo().getId())
+                    .build();
+            moves.add(move);
+        }
+
+        JsonObject fsa = Json.createObjectBuilder()
+                .add("alphabet", alphabet)
+                .add("states", states)
+                .add("start", this.start.getId())
+                .add("finalStates", finalStates)
+                .add("moves", moves)
+                .build();
+
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = Json.createWriter(stringWriter);
+        jsonWriter.writeObject(fsa);
+        jsonWriter.close();
+        return stringWriter.getBuffer().toString();
     }
 }
 

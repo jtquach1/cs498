@@ -14,13 +14,4 @@ public class Alphabet extends HashSet<Character> {
     public void addSymbols(List<Character> newSymbols) {
         this.addAll(newSymbols);
     }
-
-    public void toJSON(JSONElement json) {
-        json.addAttribute("Alphabet", this.toString());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
 }
