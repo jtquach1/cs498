@@ -1,3 +1,4 @@
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashSet;
 import javax.json.*;
@@ -25,6 +26,11 @@ public class FSA {
         this.start = start;
         this.finalStates = finalStates;
         this.moves = moves;
+    }
+
+    public static FSA convert(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        return new FSA();
     }
 
     public FSA clone() {
