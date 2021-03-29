@@ -1,6 +1,6 @@
 public class State {
-    private final int id;
     private static int idCounter;
+    private final int id;
 
     public State() {
         this.id = idCounter++;

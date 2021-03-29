@@ -1,14 +1,16 @@
+import org.jetbrains.annotations.NotNull;
+
+import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashSet;
-import javax.json.*;
 
 public class FSA {
     private final Alphabet alphabet;
     private final HashSet<State> states;
-    private State start;
     private final HashSet<State> finalStates;
     private final HashSet<Move> moves;
+    private State start;
 
     public FSA() {
         alphabet = new Alphabet();
@@ -30,7 +32,65 @@ public class FSA {
 
     public static FSA convert(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
-        return new FSA();
+        JsonObject fsa = jsonReader.readObject();
+
+        Alphabet alphabet = convertJSONToAlphabet(fsa);
+        HashSet<State> states = convertJSONToStates(fsa);
+        State start = convertJSONToStart(fsa);
+        HashSet<State> finalStates = convertJSONToFinalStates(fsa);
+        HashSet<Move> moves = convertJSONToMoves(fsa);
+
+        return new FSA(alphabet, states, start, finalStates, moves);
+    }
+
+    @NotNull
+    private static State convertJSONToStart(JsonObject fsa) {
+        int id = fsa.getJsonNumber("start").intValue();
+        return new State(id);
+    }
+
+    @NotNull
+    private static HashSet<Move> convertJSONToMoves(JsonObject fsa) {
+        HashSet<Move> moves = new HashSet<>();
+        JsonArray jsonMoves = fsa.getJsonArray("moves");
+        for (int i = 0; i < jsonMoves.toArray().length; i++) {
+            JsonObject jsonMove = jsonMoves.getJsonObject(i);
+            State from = new State(jsonMove.getInt("from"));
+            Character consumed = jsonMove.getString("consumed").charAt(0);
+            State to = new State(jsonMove.getInt("to"));
+            moves.add(new Move(from, consumed, to));
+        }
+        return moves;
+    }
+
+    @NotNull
+    private static HashSet<State> convertJSONToFinalStates(JsonObject fsa) {
+        HashSet<State> finalStates = new HashSet<>();
+        JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
+        for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
+            finalStates.add(new State(jsonFinalStates.getInt(i)));
+        }
+        return finalStates;
+    }
+
+    @NotNull
+    private static HashSet<State> convertJSONToStates(JsonObject fsa) {
+        HashSet<State> states = new HashSet<>();
+        JsonArray jsonStates = fsa.getJsonArray("states");
+        for (int i = 0; i < jsonStates.toArray().length; i++) {
+            states.add(new State(jsonStates.getInt(i)));
+        }
+        return states;
+    }
+
+    @NotNull
+    private static Alphabet convertJSONToAlphabet(JsonObject fsa) {
+        Alphabet alphabet = new Alphabet();
+        JsonArray jsonAlphabet = fsa.getJsonArray("alphabet");
+        for (int i = 0; i < jsonAlphabet.toArray().length; i++) {
+            alphabet.addSymbol(jsonAlphabet.getString(i).charAt(0));
+        }
+        return alphabet;
     }
 
     public FSA clone() {

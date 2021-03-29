@@ -1,5 +1,3 @@
-import javax.json.*;
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -16,45 +14,67 @@ public class NFA extends FSA {
         super(alphabet, states, start, finalStates, moves);
     }
 
+
+    public NFA(String regex) {
+        int regexLength = regex.length();
+        Stack<Integer> operatorIndices = new Stack<>();
+    }
+
     public static NFA convert(String json) {
-        JsonReader jsonReader = Json.createReader(new StringReader(json));
-        JsonObject nfa = jsonReader.readObject();
-        Alphabet alphabet = new Alphabet();
-        HashSet<State> states = new HashSet<>();
-        State start = new State((int) nfa.getJsonNumber("start").numberValue());
-        HashSet<State> finalStates = new HashSet<>();
-        HashSet<Move> moves = new HashSet<>();
+        FSA fsa = FSA.convert(json);
+        return new NFA(
+                fsa.getAlphabet(),
+                fsa.getStates(),
+                fsa.getStart(),
+                fsa.getFinalStates(),
+                fsa.getMoves()
+        );
+    }
 
+    public static void main(String[] args) {
+        NFA first;
         {
-            JsonArray jsonAlphabet = nfa.getJsonArray("alphabet");
-            for (int i = 0; i < jsonAlphabet.toArray().length; i++) {
-                alphabet.addSymbol(jsonAlphabet.getString(i).charAt(0));
-            }
-        }
-        {
-            JsonArray jsonStates = nfa.getJsonArray("states");
-            for (int i = 0; i < jsonStates.toArray().length; i++) {
-                states.add(new State(jsonStates.getInt(i)));
-            }
-        }
-        {
-            JsonArray jsonFinalStates = nfa.getJsonArray("finalStates");
-            for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
-                finalStates.add(new State(jsonFinalStates.getInt(i)));
-            }
-        }
-        {
-            JsonArray jsonMoves = nfa.getJsonArray("moves");
-            for (int i = 0; i < jsonMoves.toArray().length; i++) {
-                JsonObject jsonMove = jsonMoves.getJsonObject(i);
-                State from = new State(jsonMove.getInt("from"));
-                Character consumed = jsonMove.getString("consumed").charAt(0);
-                State to = new State(jsonMove.getInt("to"));
-                moves.add(new Move(from, consumed, to));
-            }
+            Alphabet alphabet = new Alphabet();
+            alphabet.addSymbol('a');
+            HashSet<State> states = new HashSet<>();
+            State start = new State();
+            HashSet<State> finalStates = new HashSet<>();
+            State last = new State();
+            HashSet<Move> moves = new HashSet<>();
+            Move move = new Move(start, 'a', last);
+            moves.add(move);
+            states.add(start);
+            states.add(last);
+            finalStates.add(last);
+
+            first = new NFA(alphabet, states, start, finalStates, moves);
         }
 
-        return new NFA(alphabet, states, start, finalStates, moves);
+        NFA second;
+        {
+            Alphabet alphabet = new Alphabet();
+            alphabet.addSymbol('b');
+            HashSet<State> states = new HashSet<>();
+            State start = new State();
+            HashSet<State> finalStates = new HashSet<>();
+            State last = new State();
+            HashSet<Move> moves = new HashSet<>();
+            Move move = new Move(start, 'b', last);
+            moves.add(move);
+            states.add(start);
+            states.add(last);
+            finalStates.add(last);
+
+            second = new NFA(alphabet, states, start, finalStates, moves);
+        }
+
+        NFA concatTest = first.concatenate(second);
+
+        String firstJson = first.toString();
+        String secondJson = second.toString();
+        String concatJson = concatTest.toString();
+
+        NFA converted = NFA.convert(firstJson);
     }
 
     public NFA clone() {
@@ -98,12 +118,6 @@ public class NFA extends FSA {
         result.addNewFinal();
         NFA helperFinal = new NFA();
         return result;
-    }
-
-    public void regularExpressionToNFA(String regularExpression) {
-        int regexLength = regularExpression.length();
-        Stack<Integer> operatorIndices = new Stack<>();
-
     }
 
     private void copyFinalStates(NFA other) {
@@ -179,52 +193,6 @@ public class NFA extends FSA {
         addMove(newStart, EPSILON, oldStart);
         setStart(newStart);
 
-    }
-
-    public static void main(String[] args) {
-        NFA first;
-        {
-            Alphabet alphabet = new Alphabet();
-            alphabet.addSymbol('a');
-            HashSet<State> states = new HashSet<>();
-            State start = new State();
-            HashSet<State> finalStates = new HashSet<>();
-            State last = new State();
-            HashSet<Move> moves = new HashSet<>();
-            Move move = new Move(start, 'a', last);
-            moves.add(move);
-            states.add(start);
-            states.add(last);
-            finalStates.add(last);
-
-            first = new NFA(alphabet, states, start, finalStates, moves);
-        }
-
-        NFA second;
-        {
-            Alphabet alphabet = new Alphabet();
-            alphabet.addSymbol('b');
-            HashSet<State> states = new HashSet<>();
-            State start = new State();
-            HashSet<State> finalStates = new HashSet<>();
-            State last = new State();
-            HashSet<Move> moves = new HashSet<>();
-            Move move = new Move(start, 'b', last);
-            moves.add(move);
-            states.add(start);
-            states.add(last);
-            finalStates.add(last);
-
-            second = new NFA(alphabet, states, start, finalStates, moves);
-        }
-
-        NFA concatTest = first.concatenate(second);
-
-        String firstJson = first.toString();
-        String secondJson = second.toString();
-        String concatJson = concatTest.toString();
-
-        NFA converted = NFA.convert(firstJson);
     }
 
 }
