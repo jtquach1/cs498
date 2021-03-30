@@ -1,4 +1,6 @@
 import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Stack;
 
 public class NFA extends FSA {
@@ -14,10 +16,26 @@ public class NFA extends FSA {
         super(alphabet, states, start, finalStates, moves);
     }
 
-
     public NFA(String regex) {
         int regexLength = regex.length();
-        Stack<Integer> operatorIndices = new Stack<>();
+        Stack<Character> operators = new Stack<>();
+        Queue<NFA> nfas = new PriorityQueue<>();
+
+        for (Character c : regex.toCharArray()) {
+            if (c.equals('(') || c.equals('|')) {
+                operators.push(c);
+            }
+            else if (c.equals(')')) {
+                NFA largeNFA = new NFA();
+                for (NFA nfa : nfas) {
+
+                }
+            }
+        }
+    }
+
+    private void shuntingYardAlgorithm() {
+
     }
 
     public static NFA convert(String json) {
