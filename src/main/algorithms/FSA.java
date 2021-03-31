@@ -1,15 +1,15 @@
 import org.jetbrains.annotations.NotNull;
-
 import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashSet;
+import java.util.Set;
 
 public class FSA {
     private final Alphabet alphabet;
-    private final HashSet<State> states;
-    private final HashSet<State> finalStates;
-    private final HashSet<Move> moves;
+    private final Set<State> states;
+    private final Set<State> finalStates;
+    private final Set<Move> moves;
     private State start;
 
     public FSA() {
@@ -21,8 +21,8 @@ public class FSA {
         states.add(start);
     }
 
-    public FSA(Alphabet alphabet, HashSet<State> states, State start,
-               HashSet<State> finalStates, HashSet<Move> moves) {
+    public FSA(Alphabet alphabet, Set<State> states, State start,
+               Set<State> finalStates, Set<Move> moves) {
         this.alphabet = alphabet;
         this.states = states;
         this.start = start;
@@ -35,10 +35,10 @@ public class FSA {
         JsonObject fsa = jsonReader.readObject();
 
         Alphabet alphabet = convertJSONToAlphabet(fsa);
-        HashSet<State> states = convertJSONToStates(fsa);
+        Set<State> states = convertJSONToStates(fsa);
         State start = convertJSONToStart(fsa);
-        HashSet<State> finalStates = convertJSONToFinalStates(fsa);
-        HashSet<Move> moves = convertJSONToMoves(fsa);
+        Set<State> finalStates = convertJSONToFinalStates(fsa);
+        Set<Move> moves = convertJSONToMoves(fsa);
 
         return new FSA(alphabet, states, start, finalStates, moves);
     }
@@ -50,8 +50,8 @@ public class FSA {
     }
 
     @NotNull
-    private static HashSet<Move> convertJSONToMoves(JsonObject fsa) {
-        HashSet<Move> moves = new HashSet<>();
+    private static Set<Move> convertJSONToMoves(JsonObject fsa) {
+        Set<Move> moves = new HashSet<>();
         JsonArray jsonMoves = fsa.getJsonArray("moves");
         for (int i = 0; i < jsonMoves.toArray().length; i++) {
             JsonObject jsonMove = jsonMoves.getJsonObject(i);
@@ -64,8 +64,8 @@ public class FSA {
     }
 
     @NotNull
-    private static HashSet<State> convertJSONToFinalStates(JsonObject fsa) {
-        HashSet<State> finalStates = new HashSet<>();
+    private static Set<State> convertJSONToFinalStates(JsonObject fsa) {
+        Set<State> finalStates = new HashSet<>();
         JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
         for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
             finalStates.add(new State(jsonFinalStates.getInt(i)));
@@ -74,8 +74,8 @@ public class FSA {
     }
 
     @NotNull
-    private static HashSet<State> convertJSONToStates(JsonObject fsa) {
-        HashSet<State> states = new HashSet<>();
+    private static Set<State> convertJSONToStates(JsonObject fsa) {
+        Set<State> states = new HashSet<>();
         JsonArray jsonStates = fsa.getJsonArray("states");
         for (int i = 0; i < jsonStates.toArray().length; i++) {
             states.add(new State(jsonStates.getInt(i)));
@@ -95,10 +95,10 @@ public class FSA {
 
     public FSA clone() {
         Alphabet alphabet = new Alphabet();
-        HashSet<State> states = new HashSet<>();
+        Set<State> states = new HashSet<>();
         State start = this.getStart();
-        HashSet<State> finalStates = new HashSet<>();
-        HashSet<Move> moves = new HashSet<>();
+        Set<State> finalStates = new HashSet<>();
+        Set<Move> moves = new HashSet<>();
 
         alphabet.addAll(this.getAlphabet());
         states.addAll(this.getStates());
@@ -136,7 +136,7 @@ public class FSA {
         return alphabet;
     }
 
-    public HashSet<State> getStates() {
+    public Set<State> getStates() {
         return states;
     }
 
@@ -148,11 +148,11 @@ public class FSA {
         start = state;
     }
 
-    public HashSet<State> getFinalStates() {
+    public Set<State> getFinalStates() {
         return finalStates;
     }
 
-    public HashSet<Move> getMoves() {
+    public Set<Move> getMoves() {
         return moves;
     }
 

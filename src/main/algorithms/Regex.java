@@ -1,14 +1,7 @@
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 
 public class Regex {
-    private final String infix;
-
-    public Regex(String infix) {
-        this.infix = markWithConcatenation(infix);
-    }
-
     private static String markWithConcatenation(String originalInfix) {
         char[] infix = originalInfix.toCharArray();
         Queue<Character> temp = new Queue<>();
@@ -42,9 +35,13 @@ public class Regex {
     }
 
     public static void main(String[] args) {
-        Regex regex = new Regex("(cd*|b)*a");
-        System.out.println("infix: " + regex.getInfix());
-        System.out.println("postfix: " + regex.infixToPostfix());
+        String originalInfix = "(cd*|b)*a";
+        System.out.println("infix: " + Regex.markWithConcatenation(originalInfix));
+        System.out.println("postfix: " + Regex.infixToPostfix(originalInfix));
+
+        originalInfix = "a(bb)a";
+        System.out.println("infix: " + Regex.markWithConcatenation(originalInfix));
+        System.out.println("postfix: " + Regex.infixToPostfix(originalInfix));
     }
 
     private static boolean isOperand(char c) {
@@ -156,13 +153,14 @@ public class Regex {
         }
     }
 
-    public String getInfix() {
-        return this.infix;
+
+    public static String infixToPostfix(String infix) {
+        infix = markWithConcatenation(infix);
+        return infixToPostfix(infix.toCharArray());
     }
 
-    public String infixToPostfix() {
+    public static String infixToPostfix(char[] infix) {
         // Following Dijkstra's Shunting-Yard Algorithm
-        char[] infix = this.infix.toCharArray();
         Stack<Character> postfix = new Stack<>();
         Stack<Character> operators = new Stack<>();
 

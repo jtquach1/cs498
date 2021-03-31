@@ -1,4 +1,5 @@
 import java.util.HashSet;
+import java.util.Set;
 
 public class NFA extends FSA {
     public static final char EPSILON = '\u025B';
@@ -8,14 +9,14 @@ public class NFA extends FSA {
         super();
     }
 
-    public NFA(Alphabet alphabet, HashSet<State> states, State start,
-               HashSet<State> finalStates, HashSet<Move> moves) {
+    public NFA(Alphabet alphabet, Set<State> states, State start,
+               Set<State> finalStates, Set<Move> moves) {
         super(alphabet, states, start, finalStates, moves);
     }
 
     public NFA(String infix) {
-        Regex regex = new Regex(infix);
-
+        String postfix = Regex.infixToPostfix(infix);
+        // generate a JSON AST (?) using convert() by reading postfix notation?
     }
 
     public static NFA convert(String json) {
@@ -34,11 +35,11 @@ public class NFA extends FSA {
         {
             Alphabet alphabet = new Alphabet();
             alphabet.addSymbol('a');
-            HashSet<State> states = new HashSet<>();
+            Set<State> states = new HashSet<>();
             State start = new State();
-            HashSet<State> finalStates = new HashSet<>();
+            Set<State> finalStates = new HashSet<>();
             State last = new State();
-            HashSet<Move> moves = new HashSet<>();
+            Set<Move> moves = new HashSet<>();
             Move move = new Move(start, 'a', last);
             moves.add(move);
             states.add(start);
@@ -52,11 +53,11 @@ public class NFA extends FSA {
         {
             Alphabet alphabet = new Alphabet();
             alphabet.addSymbol('b');
-            HashSet<State> states = new HashSet<>();
+            Set<State> states = new HashSet<>();
             State start = new State();
-            HashSet<State> finalStates = new HashSet<>();
+            Set<State> finalStates = new HashSet<>();
             State last = new State();
-            HashSet<Move> moves = new HashSet<>();
+            Set<Move> moves = new HashSet<>();
             Move move = new Move(start, 'b', last);
             moves.add(move);
             states.add(start);
@@ -77,10 +78,10 @@ public class NFA extends FSA {
 
     public NFA clone() {
         Alphabet alphabet = new Alphabet();
-        HashSet<State> states = new HashSet<>();
+        Set<State> states = new HashSet<>();
         State start = this.getStart();
-        HashSet<State> finalStates = new HashSet<>();
-        HashSet<Move> moves = new HashSet<>();
+        Set<State> finalStates = new HashSet<>();
+        Set<Move> moves = new HashSet<>();
 
         alphabet.addAll(this.getAlphabet());
         states.addAll(this.getStates());
@@ -141,7 +142,7 @@ public class NFA extends FSA {
     }
 
     private void connectOriginalFinalStatesToOtherStart(NFA other) {
-        HashSet<State> finalStates = this.getFinalStates();
+        Set<State> finalStates = this.getFinalStates();
         State otherStart = other.getStart();
         for (State finalState : finalStates) {
             this.addMove(finalState, EPSILON, otherStart);
@@ -149,7 +150,7 @@ public class NFA extends FSA {
     }
 
     private void copyMoves(NFA other) {
-        HashSet<Move> otherMoves = other.getMoves();
+        Set<Move> otherMoves = other.getMoves();
         for (Move move : otherMoves) {
             this.addMove(move);
         }
@@ -163,7 +164,7 @@ public class NFA extends FSA {
     }
 
     private void addNewFinal() {
-        HashSet<State> finalStates = getFinalStates();
+        Set<State> finalStates = getFinalStates();
         State newFinal = new State();
         for (State finalState : finalStates) {
             addMove(finalState, EPSILON, newFinal);
@@ -174,7 +175,7 @@ public class NFA extends FSA {
 
     private void connectOriginalFinalStatesToOriginalStart() {
         State oldStart = getStart();
-        HashSet<State> finalStates = getFinalStates();
+        Set<State> finalStates = getFinalStates();
         for (State finalState : finalStates) {
             addMove(finalState, EPSILON, oldStart);
         }
