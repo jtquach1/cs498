@@ -77,25 +77,7 @@ class NFATest {
                 makeMove(10, 'b', 11));
 
         NFA actual = NFA.regexToNfa("(a|b)a*b");
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void convertJsonToNfa() {
-        NFA expected = makeNFA(0);
-        addSymbols(expected, 'a');
-        addStates(expected, 0, 1);
-        addFinalStates(expected, 1);
-        addMoves(expected, makeMove(0, 'a', 1));
-
-        String json = "{" +
-                "\"alphabet\":[\"a\"]," +
-                "\"states\":[0,1]," +
-                "\"start\":0," +
-                "\"finalStates\":[1]," +
-                "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
-                "}";
-        NFA actual = NFA.convertJsonToNfa(json);
+        System.out.println(actual.toString());
         assertEquals(expected, actual);
     }
 

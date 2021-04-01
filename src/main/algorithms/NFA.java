@@ -35,19 +35,12 @@ class NFA extends FSA {
         return nfaStack.pop();
     }
 
-    static NFA convertJsonToNfa(String json) {
-        FSA fsa = FSA.convertJsonToFsa(json);
-        return new NFA(
-                fsa.getAlphabet(),
-                fsa.getStates(),
-                fsa.getStart(),
-                fsa.getFinalStates(),
-                fsa.getMoves()
-        );
-    }
-
     public static void main(String[] args) {
         // Placeholder for eventual graphviz code
+        NFA nfa = NFA.regexToNfa("(a|b)a*b");
+        String json = nfa.toString();
+        String graphviz = NFA.convertJsonToGraphviz(json);
+        System.out.println(graphviz);
     }
 
     static NFA makeSingle(Character c) {

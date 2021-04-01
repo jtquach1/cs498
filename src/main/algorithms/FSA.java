@@ -32,23 +32,43 @@ class FSA {
         this.moves = moves;
     }
 
-    static FSA convertJsonToFsa(String json) {
+    public static String convertJsonToGraphviz(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject fsa = jsonReader.readObject();
 
-        Alphabet alphabet = convertJSONToAlphabet(fsa);
-        Set<State> states = convertJSONToStates(fsa);
-        State start = convertJSONToStart(fsa);
-        Set<State> finalStates = convertJSONToFinalStates(fsa);
+        int startId = convertJSONToStartId(fsa);
+        Set<Integer> finalStateIds = convertJSONToFinalStateIds(fsa);
         Set<Move> moves = convertJSONToMoves(fsa);
 
-        return new FSA(alphabet, states, start, finalStates, moves);
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph finite_state_machine {\n");
+        sb.append("\trankdir=LR;\n");
+        sb.append("\tsize=\"8,5\";\n");
+        sb.append("\n");
+        sb.append("\tnode [shape = doublecircle];\n");
+        sb.append("\t");
+        for (Integer id : finalStateIds) {
+            sb.append(id + " ");
+        }
+        sb.append(";\n");
+        sb.append("\n");
+        sb.append("\tnode [shape = circle];\n");
+        for (Move move : moves) {
+            int fromId = move.getFrom().getId();
+            String consumed = move.getConsumed().toString();
+            int toId = move.getTo().getId();
+            sb.append("\t" + fromId + " -> " + toId + " [label = \"" + consumed + "\"];\n");
+        }
+        sb.append("\n");
+        sb.append("\tnode [shape = none, label =\"\"];\n");
+        sb.append("\tENTRY -> " + startId + ";\n");
+        sb.append("}\n");
+
+        return sb.toString();
     }
 
-    @NotNull
-    private static State convertJSONToStart(JsonObject fsa) {
-        int id = fsa.getJsonNumber("start").intValue();
-        return new State(id);
+    private static int convertJSONToStartId(JsonObject fsa) {
+        return fsa.getJsonNumber("start").intValue();
     }
 
     @NotNull
@@ -66,33 +86,13 @@ class FSA {
     }
 
     @NotNull
-    private static Set<State> convertJSONToFinalStates(JsonObject fsa) {
-        Set<State> finalStates = new TreeSet<>();
+    private static Set<Integer> convertJSONToFinalStateIds(JsonObject fsa) {
+        Set<Integer> ids = new TreeSet<>();
         JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
         for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
-            finalStates.add(new State(jsonFinalStates.getInt(i)));
+            ids.add(jsonFinalStates.getInt(i));
         }
-        return finalStates;
-    }
-
-    @NotNull
-    private static Set<State> convertJSONToStates(JsonObject fsa) {
-        Set<State> states = new TreeSet<>();
-        JsonArray jsonStates = fsa.getJsonArray("states");
-        for (int i = 0; i < jsonStates.toArray().length; i++) {
-            states.add(new State(jsonStates.getInt(i)));
-        }
-        return states;
-    }
-
-    @NotNull
-    private static Alphabet convertJSONToAlphabet(JsonObject fsa) {
-        Alphabet alphabet = new Alphabet();
-        JsonArray jsonAlphabet = fsa.getJsonArray("alphabet");
-        for (int i = 0; i < jsonAlphabet.toArray().length; i++) {
-            alphabet.addSymbol(jsonAlphabet.getString(i).charAt(0));
-        }
-        return alphabet;
+        return ids;
     }
 
     FSA deepClone() {

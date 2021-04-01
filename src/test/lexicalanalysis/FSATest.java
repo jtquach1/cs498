@@ -36,20 +36,6 @@ class FSATest {
     }
 
     @Test
-    void convertJsonToFsa() {
-        FSA expected = fsa;
-        String json = "{" +
-                "\"alphabet\":[\"a\"]," +
-                "\"states\":[0,1]," +
-                "\"start\":0," +
-                "\"finalStates\":[1]," +
-                "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
-                "}";
-        FSA actual = FSA.convertJsonToFsa(json);
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void deepClone() {
         FSA expected = fsa;
         FSA actual = fsa.deepClone();
