@@ -3,6 +3,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.Set;
 
@@ -192,6 +193,24 @@ public class FSA {
         jsonWriter.writeObject(fsa);
         jsonWriter.close();
         return stringWriter.getBuffer().toString();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FSA fsa = (FSA) o;
+        return Objects.equals(alphabet, fsa.alphabet)
+                && Objects.equals(states, fsa.states)
+                && Objects.equals(finalStates, fsa.finalStates)
+                && Objects.equals(moves, fsa.moves)
+                && Objects.equals(start, fsa.start);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(alphabet, states, finalStates, moves, start);
     }
 }
 
