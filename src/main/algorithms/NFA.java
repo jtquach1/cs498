@@ -1,3 +1,5 @@
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,9 +16,26 @@ public class NFA extends FSA {
         super(alphabet, states, start, finalStates, moves);
     }
 
-    public NFA(String infix) {
-        String postfix = Regex.infixToPostfix(infix);
-        // generate a JSON AST (?) using convert() by reading postfix notation?
+    public static NFA regexToNFA(String infix) {
+        char[] postfix = Regex.infixToPostfix(infix).toCharArray();
+        Stack<NFA> nfas = new Stack<>();
+        for (char c : postfix) {
+            if (c == '.') {
+                NFA n2 = nfas.pop();
+                NFA n1 = nfas.pop();
+                nfas.push(n1.concatenate(n2));
+            } else if (c == '|') {
+                NFA n2 = nfas.pop();
+                NFA n1 = nfas.pop();
+                nfas.push(n1.alternate(n2));
+            } else if (c == '*') {
+                NFA n = nfas.pop();
+                nfas.push(n.kleeneStar());
+            } else {
+                nfas.push(makeSingle(c));
+            }
+        }
+        return nfas.pop();
     }
 
     public static NFA convert(String json) {
@@ -31,24 +50,25 @@ public class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-        NFA first;
-        {
-            Alphabet alphabet = new Alphabet();
-            alphabet.addSymbol('a');
-            Set<State> states = new HashSet<>();
-            State start = new State();
-            Set<State> finalStates = new HashSet<>();
-            State last = new State();
-            Set<Move> moves = new HashSet<>();
-            Move move = new Move(start, 'a', last);
-            moves.add(move);
-            states.add(start);
-            states.add(last);
-            finalStates.add(last);
+//        NFA first = getFirstNfa();
+//        NFA second = getSecondNfa();
+//        NFA concatTest = first.concatenate(second);
+//
+//        String firstJson = first.toString();
+//        String secondJson = second.toString();
+//        String concatJson = concatTest.toString();
+//
+//        NFA converted = NFA.convert(firstJson);
 
-            first = new NFA(alphabet, states, start, finalStates, moves);
-        }
+        ////
+        String originalInfix = "(cd*)";
+//        System.out.println("infix: " + Regex.markWithConcatenation(originalInfix));
+//        System.out.println("postfix: " + Regex.infixToPostfix(originalInfix));
+        NFA regex2nfa = regexToNFA(originalInfix);
+    }
 
+    @NotNull
+    private static NFA getSecondNfa() {
         NFA second;
         {
             Alphabet alphabet = new Alphabet();
@@ -66,14 +86,39 @@ public class NFA extends FSA {
 
             second = new NFA(alphabet, states, start, finalStates, moves);
         }
+        return second;
+    }
 
-        NFA concatTest = first.concatenate(second);
+    @NotNull
+    private static NFA getFirstNfa() {
+        NFA first;
+        {
+            Alphabet alphabet = new Alphabet();
+            alphabet.addSymbol('a');
+            Set<State> states = new HashSet<>();
+            State start = new State();
+            Set<State> finalStates = new HashSet<>();
+            State last = new State();
+            Set<Move> moves = new HashSet<>();
+            Move move = new Move(start, 'a', last);
+            moves.add(move);
+            states.add(start);
+            states.add(last);
+            finalStates.add(last);
 
-        String firstJson = first.toString();
-        String secondJson = second.toString();
-        String concatJson = concatTest.toString();
+            first = new NFA(alphabet, states, start, finalStates, moves);
+        }
+        return first;
+    }
 
-        NFA converted = NFA.convert(firstJson);
+    public static NFA makeSingle(Character c) {
+        NFA nfa = new NFA();
+        State finalState = new State();
+        nfa.addState(finalState);
+        nfa.addFinalState(finalState);
+        nfa.addMove(nfa.getStart(), c, finalState);
+        nfa.addSymbol(c);
+        return nfa;
     }
 
     public NFA clone() {

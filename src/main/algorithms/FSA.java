@@ -1,4 +1,5 @@
 import org.jetbrains.annotations.NotNull;
+
 import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -94,16 +95,11 @@ public class FSA {
     }
 
     public FSA clone() {
-        Alphabet alphabet = new Alphabet();
-        Set<State> states = new HashSet<>();
+        Alphabet alphabet = new Alphabet(this.getAlphabet());
+        Set<State> states = new HashSet<>(this.getStates());
         State start = this.getStart();
-        Set<State> finalStates = new HashSet<>();
-        Set<Move> moves = new HashSet<>();
-
-        alphabet.addAll(this.getAlphabet());
-        states.addAll(this.getStates());
-        finalStates.addAll(this.getFinalStates());
-        moves.addAll(this.getMoves());
+        Set<State> finalStates = new HashSet<>(this.getFinalStates());
+        Set<Move> moves = new HashSet<>(this.getMoves());
 
         return new FSA(alphabet, states, start, finalStates, moves);
     }

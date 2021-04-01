@@ -1,8 +1,7 @@
 import org.jetbrains.annotations.NotNull;
-import java.util.ArrayList;
 
 public class Regex {
-    private static String markWithConcatenation(String originalInfix) {
+    public static String markWithConcatenation(String originalInfix) {
         char[] infix = originalInfix.toCharArray();
         Queue<Character> temp = new Queue<>();
         int limit = originalInfix.length();
@@ -153,7 +152,6 @@ public class Regex {
         }
     }
 
-
     public static String infixToPostfix(String infix) {
         infix = markWithConcatenation(infix);
         return infixToPostfix(infix.toCharArray());
@@ -178,36 +176,5 @@ public class Regex {
 
         handleRemainingOperators(postfix, operators);
         return generatePostfixString(postfix);
-    }
-}
-
-
-class Stack<T> extends ArrayList<T> {
-    public T pop() {
-        int last = this.size() - 1;
-        T item = this.remove(last);
-        return item;
-    }
-
-    public void push(T item) {
-        this.add(item);
-    }
-
-    public T peek() {
-        if (this.isEmpty()) {
-            return null;
-        }
-        int last = this.size() - 1;
-        return this.get(last);
-    }
-}
-
-class Queue<T> extends ArrayList<T> {
-    public void queue(T item) {
-        this.add(0, item);
-    }
-
-    public T dequeue() {
-        return this.remove(0);
     }
 }
