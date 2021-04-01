@@ -1,7 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 
-import java.util.TreeSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class NFA extends FSA {
     public static final char EPSILON = '\u025B';
@@ -147,20 +147,29 @@ public class NFA extends FSA {
     }
 
     public NFA kleeneStar() {
-        NFA result = this;
+        NFA result = this.clone();
         result.connectOriginalFinalStatesToOriginalStart();
         result.addNewFinal();
-        result.addNewStart();
+        result.addNewStartForKleeneStar();
         result.connectNewStartToNewFinal();
         return result;
     }
 
     public NFA alternate(NFA other) {
-        NFA result = this;
-        result.addNewStart();
+        NFA result = this.clone();
+        result.addNewStartForAlternation(other);
+        result.copyAlphabet(other);
+        result.copyStates(other);
+        result.copyMoves(other);
+        result.copyFinalStates(other);
         result.addNewFinal();
-        NFA helperFinal = new NFA();
         return result;
+    }
+
+    private void copyFinalStates(NFA... others) {
+        for (NFA other : others) {
+            this.copyFinalStates(other);
+        }
     }
 
     private void copyFinalStates(NFA other) {
@@ -173,9 +182,21 @@ public class NFA extends FSA {
         this.removeFinalStates();
     }
 
+    private void copyAlphabet(NFA... others) {
+        for (NFA other : others) {
+            this.copyAlphabet(other);
+        }
+    }
+
     private void copyAlphabet(NFA other) {
         for (Character consumed : other.getAlphabet()) {
             this.addSymbol(consumed);
+        }
+    }
+
+    private void copyStates(NFA... others) {
+        for (NFA other : others) {
+            this.copyStates(other);
         }
     }
 
@@ -190,6 +211,12 @@ public class NFA extends FSA {
         State otherStart = other.getStart();
         for (State finalState : finalStates) {
             this.addMove(finalState, EPSILON, otherStart);
+        }
+    }
+
+    private void copyMoves(NFA... others) {
+        for (NFA other : others) {
+            this.copyMoves(other);
         }
     }
 
@@ -225,17 +252,23 @@ public class NFA extends FSA {
         }
     }
 
-    private void addNewStart() {
+    private void addNewStartForKleeneStar() {
         State oldStart = getStart();
         State newStart = new State();
-        addNewStart(oldStart, newStart);
-    }
-
-    private void addNewStart(State oldStart, State newStart) {
         addState(newStart);
         addMove(newStart, EPSILON, oldStart);
         setStart(newStart);
-
     }
+
+    private void addNewStartForAlternation(NFA other) {
+        State newStart = new State();
+        State firstStart = this.getStart();
+        State secondStart = other.getStart();
+
+        setStart(newStart);
+        addMove(newStart, EPSILON, firstStart);
+        addMove(newStart, EPSILON, secondStart);
+    }
+
 
 }
