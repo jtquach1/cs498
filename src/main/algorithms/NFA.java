@@ -1,19 +1,19 @@
 import java.util.Set;
 import java.util.TreeSet;
 
-public class NFA extends FSA {
-    public static final char EPSILON = '\u025B';
+class NFA extends FSA {
+    static final char EPSILON = '\u025B';
 
-    public NFA() {
+    NFA() {
         super();
     }
 
-    public NFA(Alphabet alphabet, Set<State> states, State start,
-               Set<State> finalStates, Set<Move> moves) {
+    NFA(Alphabet alphabet, Set<State> states, State start,
+        Set<State> finalStates, Set<Move> moves) {
         super(alphabet, states, start, finalStates, moves);
     }
 
-    public static NFA regexToNfa(String infix) {
+    static NFA regexToNfa(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
         Stack<NFA> nfaStack = new Stack<>();
         for (char c : postfix) {
@@ -35,8 +35,8 @@ public class NFA extends FSA {
         return nfaStack.pop();
     }
 
-    public static NFA convert(String json) {
-        FSA fsa = FSA.convert(json);
+    static NFA convertJsonToNfa(String json) {
+        FSA fsa = FSA.convertJsonToFsa(json);
         return new NFA(
                 fsa.getAlphabet(),
                 fsa.getStates(),
@@ -47,10 +47,10 @@ public class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-
+        // Placeholder for eventual graphviz code
     }
 
-    public static NFA makeSingle(Character c) {
+    static NFA makeSingle(Character c) {
         NFA nfa = new NFA();
         State finalState = new State();
         nfa.addState(finalState);
@@ -60,8 +60,8 @@ public class NFA extends FSA {
         return nfa;
     }
 
-    public static NFA concatenate(NFA first, NFA second) {
-        NFA result = first.clone();
+    static NFA concatenate(NFA first, NFA second) {
+        NFA result = first.deepClone();
         result.connectOriginalFinalStatesToOtherStart(second);
         result.removeOriginalFinalStates();
         result.copyStates(second);
@@ -71,8 +71,8 @@ public class NFA extends FSA {
         return result;
     }
 
-    public static NFA kleeneStar(NFA first) {
-        NFA result = first.clone();
+    static NFA kleeneStar(NFA first) {
+        NFA result = first.deepClone();
         result.connectOriginalFinalStatesToOriginalStart();
         result.addNewFinal();
         result.addNewStartForKleeneStar();
@@ -80,8 +80,8 @@ public class NFA extends FSA {
         return result;
     }
 
-    public static NFA alternate(NFA first, NFA second) {
-        NFA result = first.clone();
+    static NFA alternate(NFA first, NFA second) {
+        NFA result = first.deepClone();
         result.addNewStartForAlternation(second);
         result.copyAlphabet(second);
         result.copyStates(second);
@@ -91,7 +91,7 @@ public class NFA extends FSA {
         return result;
     }
 
-    public NFA clone() {
+    NFA deepClone() {
         Alphabet alphabet = new Alphabet();
         Set<State> states = new TreeSet<>();
         State start = this.getStart();
@@ -187,6 +187,4 @@ public class NFA extends FSA {
         addMove(newStart, EPSILON, firstStart);
         addMove(newStart, EPSILON, secondStart);
     }
-
-
 }

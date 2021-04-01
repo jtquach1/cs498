@@ -1,15 +1,15 @@
 import java.util.TreeSet;
 
-public class Alphabet extends TreeSet<Character> {
-    public Alphabet() {
+class Alphabet extends TreeSet<Character> {
+    Alphabet() {
         super();
     }
 
-    public Alphabet(Alphabet alphabet) {
+    Alphabet(Alphabet alphabet) {
         addAll(alphabet);
     }
 
-    public void addSymbol(Character newSymbol) {
+    void addSymbol(Character newSymbol) {
         this.add(newSymbol);
     }
 }

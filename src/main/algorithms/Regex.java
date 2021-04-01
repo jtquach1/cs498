@@ -1,7 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 
-public class Regex {
-    public static String markWithConcatenation(String originalInfix) {
+class Regex {
+    static String markWithConcatenation(String originalInfix) {
         char[] infix = originalInfix.toCharArray();
         Queue<Character> temp = new Queue<>();
         int limit = originalInfix.length();
@@ -152,12 +152,12 @@ public class Regex {
         }
     }
 
-    public static String infixToPostfix(String infix) {
+    static String infixToPostfix(String infix) {
         infix = markWithConcatenation(infix);
         return infixToPostfix(infix.toCharArray());
     }
 
-    public static String infixToPostfix(char[] infix) {
+    static String infixToPostfix(char[] infix) {
         // Following Dijkstra's Shunting-Yard Algorithm
         Stack<Character> postfix = new Stack<>();
         Stack<Character> operators = new Stack<>();

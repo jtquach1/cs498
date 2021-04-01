@@ -2,26 +2,26 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class Move implements Comparable<Move> {
+class Move implements Comparable<Move> {
     private final State from;
     private final Character consumed;
     private final State to;
 
-    public Move(State from, Character consumed, State to) {
+    Move(State from, Character consumed, State to) {
         this.from = from;
         this.consumed = consumed;
         this.to = to;
     }
 
-    public State getFrom() {
+    State getFrom() {
         return this.from;
     }
 
-    public Character getConsumed() {
+    Character getConsumed() {
         return this.consumed;
     }
 
-    public State getTo() {
+    State getTo() {
         return this.to;
     }
 

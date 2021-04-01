@@ -2,25 +2,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class State implements Comparable<State> {
+class State implements Comparable<State> {
     private static int idCounter;
-
-    // For marking the states visually
     private final int id;
 
-    public State() {
+    State() {
         this.id = idCounter++;
     }
 
-    public State(int id) {
+    State(int id) {
         this.id = id;
     }
 
-    public static void setIdCounter(int idCounter) {
+    static void setIdCounter(int idCounter) {
         State.idCounter = idCounter;
     }
 
-    public int getId() {
+    int getId() {
         return this.id;
     }
 

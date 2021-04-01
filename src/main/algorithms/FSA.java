@@ -7,14 +7,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class FSA {
+class FSA {
     private final Alphabet alphabet;
     private final Set<State> states;
     private final Set<State> finalStates;
     private final Set<Move> moves;
     private State start;
 
-    public FSA() {
+    FSA() {
         alphabet = new Alphabet();
         states = new TreeSet<>();
         start = new State();
@@ -23,8 +23,8 @@ public class FSA {
         states.add(start);
     }
 
-    public FSA(Alphabet alphabet, Set<State> states, State start,
-               Set<State> finalStates, Set<Move> moves) {
+    FSA(Alphabet alphabet, Set<State> states, State start,
+        Set<State> finalStates, Set<Move> moves) {
         this.alphabet = alphabet;
         this.states = states;
         this.start = start;
@@ -32,7 +32,7 @@ public class FSA {
         this.moves = moves;
     }
 
-    public static FSA convert(String json) {
+    static FSA convertJsonToFsa(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject fsa = jsonReader.readObject();
 
@@ -95,7 +95,7 @@ public class FSA {
         return alphabet;
     }
 
-    public FSA clone() {
+    FSA deepClone() {
         Alphabet alphabet = new Alphabet(this.getAlphabet());
         Set<State> states = new TreeSet<>(this.getStates());
         State start = this.getStart();
@@ -105,71 +105,84 @@ public class FSA {
         return new FSA(alphabet, states, start, finalStates, moves);
     }
 
-    public void addSymbol(Character newSymbol) {
+    void addSymbol(Character newSymbol) {
         alphabet.addSymbol(newSymbol);
     }
 
-    public void addState(State state) {
+    void addState(State state) {
         states.add(state);
     }
 
-    public void addFinalState(State state) {
+    void addFinalState(State state) {
         finalStates.add(state);
     }
 
-    public void removeFinalStates() {
+    void removeFinalStates() {
         finalStates.clear();
     }
 
-    public void addMove(State from, Character consumed, State to) {
+    void addMove(State from, Character consumed, State to) {
         moves.add(new Move(from, consumed, to));
     }
 
-    public void addMove(Move move) {
+    void addMove(Move move) {
         moves.add(move);
     }
 
-    public Alphabet getAlphabet() {
+    Alphabet getAlphabet() {
         return alphabet;
     }
 
-    public Set<State> getStates() {
+    Set<State> getStates() {
         return states;
     }
 
-    public State getStart() {
+    State getStart() {
         return start;
     }
 
-    public void setStart(State state) {
+    void setStart(State state) {
         start = state;
     }
 
-    public Set<State> getFinalStates() {
+    Set<State> getFinalStates() {
         return finalStates;
     }
 
-    public Set<Move> getMoves() {
+    Set<Move> getMoves() {
         return moves;
     }
 
     @Override
     public String toString() {
-        JsonArrayBuilder alphabet = Json.createArrayBuilder();
-        for (Character c : this.alphabet) {
-            alphabet.add(c.toString());
-        }
+        JsonArrayBuilder alphabet = createJsonAlphabet();
+        JsonArrayBuilder states = createJsonStates();
+        JsonArrayBuilder finalStates = createJsonFinalStates();
+        JsonArrayBuilder moves = createJsonMoves();
+        JsonObject fsa = createJsonFsa(alphabet, states, finalStates, moves);
 
-        JsonArrayBuilder states = Json.createArrayBuilder();
-        for (State s : this.states) {
-            states.add(s.getId());
-        }
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = Json.createWriter(stringWriter);
+        jsonWriter.writeObject(fsa);
+        jsonWriter.close();
+        return stringWriter.getBuffer().toString();
+    }
 
-        JsonArrayBuilder finalStates = Json.createArrayBuilder();
-        for (State s : this.finalStates) {
-            finalStates.add(s.getId());
-        }
+    private JsonObject createJsonFsa(JsonArrayBuilder alphabet,
+                                     JsonArrayBuilder states,
+                                     JsonArrayBuilder finalStates,
+                                     JsonArrayBuilder moves) {
+        JsonObject fsa = Json.createObjectBuilder()
+                .add("alphabet", alphabet)
+                .add("states", states)
+                .add("start", this.start.getId())
+                .add("finalStates", finalStates)
+                .add("moves", moves)
+                .build();
+        return fsa;
+    }
 
+    private JsonArrayBuilder createJsonMoves() {
         JsonArrayBuilder moves = Json.createArrayBuilder();
         for (Move m : this.moves) {
             JsonObject move = Json.createObjectBuilder()
@@ -179,20 +192,31 @@ public class FSA {
                     .build();
             moves.add(move);
         }
+        return moves;
+    }
 
-        JsonObject fsa = Json.createObjectBuilder()
-                .add("alphabet", alphabet)
-                .add("states", states)
-                .add("start", this.start.getId())
-                .add("finalStates", finalStates)
-                .add("moves", moves)
-                .build();
+    private JsonArrayBuilder createJsonFinalStates() {
+        JsonArrayBuilder finalStates = Json.createArrayBuilder();
+        for (State s : this.finalStates) {
+            finalStates.add(s.getId());
+        }
+        return finalStates;
+    }
 
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = Json.createWriter(stringWriter);
-        jsonWriter.writeObject(fsa);
-        jsonWriter.close();
-        return stringWriter.getBuffer().toString();
+    private JsonArrayBuilder createJsonStates() {
+        JsonArrayBuilder states = Json.createArrayBuilder();
+        for (State s : this.states) {
+            states.add(s.getId());
+        }
+        return states;
+    }
+
+    private JsonArrayBuilder createJsonAlphabet() {
+        JsonArrayBuilder alphabet = Json.createArrayBuilder();
+        for (Character c : this.alphabet) {
+            alphabet.add(c.toString());
+        }
+        return alphabet;
     }
 
 

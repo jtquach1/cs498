@@ -2,9 +2,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
 import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class NFATest {
     private static void addSymbols(NFA nfa, Character... symbols) {
@@ -79,7 +81,7 @@ class NFATest {
     }
 
     @Test
-    void convert() {
+    void convertJsonToNfa() {
         NFA expected = makeNFA(0);
         addSymbols(expected, 'a');
         addStates(expected, 0, 1);
@@ -93,7 +95,7 @@ class NFATest {
                 "\"finalStates\":[1]," +
                 "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
                 "}";
-        NFA actual = NFA.convert(json);
+        NFA actual = NFA.convertJsonToNfa(json);
         assertEquals(expected, actual);
     }
 
@@ -110,7 +112,32 @@ class NFATest {
     }
 
     @Test
-    void testClone() {
+    void deepClone() {
+        Alphabet alphabet = new Alphabet();
+        Set<State> states = new TreeSet<>();
+        State start = new State(0);
+        Set<State> finalStates = new TreeSet<>();
+        State finalState = new State(1);
+        Set<Move> moves = new TreeSet<>();
+        Move move = new Move(start, 'a', finalState);
+
+        alphabet.addSymbol('a');
+        moves.add(move);
+        states.add(start);
+        states.add(finalState);
+        finalStates.add(finalState);
+        NFA nfa = new NFA(alphabet, states, start, finalStates, moves);
+
+        NFA expected = nfa;
+        NFA actual = nfa.deepClone();
+        assertEquals(expected, actual);
+
+        NFA unexpected = nfa;
+        unexpected.addSymbol('b');
+        unexpected.addFinalState(new State(2));
+        unexpected.addState(new State(2));
+        unexpected.addMove(new State(0), 'b', new State(2));
+        assertNotEquals(unexpected, actual);
     }
 
     @Test
