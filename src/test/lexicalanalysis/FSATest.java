@@ -37,6 +37,7 @@ class FSATest {
 
     @Test
     void convert() {
+        FSA expected = fsa;
         String json = "{" +
                 "\"alphabet\":[\"a\"]," +
                 "\"states\":[0,1]," +
@@ -44,7 +45,6 @@ class FSATest {
                 "\"finalStates\":[1]," +
                 "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
                 "}";
-        FSA expected = fsa;
         FSA actual = FSA.convert(json);
         assertEquals(expected, actual);
     }
@@ -55,7 +55,7 @@ class FSATest {
         FSA actual = fsa.clone();
         assertEquals(expected, actual);
 
-        // Prove the clone is a "deep" copy.
+        // Prove the clone is a deep copy.
         FSA unexpected = fsa;
         unexpected.addSymbol('b');
         unexpected.addFinalState(new State(2));

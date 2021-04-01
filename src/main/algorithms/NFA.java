@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,26 +13,26 @@ public class NFA extends FSA {
         super(alphabet, states, start, finalStates, moves);
     }
 
-    public static NFA regexToNFA(String infix) {
+    public static NFA regexToNfa(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
-        Stack<NFA> nfas = new Stack<>();
+        Stack<NFA> nfaStack = new Stack<>();
         for (char c : postfix) {
             if (c == '.') {
-                NFA n2 = nfas.pop();
-                NFA n1 = nfas.pop();
-                nfas.push(n1.concatenate(n2));
+                NFA second = nfaStack.pop();
+                NFA first = nfaStack.pop();
+                nfaStack.push(concatenate(first, second));
             } else if (c == '|') {
-                NFA n2 = nfas.pop();
-                NFA n1 = nfas.pop();
-                nfas.push(n1.alternate(n2));
+                NFA second = nfaStack.pop();
+                NFA first = nfaStack.pop();
+                nfaStack.push(alternate(first, second));
             } else if (c == '*') {
-                NFA n = nfas.pop();
-                nfas.push(n.kleeneStar());
+                NFA first = nfaStack.pop();
+                nfaStack.push(kleeneStar(first));
             } else {
-                nfas.push(makeSingle(c));
+                nfaStack.push(makeSingle(c));
             }
         }
-        return nfas.pop();
+        return nfaStack.pop();
     }
 
     public static NFA convert(String json) {
@@ -49,65 +47,7 @@ public class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-//        NFA first = getFirstNfa();
-//        NFA second = getSecondNfa();
-//        NFA concatTest = first.concatenate(second);
-//
-//        String firstJson = first.toString();
-//        String secondJson = second.toString();
-//        String concatJson = concatTest.toString();
-//
-//        NFA converted = NFA.convert(firstJson);
 
-        ////
-        String originalInfix = "(cd*)";
-//        System.out.println("infix: " + Regex.markWithConcatenation(originalInfix));
-//        System.out.println("postfix: " + Regex.infixToPostfix(originalInfix));
-        NFA regex2nfa = regexToNFA(originalInfix);
-    }
-
-    @NotNull
-    private static NFA getSecondNfa() {
-        NFA second;
-        {
-            Alphabet alphabet = new Alphabet();
-            alphabet.addSymbol('b');
-            Set<State> states = new TreeSet<>();
-            State start = new State();
-            Set<State> finalStates = new TreeSet<>();
-            State last = new State();
-            Set<Move> moves = new TreeSet<>();
-            Move move = new Move(start, 'b', last);
-            moves.add(move);
-            states.add(start);
-            states.add(last);
-            finalStates.add(last);
-
-            second = new NFA(alphabet, states, start, finalStates, moves);
-        }
-        return second;
-    }
-
-    @NotNull
-    private static NFA getFirstNfa() {
-        NFA first;
-        {
-            Alphabet alphabet = new Alphabet();
-            alphabet.addSymbol('a');
-            Set<State> states = new TreeSet<>();
-            State start = new State();
-            Set<State> finalStates = new TreeSet<>();
-            State last = new State();
-            Set<Move> moves = new TreeSet<>();
-            Move move = new Move(start, 'a', last);
-            moves.add(move);
-            states.add(start);
-            states.add(last);
-            finalStates.add(last);
-
-            first = new NFA(alphabet, states, start, finalStates, moves);
-        }
-        return first;
     }
 
     public static NFA makeSingle(Character c) {
@@ -118,6 +58,37 @@ public class NFA extends FSA {
         nfa.addMove(nfa.getStart(), c, finalState);
         nfa.addSymbol(c);
         return nfa;
+    }
+
+    public static NFA concatenate(NFA first, NFA second) {
+        NFA result = first.clone();
+        result.connectOriginalFinalStatesToOtherStart(second);
+        result.removeOriginalFinalStates();
+        result.copyStates(second);
+        result.copyAlphabet(second);
+        result.copyMoves(second);
+        result.copyFinalStates(second);
+        return result;
+    }
+
+    public static NFA kleeneStar(NFA first) {
+        NFA result = first.clone();
+        result.connectOriginalFinalStatesToOriginalStart();
+        result.addNewFinal();
+        result.addNewStartForKleeneStar();
+        result.connectNewStartToNewFinal();
+        return result;
+    }
+
+    public static NFA alternate(NFA first, NFA second) {
+        NFA result = first.clone();
+        result.addNewStartForAlternation(second);
+        result.copyAlphabet(second);
+        result.copyStates(second);
+        result.copyMoves(second);
+        result.copyFinalStates(second);
+        result.addNewFinal();
+        return result;
     }
 
     public NFA clone() {
@@ -135,43 +106,6 @@ public class NFA extends FSA {
         return new NFA(alphabet, states, start, finalStates, moves);
     }
 
-    public NFA concatenate(NFA other) {
-        NFA result = this.clone();
-        result.connectOriginalFinalStatesToOtherStart(other);
-        result.removeOriginalFinalStates();
-        result.copyStates(other);
-        result.copyAlphabet(other);
-        result.copyMoves(other);
-        result.copyFinalStates(other);
-        return result;
-    }
-
-    public NFA kleeneStar() {
-        NFA result = this.clone();
-        result.connectOriginalFinalStatesToOriginalStart();
-        result.addNewFinal();
-        result.addNewStartForKleeneStar();
-        result.connectNewStartToNewFinal();
-        return result;
-    }
-
-    public NFA alternate(NFA other) {
-        NFA result = this.clone();
-        result.addNewStartForAlternation(other);
-        result.copyAlphabet(other);
-        result.copyStates(other);
-        result.copyMoves(other);
-        result.copyFinalStates(other);
-        result.addNewFinal();
-        return result;
-    }
-
-    private void copyFinalStates(NFA... others) {
-        for (NFA other : others) {
-            this.copyFinalStates(other);
-        }
-    }
-
     private void copyFinalStates(NFA other) {
         for (State state : other.getFinalStates()) {
             this.addFinalState(state);
@@ -182,21 +116,9 @@ public class NFA extends FSA {
         this.removeFinalStates();
     }
 
-    private void copyAlphabet(NFA... others) {
-        for (NFA other : others) {
-            this.copyAlphabet(other);
-        }
-    }
-
     private void copyAlphabet(NFA other) {
         for (Character consumed : other.getAlphabet()) {
             this.addSymbol(consumed);
-        }
-    }
-
-    private void copyStates(NFA... others) {
-        for (NFA other : others) {
-            this.copyStates(other);
         }
     }
 
@@ -211,12 +133,6 @@ public class NFA extends FSA {
         State otherStart = other.getStart();
         for (State finalState : finalStates) {
             this.addMove(finalState, EPSILON, otherStart);
-        }
-    }
-
-    private void copyMoves(NFA... others) {
-        for (NFA other : others) {
-            this.copyMoves(other);
         }
     }
 
@@ -242,6 +158,7 @@ public class NFA extends FSA {
         }
         removeFinalStates();
         addFinalState(newFinal);
+        addState(newFinal);
     }
 
     private void connectOriginalFinalStatesToOriginalStart() {
@@ -265,6 +182,7 @@ public class NFA extends FSA {
         State firstStart = this.getStart();
         State secondStart = other.getStart();
 
+        addState(newStart);
         setStart(newStart);
         addMove(newStart, EPSILON, firstStart);
         addMove(newStart, EPSILON, secondStart);

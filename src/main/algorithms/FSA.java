@@ -4,8 +4,8 @@ import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Objects;
-import java.util.TreeSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class FSA {
     private final Alphabet alphabet;

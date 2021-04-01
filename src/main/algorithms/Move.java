@@ -27,7 +27,9 @@ public class Move implements Comparable<Move> {
 
     @Override
     public int compareTo(@NotNull Move other) {
-        return Integer.compare(this.getFrom().getId(), other.getFrom().getId());
+        return Integer.compare(this.getFrom().getId(), other.getFrom().getId())
+                - Character.compare(this.consumed, other.consumed)
+                - Integer.compare(this.getTo().getId(), other.getTo().getId());
     }
 
     @Override

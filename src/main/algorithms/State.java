@@ -16,6 +16,10 @@ public class State implements Comparable<State> {
         this.id = id;
     }
 
+    public static void setIdCounter(int idCounter) {
+        State.idCounter = idCounter;
+    }
+
     public int getId() {
         return this.id;
     }
