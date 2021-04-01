@@ -2,75 +2,104 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FSATest {
+    FSA fsa;
 
     @BeforeEach
     void setUp() {
+        Alphabet alphabet = new Alphabet();
+        alphabet.addSymbol('a');
+        Set<State> states = new TreeSet<>();
+        State start = new State();
+        Set<State> finalStates = new TreeSet<>();
+        State last = new State();
+        Set<Move> moves = new TreeSet<>();
+        Move move = new Move(start, 'a', last);
+        moves.add(move);
+        states.add(start);
+        states.add(last);
+        finalStates.add(last);
+        fsa = new FSA(alphabet, states, start, finalStates, moves);
     }
 
     @AfterEach
     void tearDown() {
+        fsa = null;
     }
 
     @Test
-    public void testAlphabet() {
-        Alphabet alphabet = new Alphabet();
-        alphabet.addSymbol('a');
-        alphabet.addSymbol('b');
-        assertEquals("[a, b]", alphabet.toString());
+    void convert() {
+
     }
 
     @Test
-    public void testState() {
-        State start = new State();
-        State other = new State();
-        assertEquals(0, start.getId());
-        assertEquals(1, other.getId());
+    void testClone() {
     }
 
     @Test
-    void testFSA() {
-        FSA fsa = new FSA();
-        State start = fsa.getStart();
-        fsa.addSymbol('a');
-        fsa.addMove(start, 'a', start);
-        fsa.addFinalState(start);
-        String expected = "{\n" +
-                "    \"Alphabet\": [a],\n" +
-                "    \"States\":\n" +
-                "    {\n" +
-                "        \"State\":\n" +
-                "        {\n" +
-                "            \"id\": \"0\"\n" +
-                "        }\n" +
-                "    },\n" +
-                "    \"Start\":\n" +
-                "    {\n" +
-                "        \"State\":\n" +
-                "        {\n" +
-                "            \"id\": \"0\"\n" +
-                "        }\n" +
-                "    },\n" +
-                "    \"FinalStates\":\n" +
-                "    {\n" +
-                "        \"State\":\n" +
-                "        {\n" +
-                "            \"id\": \"0\"\n" +
-                "        }\n" +
-                "    },\n" +
-                "    \"Moves\":\n" +
-                "    {\n" +
-                "        \"Move\":\n" +
-                "        {\n" +
-                "            \"From\": \"0\",\n" +
-                "            \"Consumed\": \"a\",\n" +
-                "            \"To\": \"0\"\n" +
-                "        }\n" +
-                "    }\n" +
+    void addSymbol() {
+    }
+
+    @Test
+    void addState() {
+    }
+
+    @Test
+    void addFinalState() {
+    }
+
+    @Test
+    void removeFinalStates() {
+    }
+
+    @Test
+    void addMove() {
+    }
+
+    @Test
+    void testAddMove() {
+    }
+
+    @Test
+    void getAlphabet() {
+        assertEquals("[a]", fsa.getAlphabet().toString());
+    }
+
+    @Test
+    void getStates() {
+    }
+
+    @Test
+    void getStart() {
+    }
+
+    @Test
+    void setStart() {
+    }
+
+    @Test
+    void getFinalStates() {
+    }
+
+    @Test
+    void getMoves() {
+    }
+
+    @Test
+    void testToString() {
+        String expected = "{" +
+                "\"alphabet\":[\"a\"]," +
+                "\"states\":[0,1]," +
+                "\"start\":0," +
+                "\"finalStates\":[1]," +
+                "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
                 "}";
-        assertEquals(expected, fsa.toString());
+        String actual = fsa.toString();
+        assertEquals(expected, actual);
     }
-
 }

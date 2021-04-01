@@ -1,11 +1,10 @@
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Set;
 
 public class NFA extends FSA {
     public static final char EPSILON = '\u025B';
-    public static final Character[] reservedCharacters = new Character[]{'|', '(', ')', '*', EPSILON};
 
     public NFA() {
         super();
@@ -73,11 +72,11 @@ public class NFA extends FSA {
         {
             Alphabet alphabet = new Alphabet();
             alphabet.addSymbol('b');
-            Set<State> states = new HashSet<>();
+            Set<State> states = new TreeSet<>();
             State start = new State();
-            Set<State> finalStates = new HashSet<>();
+            Set<State> finalStates = new TreeSet<>();
             State last = new State();
-            Set<Move> moves = new HashSet<>();
+            Set<Move> moves = new TreeSet<>();
             Move move = new Move(start, 'b', last);
             moves.add(move);
             states.add(start);
@@ -95,11 +94,11 @@ public class NFA extends FSA {
         {
             Alphabet alphabet = new Alphabet();
             alphabet.addSymbol('a');
-            Set<State> states = new HashSet<>();
+            Set<State> states = new TreeSet<>();
             State start = new State();
-            Set<State> finalStates = new HashSet<>();
+            Set<State> finalStates = new TreeSet<>();
             State last = new State();
-            Set<Move> moves = new HashSet<>();
+            Set<Move> moves = new TreeSet<>();
             Move move = new Move(start, 'a', last);
             moves.add(move);
             states.add(start);
@@ -123,10 +122,10 @@ public class NFA extends FSA {
 
     public NFA clone() {
         Alphabet alphabet = new Alphabet();
-        Set<State> states = new HashSet<>();
+        Set<State> states = new TreeSet<>();
         State start = this.getStart();
-        Set<State> finalStates = new HashSet<>();
-        Set<Move> moves = new HashSet<>();
+        Set<State> finalStates = new TreeSet<>();
+        Set<Move> moves = new TreeSet<>();
 
         alphabet.addAll(this.getAlphabet());
         states.addAll(this.getStates());

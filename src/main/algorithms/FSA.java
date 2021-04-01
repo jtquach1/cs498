@@ -3,7 +3,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Set;
 
 public class FSA {
@@ -15,10 +15,10 @@ public class FSA {
 
     public FSA() {
         alphabet = new Alphabet();
-        states = new HashSet<>();
+        states = new TreeSet<>();
         start = new State();
-        finalStates = new HashSet<>();
-        moves = new HashSet<>();
+        finalStates = new TreeSet<>();
+        moves = new TreeSet<>();
         states.add(start);
     }
 
@@ -52,7 +52,7 @@ public class FSA {
 
     @NotNull
     private static Set<Move> convertJSONToMoves(JsonObject fsa) {
-        Set<Move> moves = new HashSet<>();
+        Set<Move> moves = new TreeSet<>();
         JsonArray jsonMoves = fsa.getJsonArray("moves");
         for (int i = 0; i < jsonMoves.toArray().length; i++) {
             JsonObject jsonMove = jsonMoves.getJsonObject(i);
@@ -66,7 +66,7 @@ public class FSA {
 
     @NotNull
     private static Set<State> convertJSONToFinalStates(JsonObject fsa) {
-        Set<State> finalStates = new HashSet<>();
+        Set<State> finalStates = new TreeSet<>();
         JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
         for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
             finalStates.add(new State(jsonFinalStates.getInt(i)));
@@ -76,7 +76,7 @@ public class FSA {
 
     @NotNull
     private static Set<State> convertJSONToStates(JsonObject fsa) {
-        Set<State> states = new HashSet<>();
+        Set<State> states = new TreeSet<>();
         JsonArray jsonStates = fsa.getJsonArray("states");
         for (int i = 0; i < jsonStates.toArray().length; i++) {
             states.add(new State(jsonStates.getInt(i)));
@@ -96,10 +96,10 @@ public class FSA {
 
     public FSA clone() {
         Alphabet alphabet = new Alphabet(this.getAlphabet());
-        Set<State> states = new HashSet<>(this.getStates());
+        Set<State> states = new TreeSet<>(this.getStates());
         State start = this.getStart();
-        Set<State> finalStates = new HashSet<>(this.getFinalStates());
-        Set<Move> moves = new HashSet<>(this.getMoves());
+        Set<State> finalStates = new TreeSet<>(this.getFinalStates());
+        Set<Move> moves = new TreeSet<>(this.getMoves());
 
         return new FSA(alphabet, states, start, finalStates, moves);
     }
