@@ -75,8 +75,16 @@ class NFATest {
                 makeMove(8, NFA.EPSILON, 9),
                 makeMove(9, NFA.EPSILON, 10),
                 makeMove(10, 'b', 11));
-
         NFA actual = NFA.regexToNFA("(a|b)a*b");
+        assertEquals(expected, actual);
+
+        State.setIdCounter(0);
+        expected = makeNFA(0);
+        addSymbols(expected, NFA.EPSILON);
+        addStates(expected, 0, 1);
+        addFinalStates(expected, 1);
+        addMoves(expected, makeMove(0, NFA.EPSILON, 1));
+        actual = NFA.regexToNFA("");
         assertEquals(expected, actual);
     }
 

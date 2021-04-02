@@ -14,6 +14,10 @@ class NFA extends FSA {
     static NFA regexToNFA(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
         Stack<NFA> nfaStack = new Stack<>();
+
+        if (postfix.length == 0)
+            return makeSingle(EPSILON);
+
         for (char c : postfix) {
             if (c == '.') {
                 NFA second = nfaStack.pop();
