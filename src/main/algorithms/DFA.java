@@ -69,5 +69,8 @@ public class DFA extends NFA {
         return validTos;
     }
 
+    static DFA nfaToDfa(NFA nfa) {
+        return new DFA();
+    }
 
 }

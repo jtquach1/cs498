@@ -2,13 +2,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
 import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class NFATest {
+
     private static void addSymbols(NFA nfa, Character... symbols) {
         for (Character symbol : symbols) {
             nfa.addSymbol(symbol);
@@ -91,35 +90,6 @@ class NFATest {
 
         NFA actual = NFA.makeSingle('a');
         assertEquals(expected, actual);
-    }
-
-    @Test
-    void deepClone() {
-        Alphabet alphabet = new Alphabet();
-        Set<State> states = new TreeSet<>();
-        State start = new State(0);
-        Set<State> finalStates = new TreeSet<>();
-        State finalState = new State(1);
-        Set<Move> moves = new TreeSet<>();
-        Move move = new Move(start, 'a', finalState);
-
-        alphabet.addSymbol('a');
-        moves.add(move);
-        states.add(start);
-        states.add(finalState);
-        finalStates.add(finalState);
-        NFA nfa = new NFA(alphabet, states, start, finalStates, moves);
-
-        NFA expected = nfa;
-        NFA actual = nfa.deepClone();
-        assertEquals(expected, actual);
-
-        NFA unexpected = nfa;
-        unexpected.addSymbol('b');
-        unexpected.addFinalState(new State(2));
-        unexpected.addState(new State(2));
-        unexpected.addMove(new State(0), 'b', new State(2));
-        assertNotEquals(unexpected, actual);
     }
 
     @Test

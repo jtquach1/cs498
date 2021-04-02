@@ -1,13 +1,16 @@
-import org.jetbrains.annotations.NotNull;
-
-import javax.json.*;
-import java.io.StringReader;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonWriter;
 import java.io.StringWriter;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 class FSA {
+    static final char EPSILON = '\u025B';
+
     private final Alphabet alphabet;
     private final Set<State> states;
     private final Set<State> finalStates;
@@ -32,41 +35,13 @@ class FSA {
         this.moves = moves;
     }
 
-    private static int convertJSONToStartId(JsonObject fsa) {
-        return fsa.getJsonNumber("start").intValue();
-    }
-
-    @NotNull
-    private static Set<Move> convertJSONToMoves(JsonObject fsa) {
-        Set<Move> moves = new TreeSet<>();
-        JsonArray jsonMoves = fsa.getJsonArray("moves");
-        for (int i = 0; i < jsonMoves.toArray().length; i++) {
-            JsonObject jsonMove = jsonMoves.getJsonObject(i);
-            State from = new State(jsonMove.getInt("from"));
-            Character consumed = jsonMove.getString("consumed").charAt(0);
-            State to = new State(jsonMove.getInt("to"));
-            moves.add(new Move(from, consumed, to));
-        }
-        return moves;
-    }
-
-    @NotNull
-    private static Set<Integer> convertJSONToFinalStateIds(JsonObject fsa) {
-        Set<Integer> ids = new TreeSet<>();
-        JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
-        for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
-            ids.add(jsonFinalStates.getInt(i));
-        }
-        return ids;
-    }
-
-    public static String convertJsonToGraphviz(String json) {
-        JsonReader jsonReader = Json.createReader(new StringReader(json));
-        JsonObject fsa = jsonReader.readObject();
-
-        int startId = convertJSONToStartId(fsa);
-        Set<Integer> finalStateIds = convertJSONToFinalStateIds(fsa);
-        Set<Move> moves = convertJSONToMoves(fsa);
+    public String toDOT() {
+        int startId = getStart().getId();
+        Set<Integer> finalStateIds = getFinalStates()
+                .stream()
+                .map(State::getId)
+                .collect(Collectors.toSet());
+        Set<Move> moves = getMoves();
 
         StringBuilder sb = new StringBuilder();
         sb.append("digraph finite_state_machine {\n");
@@ -155,6 +130,10 @@ class FSA {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    String toJSON() {
         JsonArrayBuilder alphabet = createJsonAlphabet();
         JsonArrayBuilder states = createJsonStates();
         JsonArrayBuilder finalStates = createJsonFinalStates();

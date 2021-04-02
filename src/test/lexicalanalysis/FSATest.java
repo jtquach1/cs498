@@ -11,6 +11,43 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class FSATest {
     FSA fsa;
 
+    private static void addSymbols(FSA fsa, Character... symbols) {
+        for (Character symbol : symbols) {
+            fsa.addSymbol(symbol);
+        }
+    }
+
+    private static void addStates(FSA fsa, Integer... stateIds) {
+        for (Integer id : stateIds) {
+            fsa.addState(new State(id));
+        }
+    }
+
+    private static void addFinalStates(FSA fsa, Integer... stateIds) {
+        for (Integer id : stateIds) {
+            fsa.addFinalState(new State(id));
+        }
+    }
+
+    private static void addMoves(FSA fsa, Move... moves) {
+        for (Move move : moves) {
+            fsa.addMove(move);
+        }
+    }
+
+    private static Move makeMove(Integer fromId, Character consumed, Integer toId) {
+        return new Move(new State(fromId), consumed, new State(toId));
+    }
+
+    private static FSA makeFSA(Integer stateId) {
+        return new FSA(
+                new Alphabet(),
+                new TreeSet<>(),
+                new State(stateId),
+                new TreeSet<>(), new TreeSet<>()
+        );
+    }
+
     @BeforeEach
     void setUp() {
         Alphabet alphabet = new Alphabet();
@@ -166,7 +203,7 @@ class FSATest {
     }
 
     @Test
-    void testToString() {
+    void toJSON() {
         String expected = "{" +
                 "\"alphabet\":[\"a\"]," +
                 "\"states\":[0,1]," +
@@ -179,30 +216,7 @@ class FSATest {
     }
 
     @Test
-    void convertJsonToGraphviz() {
-        String json = "{\n" +
-                "  \"alphabet\": [\"a\", \"b\"],\n" +
-                "  \"states\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],\n" +
-                "  \"start\": 4,\n" +
-                "  \"finalStates\": [11],\n" +
-                "  \"moves\": [\n" +
-                "    { \"from\": 0, \"consumed\": \"a\", \"to\": 1 },\n" +
-                "    { \"from\": 1, \"consumed\": \"ɛ\", \"to\": 5 },\n" +
-                "    { \"from\": 2, \"consumed\": \"b\", \"to\": 3 },\n" +
-                "    { \"from\": 3, \"consumed\": \"ɛ\", \"to\": 5 },\n" +
-                "    { \"from\": 4, \"consumed\": \"ɛ\", \"to\": 0 },\n" +
-                "    { \"from\": 4, \"consumed\": \"ɛ\", \"to\": 2 },\n" +
-                "    { \"from\": 5, \"consumed\": \"ɛ\", \"to\": 8 },\n" +
-                "    { \"from\": 6, \"consumed\": \"a\", \"to\": 7 },\n" +
-                "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
-                "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 9 },\n" +
-                "    { \"from\": 8, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
-                "    { \"from\": 8, \"consumed\": \"ɛ\", \"to\": 9 },\n" +
-                "    { \"from\": 9, \"consumed\": \"ɛ\", \"to\": 10 },\n" +
-                "    { \"from\": 10, \"consumed\": \"b\", \"to\": 11 }\n" +
-                "  ]\n" +
-                "}\n";
-
+    void toDOT() {
         String expected = "digraph finite_state_machine {\n" +
                 "\trankdir=LR;\n" +
                 "\tsize=\"8,5\";\n" +
@@ -230,7 +244,27 @@ class FSATest {
                 "\tENTRY -> 4;\n" +
                 "}\n";
 
-        String actual = FSA.convertJsonToGraphviz(json);
+        FSA fsa = makeFSA(4);
+        addSymbols(fsa, 'a', 'b');
+        addStates(fsa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        addFinalStates(fsa, 11);
+        addMoves(fsa,
+                makeMove(0, 'a', 1),
+                makeMove(1, FSA.EPSILON, 5),
+                makeMove(2, 'b', 3),
+                makeMove(3, FSA.EPSILON, 5),
+                makeMove(4, FSA.EPSILON, 0),
+                makeMove(4, FSA.EPSILON, 2),
+                makeMove(5, FSA.EPSILON, 8),
+                makeMove(6, 'a', 7),
+                makeMove(7, FSA.EPSILON, 6),
+                makeMove(7, FSA.EPSILON, 9),
+                makeMove(8, FSA.EPSILON, 6),
+                makeMove(8, FSA.EPSILON, 9),
+                makeMove(9, FSA.EPSILON, 10),
+                makeMove(10, 'b', 11));
+        String actual = fsa.toDOT();
+
         assertEquals(expected, actual);
     }
 }

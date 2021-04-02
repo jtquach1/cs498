@@ -66,10 +66,6 @@ class DFATest {
     }
 
     @Test
-    void deepClone() {
-    }
-
-    @Test
     void epsilonClosureForOneState() {
         Set<Move> moves = new TreeSet<>();
         addMoves(moves,

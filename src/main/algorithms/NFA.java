@@ -2,8 +2,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 class NFA extends FSA {
-    static final char EPSILON = '\u025B';
-
     NFA() {
         super();
     }
@@ -77,10 +75,15 @@ class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-        String infix = args[0];
+        String infix = "(a|b)a*b";
+        // uppercase all of "Nfa"
         NFA nfa = NFA.regexToNfa(infix);
         String json = nfa.toString();
-        String graphviz = NFA.convertJsonToGraphviz(json);
+        // uppercase all of "Json"
+        // can do instance method, toDOT, FSA directly to DOT
+        // and separate out toJSON
+        String graphviz = nfa.toDOT();
+        System.out.println(json);
         System.out.println(graphviz);
     }
 
