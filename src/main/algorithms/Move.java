@@ -1,5 +1,6 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 class Move implements Comparable<Move> {
@@ -27,9 +28,10 @@ class Move implements Comparable<Move> {
 
     @Override
     public int compareTo(@NotNull Move other) {
-        return Integer.compare(this.getFrom().getId(), other.getFrom().getId())
-                - Character.compare(this.consumed, other.consumed)
-                - Integer.compare(this.getTo().getId(), other.getTo().getId());
+        return Comparator.comparing(Move::getFrom)
+                .thenComparing(Move::getConsumed)
+                .thenComparing(Move::getTo)
+                .compare(this, other);
     }
 
     @Override

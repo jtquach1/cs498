@@ -71,6 +71,7 @@ class NFATest {
                 makeMove(4, NFA.EPSILON, 2),
                 makeMove(5, NFA.EPSILON, 9),
                 makeMove(6, 'a', 7),
+                makeMove(7, NFA.EPSILON, 6),
                 makeMove(7, NFA.EPSILON, 8),
                 makeMove(8, NFA.EPSILON, 10),
                 makeMove(9, NFA.EPSILON, 6),
