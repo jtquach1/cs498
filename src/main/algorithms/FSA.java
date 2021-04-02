@@ -32,6 +32,34 @@ class FSA {
         this.moves = moves;
     }
 
+    private static int convertJSONToStartId(JsonObject fsa) {
+        return fsa.getJsonNumber("start").intValue();
+    }
+
+    @NotNull
+    private static Set<Move> convertJSONToMoves(JsonObject fsa) {
+        Set<Move> moves = new TreeSet<>();
+        JsonArray jsonMoves = fsa.getJsonArray("moves");
+        for (int i = 0; i < jsonMoves.toArray().length; i++) {
+            JsonObject jsonMove = jsonMoves.getJsonObject(i);
+            State from = new State(jsonMove.getInt("from"));
+            Character consumed = jsonMove.getString("consumed").charAt(0);
+            State to = new State(jsonMove.getInt("to"));
+            moves.add(new Move(from, consumed, to));
+        }
+        return moves;
+    }
+
+    @NotNull
+    private static Set<Integer> convertJSONToFinalStateIds(JsonObject fsa) {
+        Set<Integer> ids = new TreeSet<>();
+        JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
+        for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
+            ids.add(jsonFinalStates.getInt(i));
+        }
+        return ids;
+    }
+
     public static String convertJsonToGraphviz(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject fsa = jsonReader.readObject();
@@ -65,34 +93,6 @@ class FSA {
         sb.append("}\n");
 
         return sb.toString();
-    }
-
-    private static int convertJSONToStartId(JsonObject fsa) {
-        return fsa.getJsonNumber("start").intValue();
-    }
-
-    @NotNull
-    private static Set<Move> convertJSONToMoves(JsonObject fsa) {
-        Set<Move> moves = new TreeSet<>();
-        JsonArray jsonMoves = fsa.getJsonArray("moves");
-        for (int i = 0; i < jsonMoves.toArray().length; i++) {
-            JsonObject jsonMove = jsonMoves.getJsonObject(i);
-            State from = new State(jsonMove.getInt("from"));
-            Character consumed = jsonMove.getString("consumed").charAt(0);
-            State to = new State(jsonMove.getInt("to"));
-            moves.add(new Move(from, consumed, to));
-        }
-        return moves;
-    }
-
-    @NotNull
-    private static Set<Integer> convertJSONToFinalStateIds(JsonObject fsa) {
-        Set<Integer> ids = new TreeSet<>();
-        JsonArray jsonFinalStates = fsa.getJsonArray("finalStates");
-        for (int i = 0; i < jsonFinalStates.toArray().length; i++) {
-            ids.add(jsonFinalStates.getInt(i));
-        }
-        return ids;
     }
 
     FSA deepClone() {
@@ -218,7 +218,6 @@ class FSA {
         }
         return alphabet;
     }
-
 
     @Override
     public boolean equals(Object o) {

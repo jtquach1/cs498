@@ -35,14 +35,6 @@ class NFA extends FSA {
         return nfaStack.pop();
     }
 
-    public static void main(String[] args) {
-        String infix = args[0];
-        NFA nfa = NFA.regexToNfa(infix);
-        String json = nfa.toString();
-        String graphviz = NFA.convertJsonToGraphviz(json);
-        System.out.println(graphviz);
-    }
-
     static NFA makeSingle(Character c) {
         NFA nfa = new NFA();
         State finalState = new State();
@@ -82,6 +74,14 @@ class NFA extends FSA {
         result.copyFinalStates(second);
         result.addNewFinal();
         return result;
+    }
+
+    public static void main(String[] args) {
+        String infix = args[0];
+        NFA nfa = NFA.regexToNfa(infix);
+        String json = nfa.toString();
+        String graphviz = NFA.convertJsonToGraphviz(json);
+        System.out.println(graphviz);
     }
 
     NFA deepClone() {
