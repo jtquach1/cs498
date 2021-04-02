@@ -1,5 +1,6 @@
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class DFA extends NFA {
     DFA() {
@@ -26,12 +27,46 @@ public class DFA extends NFA {
         return new DFA(alphabet, states, start, finalStates, moves);
     }
 
-    Set<State> epsilonClosure(Set<State> states) {
-        return new TreeSet<>();
+    static Set<State> epsilonClosure(State state, Set<Move> moves) {
+        Set<State> states = new TreeSet<>();
+        states.add(state);
+        return epsilonClosure(states, moves);
     }
 
-    Set<State> epsilonClosure(State state) {
-        return new TreeSet<>();
+    static Set<State> epsilonClosure(Set<State> states, Set<Move> moves) {
+        Stack<State> stack = new Stack<>(states);
+        Set<State> closure = new TreeSet<>(states);
+
+        while (!stack.isEmpty()) {
+            State from = stack.pop();
+            Set<State> validTos = moves
+                    .stream()
+                    .filter(move -> move.getFrom().equals(from) && move.getConsumed().equals(EPSILON))
+                    .map(Move::getTo)
+                    .collect(Collectors.toSet());
+
+            for (State to : validTos) {
+                if (!closure.contains(to)) {
+                    stack.push(to);
+                    closure.add(to);
+                }
+            }
+        }
+
+        return closure;
+    }
+
+    static Set<State> getReachableStates(Set<State> states, Set<Move> moves, Character consumed) {
+        Set<State> validTos = new TreeSet<>();
+        for (State from : states) {
+            Set<State> validStates = moves
+                    .stream()
+                    .filter(move -> move.getFrom().equals(from) && move.getConsumed().equals(consumed))
+                    .map(Move::getTo)
+                    .collect(Collectors.toSet());
+            validTos.addAll(validStates);
+        }
+        return validTos;
     }
 
 

@@ -1,6 +1,15 @@
 import java.util.ArrayList;
+import java.util.Collection;
 
 class Stack<T> extends ArrayList<T> {
+    public Stack() {
+        super();
+    }
+
+    public Stack(Collection<T> states) {
+        this.addAll(states);
+    }
+
     T pop() {
         int last = this.size() - 1;
         T item = this.remove(last);
