@@ -1,4 +1,3 @@
-import org.javatuples.Triplet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,14 +27,14 @@ class NFATest {
         }
     }
 
-    private static void addMoves(NFA nfa, Triplet... moves) {
-        for (Triplet move : moves) {
+    private static void addMoves(NFA nfa, Move... moves) {
+        for (Move move : moves) {
             nfa.addMove(move);
         }
     }
 
-    private static Triplet makeMove(Integer fromId, Character consumed, Integer toId) {
-        return new Triplet(new State(fromId), consumed, new State(toId));
+    private static Move makeMove(Integer fromId, Character consumed, Integer toId) {
+        return new Move(new State(fromId), consumed, new State(toId));
     }
 
     private static NFA makeNFA(Integer stateId) {
@@ -79,7 +78,6 @@ class NFATest {
                 makeMove(10, 'b', 11));
 
         NFA actual = NFA.regexToNfa("(a|b)a*b");
-        System.out.println(actual.toString());
         assertEquals(expected, actual);
     }
 
@@ -102,8 +100,8 @@ class NFATest {
         State start = new State(0);
         Set<State> finalStates = new TreeSet<>();
         State finalState = new State(1);
-        Set<Triplet> moves = new TreeSet<>();
-        Triplet move = new Triplet(start, 'a', finalState);
+        Set<Move> moves = new TreeSet<>();
+        Move move = new Move(start, 'a', finalState);
 
         alphabet.addSymbol('a');
         moves.add(move);

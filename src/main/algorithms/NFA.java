@@ -1,5 +1,3 @@
-import org.javatuples.Triplet;
-
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -11,7 +9,7 @@ class NFA extends FSA {
     }
 
     NFA(Alphabet alphabet, Set<State> states, State start,
-        Set<State> finalStates, Set<Triplet> moves) {
+        Set<State> finalStates, Set<Move> moves) {
         super(alphabet, states, start, finalStates, moves);
     }
 
@@ -38,8 +36,8 @@ class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-        // Placeholder for eventual graphviz code
-        NFA nfa = NFA.regexToNfa("(a|b)a*b");
+        String infix = args[0];
+        NFA nfa = NFA.regexToNfa(infix);
         String json = nfa.toString();
         String graphviz = NFA.convertJsonToGraphviz(json);
         System.out.println(graphviz);
@@ -91,7 +89,7 @@ class NFA extends FSA {
         Set<State> states = new TreeSet<>();
         State start = this.getStart();
         Set<State> finalStates = new TreeSet<>();
-        Set<Triplet> moves = new TreeSet<>();
+        Set<Move> moves = new TreeSet<>();
 
         alphabet.addAll(this.getAlphabet());
         states.addAll(this.getStates());
@@ -132,8 +130,8 @@ class NFA extends FSA {
     }
 
     private void copyMoves(NFA other) {
-        Set<Triplet> otherMoves = other.getMoves();
-        for (Triplet move : otherMoves) {
+        Set<Move> otherMoves = other.getMoves();
+        for (Move move : otherMoves) {
             this.addMove(move);
         }
     }

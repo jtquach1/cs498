@@ -1,4 +1,3 @@
-import org.javatuples.Triplet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +18,8 @@ class FSATest {
         State start = new State(0);
         Set<State> finalStates = new TreeSet<>();
         State finalState = new State(1);
-        Set<Triplet> moves = new TreeSet<>();
-        Triplet move = new Triplet(start, 'a', finalState);
+        Set<Move> moves = new TreeSet<>();
+        Move move = new Move(start, 'a', finalState);
 
         alphabet.addSymbol('a');
         moves.add(move);
@@ -94,13 +93,13 @@ class FSATest {
         State from = new State(2);
         Character consumed = 'b';
         State to = new State(3);
-        Triplet move = new Triplet(from, consumed, to);
+        Move move = new Move(from, consumed, to);
         fsa.addMove(move);
 
-        Set<Triplet> actual = fsa.getMoves();
-        Set<Triplet> expected = new TreeSet<>();
-        expected.add(new Triplet(new State(0), 'a', new State(1)));
-        expected.add(new Triplet(new State(2), 'b', new State(3)));
+        Set<Move> actual = fsa.getMoves();
+        Set<Move> expected = new TreeSet<>();
+        expected.add(new Move(new State(0), 'a', new State(1)));
+        expected.add(new Move(new State(2), 'b', new State(3)));
         assertEquals(expected, actual);
     }
 
@@ -111,10 +110,10 @@ class FSATest {
         State to = new State(3);
         fsa.addMove(from, consumed, to);
 
-        Set<Triplet> actual = fsa.getMoves();
-        Set<Triplet> expected = new TreeSet<>();
-        expected.add(new Triplet(new State(0), 'a', new State(1)));
-        expected.add(new Triplet(new State(2), 'b', new State(3)));
+        Set<Move> actual = fsa.getMoves();
+        Set<Move> expected = new TreeSet<>();
+        expected.add(new Move(new State(0), 'a', new State(1)));
+        expected.add(new Move(new State(2), 'b', new State(3)));
         assertEquals(expected, actual);
     }
 
@@ -160,9 +159,9 @@ class FSATest {
 
     @Test
     void getMoves() {
-        Set<Triplet> actual = fsa.getMoves();
-        Set<Triplet> expected = new TreeSet<>();
-        expected.add(new Triplet(new State(0), 'a', new State(1)));
+        Set<Move> actual = fsa.getMoves();
+        Set<Move> expected = new TreeSet<>();
+        expected.add(new Move(new State(0), 'a', new State(1)));
         assertEquals(expected, actual);
     }
 
@@ -176,6 +175,62 @@ class FSATest {
                 "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
                 "}";
         String actual = fsa.toString();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void convertJsonToGraphviz() {
+        String json = "{\n" +
+                "  \"alphabet\": [\"a\", \"b\"],\n" +
+                "  \"states\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],\n" +
+                "  \"start\": 4,\n" +
+                "  \"finalStates\": [11],\n" +
+                "  \"moves\": [\n" +
+                "    { \"from\": 0, \"consumed\": \"a\", \"to\": 1 },\n" +
+                "    { \"from\": 1, \"consumed\": \"ɛ\", \"to\": 5 },\n" +
+                "    { \"from\": 2, \"consumed\": \"b\", \"to\": 3 },\n" +
+                "    { \"from\": 3, \"consumed\": \"ɛ\", \"to\": 5 },\n" +
+                "    { \"from\": 4, \"consumed\": \"ɛ\", \"to\": 0 },\n" +
+                "    { \"from\": 4, \"consumed\": \"ɛ\", \"to\": 2 },\n" +
+                "    { \"from\": 5, \"consumed\": \"ɛ\", \"to\": 9 },\n" +
+                "    { \"from\": 6, \"consumed\": \"a\", \"to\": 7 },\n" +
+                "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
+                "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 8 },\n" +
+                "    { \"from\": 8, \"consumed\": \"ɛ\", \"to\": 10 },\n" +
+                "    { \"from\": 9, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
+                "    { \"from\": 9, \"consumed\": \"ɛ\", \"to\": 8 },\n" +
+                "    { \"from\": 10, \"consumed\": \"b\", \"to\": 11 }\n" +
+                "  ]\n" +
+                "}\n";
+
+        String expected = "digraph finite_state_machine {\n" +
+                "\trankdir=LR;\n" +
+                "\tsize=\"8,5\";\n" +
+                "\n" +
+                "\tnode [shape = doublecircle];\n" +
+                "\t11 ;\n" +
+                "\n" +
+                "\tnode [shape = circle];\n" +
+                "\t0 -> 1 [label = \"a\"];\n" +
+                "\t1 -> 5 [label = \"ɛ\"];\n" +
+                "\t2 -> 3 [label = \"b\"];\n" +
+                "\t3 -> 5 [label = \"ɛ\"];\n" +
+                "\t4 -> 0 [label = \"ɛ\"];\n" +
+                "\t4 -> 2 [label = \"ɛ\"];\n" +
+                "\t5 -> 9 [label = \"ɛ\"];\n" +
+                "\t6 -> 7 [label = \"a\"];\n" +
+                "\t7 -> 6 [label = \"ɛ\"];\n" +
+                "\t7 -> 8 [label = \"ɛ\"];\n" +
+                "\t8 -> 10 [label = \"ɛ\"];\n" +
+                "\t9 -> 6 [label = \"ɛ\"];\n" +
+                "\t9 -> 8 [label = \"ɛ\"];\n" +
+                "\t10 -> 11 [label = \"b\"];\n" +
+                "\n" +
+                "\tnode [shape = none, label =\"\"];\n" +
+                "\tENTRY -> 4;\n" +
+                "}\n";
+
+        String actual = NFA.convertJsonToGraphviz(json);
         assertEquals(expected, actual);
     }
 }

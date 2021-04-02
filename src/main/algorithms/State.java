@@ -1,5 +1,6 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 class State implements Comparable<State> {
@@ -24,7 +25,8 @@ class State implements Comparable<State> {
 
     @Override
     public int compareTo(@NotNull State other) {
-        return Integer.compare(this.getId(), other.getId());
+        return Comparator.comparing(State::getId)
+                .compare(this, other);
     }
 
     @Override
