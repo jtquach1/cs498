@@ -134,11 +134,11 @@ class FSA {
     }
 
     String toJSON() {
-        JsonArrayBuilder alphabet = createJsonAlphabet();
-        JsonArrayBuilder states = createJsonStates();
-        JsonArrayBuilder finalStates = createJsonFinalStates();
-        JsonArrayBuilder moves = createJsonMoves();
-        JsonObject fsa = createJsonFsa(alphabet, states, finalStates, moves);
+        JsonArrayBuilder alphabet = createJSONAlphabet();
+        JsonArrayBuilder states = createJSONStates();
+        JsonArrayBuilder finalStates = createJSONFinalStates();
+        JsonArrayBuilder moves = createJSONMoves();
+        JsonObject fsa = createJSONFSA(alphabet, states, finalStates, moves);
 
         StringWriter stringWriter = new StringWriter();
         JsonWriter jsonWriter = Json.createWriter(stringWriter);
@@ -147,7 +147,7 @@ class FSA {
         return stringWriter.getBuffer().toString();
     }
 
-    private JsonObject createJsonFsa(JsonArrayBuilder alphabet,
+    private JsonObject createJSONFSA(JsonArrayBuilder alphabet,
                                      JsonArrayBuilder states,
                                      JsonArrayBuilder finalStates,
                                      JsonArrayBuilder moves) {
@@ -161,7 +161,7 @@ class FSA {
         return fsa;
     }
 
-    private JsonArrayBuilder createJsonMoves() {
+    private JsonArrayBuilder createJSONMoves() {
         JsonArrayBuilder moves = Json.createArrayBuilder();
         for (Move m : this.moves) {
             JsonObject move = Json.createObjectBuilder()
@@ -174,7 +174,7 @@ class FSA {
         return moves;
     }
 
-    private JsonArrayBuilder createJsonFinalStates() {
+    private JsonArrayBuilder createJSONFinalStates() {
         JsonArrayBuilder finalStates = Json.createArrayBuilder();
         for (State s : this.finalStates) {
             finalStates.add(s.getId());
@@ -182,7 +182,7 @@ class FSA {
         return finalStates;
     }
 
-    private JsonArrayBuilder createJsonStates() {
+    private JsonArrayBuilder createJSONStates() {
         JsonArrayBuilder states = Json.createArrayBuilder();
         for (State s : this.states) {
             states.add(s.getId());
@@ -190,7 +190,7 @@ class FSA {
         return states;
     }
 
-    private JsonArrayBuilder createJsonAlphabet() {
+    private JsonArrayBuilder createJSONAlphabet() {
         JsonArrayBuilder alphabet = Json.createArrayBuilder();
         for (Character c : this.alphabet) {
             alphabet.add(c.toString());

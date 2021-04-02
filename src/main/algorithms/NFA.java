@@ -11,7 +11,7 @@ class NFA extends FSA {
         super(alphabet, states, start, finalStates, moves);
     }
 
-    static NFA regexToNfa(String infix) {
+    static NFA regexToNFA(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
         Stack<NFA> nfaStack = new Stack<>();
         for (char c : postfix) {
@@ -76,15 +76,11 @@ class NFA extends FSA {
 
     public static void main(String[] args) {
         String infix = "(a|b)a*b";
-        // uppercase all of "Nfa"
-        NFA nfa = NFA.regexToNfa(infix);
-        String json = nfa.toString();
-        // uppercase all of "Json"
-        // can do instance method, toDOT, FSA directly to DOT
-        // and separate out toJSON
-        String graphviz = nfa.toDOT();
+        NFA nfa = NFA.regexToNFA(infix);
+        String json = nfa.toJSON();
+        String dot = nfa.toDOT();
         System.out.println(json);
-        System.out.println(graphviz);
+        System.out.println(dot);
     }
 
     NFA deepClone() {

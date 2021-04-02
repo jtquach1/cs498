@@ -55,7 +55,7 @@ class NFATest {
     }
 
     @Test
-    void regexToNfa() {
+    void regexToNFA() {
         NFA expected = makeNFA(4);
         addSymbols(expected, 'a', 'b');
         addStates(expected, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
@@ -76,7 +76,7 @@ class NFATest {
                 makeMove(9, NFA.EPSILON, 10),
                 makeMove(10, 'b', 11));
 
-        NFA actual = NFA.regexToNfa("(a|b)a*b");
+        NFA actual = NFA.regexToNFA("(a|b)a*b");
         assertEquals(expected, actual);
     }
 

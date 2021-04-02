@@ -12,21 +12,6 @@ public class DFA extends NFA {
         super(alphabet, states, start, finalStates, moves);
     }
 
-    DFA deepClone() {
-        Alphabet alphabet = new Alphabet();
-        Set<State> states = new TreeSet<>();
-        State start = this.getStart();
-        Set<State> finalStates = new TreeSet<>();
-        Set<Move> moves = new TreeSet<>();
-
-        alphabet.addAll(this.getAlphabet());
-        states.addAll(this.getStates());
-        finalStates.addAll(this.getFinalStates());
-        moves.addAll(this.getMoves());
-
-        return new DFA(alphabet, states, start, finalStates, moves);
-    }
-
     static Set<State> epsilonClosure(State state, Set<Move> moves) {
         Set<State> states = new TreeSet<>();
         states.add(state);
@@ -71,6 +56,21 @@ public class DFA extends NFA {
 
     static DFA nfaToDfa(NFA nfa) {
         return new DFA();
+    }
+
+    DFA deepClone() {
+        Alphabet alphabet = new Alphabet();
+        Set<State> states = new TreeSet<>();
+        State start = this.getStart();
+        Set<State> finalStates = new TreeSet<>();
+        Set<Move> moves = new TreeSet<>();
+
+        alphabet.addAll(this.getAlphabet());
+        states.addAll(this.getStates());
+        finalStates.addAll(this.getFinalStates());
+        moves.addAll(this.getMoves());
+
+        return new DFA(alphabet, states, start, finalStates, moves);
     }
 
 }
