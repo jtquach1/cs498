@@ -1,3 +1,4 @@
+import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
 
 import javax.json.*;
@@ -11,7 +12,7 @@ class FSA {
     private final Alphabet alphabet;
     private final Set<State> states;
     private final Set<State> finalStates;
-    private final Set<Move> moves;
+    private final Set<Triplet> moves;
     private State start;
 
     FSA() {
@@ -24,7 +25,7 @@ class FSA {
     }
 
     FSA(Alphabet alphabet, Set<State> states, State start,
-        Set<State> finalStates, Set<Move> moves) {
+        Set<State> finalStates, Set<Triplet> moves) {
         this.alphabet = alphabet;
         this.states = states;
         this.start = start;
@@ -38,7 +39,7 @@ class FSA {
 
         int startId = convertJSONToStartId(fsa);
         Set<Integer> finalStateIds = convertJSONToFinalStateIds(fsa);
-        Set<Move> moves = convertJSONToMoves(fsa);
+        Set<Triplet> moves = convertJSONToMoves(fsa);
 
         StringBuilder sb = new StringBuilder();
         sb.append("digraph finite_state_machine {\n");
@@ -53,10 +54,10 @@ class FSA {
         sb.append(";\n");
         sb.append("\n");
         sb.append("\tnode [shape = circle];\n");
-        for (Move move : moves) {
-            int fromId = move.getFrom().getId();
-            String consumed = move.getConsumed().toString();
-            int toId = move.getTo().getId();
+        for (Triplet move : moves) {
+            int fromId = ((State) move.getValue(0)).getId();
+            String consumed = ((Character) move.getValue(1)).toString();
+            int toId = ((State) move.getValue(2)).getId();
             sb.append("\t" + fromId + " -> " + toId + " [label = \"" + consumed + "\"];\n");
         }
         sb.append("\n");
@@ -72,15 +73,15 @@ class FSA {
     }
 
     @NotNull
-    private static Set<Move> convertJSONToMoves(JsonObject fsa) {
-        Set<Move> moves = new TreeSet<>();
+    private static Set<Triplet> convertJSONToMoves(JsonObject fsa) {
+        Set<Triplet> moves = new TreeSet<>();
         JsonArray jsonMoves = fsa.getJsonArray("moves");
         for (int i = 0; i < jsonMoves.toArray().length; i++) {
             JsonObject jsonMove = jsonMoves.getJsonObject(i);
             State from = new State(jsonMove.getInt("from"));
             Character consumed = jsonMove.getString("consumed").charAt(0);
             State to = new State(jsonMove.getInt("to"));
-            moves.add(new Move(from, consumed, to));
+            moves.add(new Triplet(from, consumed, to));
         }
         return moves;
     }
@@ -100,7 +101,7 @@ class FSA {
         Set<State> states = new TreeSet<>(this.getStates());
         State start = this.getStart();
         Set<State> finalStates = new TreeSet<>(this.getFinalStates());
-        Set<Move> moves = new TreeSet<>(this.getMoves());
+        Set<Triplet> moves = new TreeSet<>(this.getMoves());
 
         return new FSA(alphabet, states, start, finalStates, moves);
     }
@@ -122,10 +123,10 @@ class FSA {
     }
 
     void addMove(State from, Character consumed, State to) {
-        moves.add(new Move(from, consumed, to));
+        moves.add(new Triplet(from, consumed, to));
     }
 
-    void addMove(Move move) {
+    void addMove(Triplet move) {
         moves.add(move);
     }
 
@@ -149,7 +150,7 @@ class FSA {
         return finalStates;
     }
 
-    Set<Move> getMoves() {
+    Set<Triplet> getMoves() {
         return moves;
     }
 
@@ -184,11 +185,11 @@ class FSA {
 
     private JsonArrayBuilder createJsonMoves() {
         JsonArrayBuilder moves = Json.createArrayBuilder();
-        for (Move m : this.moves) {
+        for (Triplet m : this.moves) {
             JsonObject move = Json.createObjectBuilder()
-                    .add("from", m.getFrom().getId())
-                    .add("consumed", m.getConsumed().toString())
-                    .add("to", m.getTo().getId())
+                    .add("from", ((State) m.getValue(0)).getId())
+                    .add("consumed", ((Character) m.getValue(1)).toString())
+                    .add("to", ((State) m.getValue(2)).getId())
                     .build();
             moves.add(move);
         }

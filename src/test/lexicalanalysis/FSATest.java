@@ -1,3 +1,4 @@
+import org.javatuples.Triplet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,8 @@ class FSATest {
         State start = new State(0);
         Set<State> finalStates = new TreeSet<>();
         State finalState = new State(1);
-        Set<Move> moves = new TreeSet<>();
-        Move move = new Move(start, 'a', finalState);
+        Set<Triplet> moves = new TreeSet<>();
+        Triplet move = new Triplet(start, 'a', finalState);
 
         alphabet.addSymbol('a');
         moves.add(move);
@@ -93,13 +94,13 @@ class FSATest {
         State from = new State(2);
         Character consumed = 'b';
         State to = new State(3);
-        Move move = new Move(from, consumed, to);
+        Triplet move = new Triplet(from, consumed, to);
         fsa.addMove(move);
 
-        Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>();
-        expected.add(new Move(new State(0), 'a', new State(1)));
-        expected.add(new Move(new State(2), 'b', new State(3)));
+        Set<Triplet> actual = fsa.getMoves();
+        Set<Triplet> expected = new TreeSet<>();
+        expected.add(new Triplet(new State(0), 'a', new State(1)));
+        expected.add(new Triplet(new State(2), 'b', new State(3)));
         assertEquals(expected, actual);
     }
 
@@ -110,10 +111,10 @@ class FSATest {
         State to = new State(3);
         fsa.addMove(from, consumed, to);
 
-        Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>();
-        expected.add(new Move(new State(0), 'a', new State(1)));
-        expected.add(new Move(new State(2), 'b', new State(3)));
+        Set<Triplet> actual = fsa.getMoves();
+        Set<Triplet> expected = new TreeSet<>();
+        expected.add(new Triplet(new State(0), 'a', new State(1)));
+        expected.add(new Triplet(new State(2), 'b', new State(3)));
         assertEquals(expected, actual);
     }
 
@@ -159,9 +160,9 @@ class FSATest {
 
     @Test
     void getMoves() {
-        Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>();
-        expected.add(new Move(new State(0), 'a', new State(1)));
+        Set<Triplet> actual = fsa.getMoves();
+        Set<Triplet> expected = new TreeSet<>();
+        expected.add(new Triplet(new State(0), 'a', new State(1)));
         assertEquals(expected, actual);
     }
 

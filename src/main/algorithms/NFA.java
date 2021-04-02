@@ -1,3 +1,5 @@
+import org.javatuples.Triplet;
+
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -9,7 +11,7 @@ class NFA extends FSA {
     }
 
     NFA(Alphabet alphabet, Set<State> states, State start,
-        Set<State> finalStates, Set<Move> moves) {
+        Set<State> finalStates, Set<Triplet> moves) {
         super(alphabet, states, start, finalStates, moves);
     }
 
@@ -89,7 +91,7 @@ class NFA extends FSA {
         Set<State> states = new TreeSet<>();
         State start = this.getStart();
         Set<State> finalStates = new TreeSet<>();
-        Set<Move> moves = new TreeSet<>();
+        Set<Triplet> moves = new TreeSet<>();
 
         alphabet.addAll(this.getAlphabet());
         states.addAll(this.getStates());
@@ -130,8 +132,8 @@ class NFA extends FSA {
     }
 
     private void copyMoves(NFA other) {
-        Set<Move> otherMoves = other.getMoves();
-        for (Move move : otherMoves) {
+        Set<Triplet> otherMoves = other.getMoves();
+        for (Triplet move : otherMoves) {
             this.addMove(move);
         }
     }
