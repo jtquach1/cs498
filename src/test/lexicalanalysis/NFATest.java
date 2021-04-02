@@ -68,13 +68,13 @@ class NFATest {
                 makeMove(3, NFA.EPSILON, 5),
                 makeMove(4, NFA.EPSILON, 0),
                 makeMove(4, NFA.EPSILON, 2),
-                makeMove(5, NFA.EPSILON, 9),
+                makeMove(5, NFA.EPSILON, 8),
                 makeMove(6, 'a', 7),
                 makeMove(7, NFA.EPSILON, 6),
-                makeMove(7, NFA.EPSILON, 8),
-                makeMove(8, NFA.EPSILON, 10),
-                makeMove(9, NFA.EPSILON, 6),
-                makeMove(9, NFA.EPSILON, 8),
+                makeMove(7, NFA.EPSILON, 9),
+                makeMove(8, NFA.EPSILON, 6),
+                makeMove(8, NFA.EPSILON, 9),
+                makeMove(9, NFA.EPSILON, 10),
                 makeMove(10, 'b', 11));
 
         NFA actual = NFA.regexToNfa("(a|b)a*b");
@@ -152,16 +152,16 @@ class NFATest {
 
     @Test
     void kleeneStar() {
-        NFA expected = makeNFA(3);
+        NFA expected = makeNFA(2);
         addSymbols(expected, 'a');
         addStates(expected, 0, 1, 2, 3);
-        addFinalStates(expected, 2);
+        addFinalStates(expected, 3);
         addMoves(expected,
                 makeMove(0, 'a', 1),
                 makeMove(1, NFA.EPSILON, 0),
-                makeMove(1, NFA.EPSILON, 2),
-                makeMove(3, NFA.EPSILON, 0),
-                makeMove(3, NFA.EPSILON, 2));
+                makeMove(1, NFA.EPSILON, 3),
+                makeMove(2, NFA.EPSILON, 0),
+                makeMove(2, NFA.EPSILON, 3));
 
         NFA actual = makeNFA(0);
         addSymbols(actual, 'a');

@@ -67,8 +67,8 @@ class NFA extends FSA {
     static NFA kleeneStar(NFA first) {
         NFA result = first.deepClone();
         result.connectOriginalFinalStatesToOriginalStart();
-        result.addNewFinal();
         result.addNewStartForKleeneStar();
+        result.addNewFinal();
         result.connectNewStartToNewFinal();
         return result;
     }

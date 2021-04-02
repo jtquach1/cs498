@@ -192,13 +192,13 @@ class FSATest {
                 "    { \"from\": 3, \"consumed\": \"ɛ\", \"to\": 5 },\n" +
                 "    { \"from\": 4, \"consumed\": \"ɛ\", \"to\": 0 },\n" +
                 "    { \"from\": 4, \"consumed\": \"ɛ\", \"to\": 2 },\n" +
-                "    { \"from\": 5, \"consumed\": \"ɛ\", \"to\": 9 },\n" +
+                "    { \"from\": 5, \"consumed\": \"ɛ\", \"to\": 8 },\n" +
                 "    { \"from\": 6, \"consumed\": \"a\", \"to\": 7 },\n" +
                 "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
-                "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 8 },\n" +
-                "    { \"from\": 8, \"consumed\": \"ɛ\", \"to\": 10 },\n" +
-                "    { \"from\": 9, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
-                "    { \"from\": 9, \"consumed\": \"ɛ\", \"to\": 8 },\n" +
+                "    { \"from\": 7, \"consumed\": \"ɛ\", \"to\": 9 },\n" +
+                "    { \"from\": 8, \"consumed\": \"ɛ\", \"to\": 6 },\n" +
+                "    { \"from\": 8, \"consumed\": \"ɛ\", \"to\": 9 },\n" +
+                "    { \"from\": 9, \"consumed\": \"ɛ\", \"to\": 10 },\n" +
                 "    { \"from\": 10, \"consumed\": \"b\", \"to\": 11 }\n" +
                 "  ]\n" +
                 "}\n";
@@ -217,20 +217,20 @@ class FSATest {
                 "\t3 -> 5 [label = \"ɛ\"];\n" +
                 "\t4 -> 0 [label = \"ɛ\"];\n" +
                 "\t4 -> 2 [label = \"ɛ\"];\n" +
-                "\t5 -> 9 [label = \"ɛ\"];\n" +
+                "\t5 -> 8 [label = \"ɛ\"];\n" +
                 "\t6 -> 7 [label = \"a\"];\n" +
                 "\t7 -> 6 [label = \"ɛ\"];\n" +
-                "\t7 -> 8 [label = \"ɛ\"];\n" +
-                "\t8 -> 10 [label = \"ɛ\"];\n" +
-                "\t9 -> 6 [label = \"ɛ\"];\n" +
-                "\t9 -> 8 [label = \"ɛ\"];\n" +
+                "\t7 -> 9 [label = \"ɛ\"];\n" +
+                "\t8 -> 6 [label = \"ɛ\"];\n" +
+                "\t8 -> 9 [label = \"ɛ\"];\n" +
+                "\t9 -> 10 [label = \"ɛ\"];\n" +
                 "\t10 -> 11 [label = \"b\"];\n" +
                 "\n" +
                 "\tnode [shape = none, label =\"\"];\n" +
                 "\tENTRY -> 4;\n" +
                 "}\n";
 
-        String actual = NFA.convertJsonToGraphviz(json);
+        String actual = FSA.convertJsonToGraphviz(json);
         assertEquals(expected, actual);
     }
 }
