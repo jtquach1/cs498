@@ -2,7 +2,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public class DFA extends NFA {
+class DFA extends NFA {
     DFA() {
         super();
     }

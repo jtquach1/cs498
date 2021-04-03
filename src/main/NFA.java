@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -78,13 +81,36 @@ class NFA extends FSA {
         return result;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
         String infix = "(a|b)a*b";
         NFA nfa = NFA.regexToNFA(infix);
         String json = nfa.toJSON();
         String dot = nfa.toDOT();
-        System.out.println(json);
-        System.out.println(dot);
+
+        try {
+            File output = new File("nfa.json");
+            FileWriter writer = new FileWriter(output);
+            writer.write(json);
+            writer.flush();
+            writer.close();
+
+            output = new File("nfa.dot");
+            writer = new FileWriter(output);
+            writer.write(dot);
+            writer.flush();
+            writer.close();
+
+            String[] commands = {
+                    "dot -Tpdf nfa.dot > nfa.pdf"
+            };
+
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec(commands);
+            process.waitFor();
+        } catch (IOException | InterruptedException exception) {
+            System.err.println(exception);
+        }
+
     }
 
     NFA deepClone() {

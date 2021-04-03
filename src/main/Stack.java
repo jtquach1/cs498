@@ -2,11 +2,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 class Stack<T> extends ArrayList<T> {
-    public Stack() {
+    Stack() {
         super();
     }
 
-    public Stack(Collection<T> states) {
+    Stack(Collection<T> states) {
         this.addAll(states);
     }
 
