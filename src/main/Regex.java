@@ -61,12 +61,22 @@ class Regex {
 
     private static int getPrecedence(Character operator) {
         // Default is unimplemented operator
-        int precedence = switch (operator) {
-            case '.' -> 1;
-            case '|' -> 2;
-            case '*' -> 3;
-            default -> 0;
-        };
+        int precedence;
+
+        switch (operator) {
+            case '.':
+                precedence = 1;
+                break;
+            case '|':
+                precedence = 2;
+                break;
+            case '*':
+                precedence = 3;
+                break;
+            default:
+                precedence = 0;
+                break;
+        }
 
         return precedence;
     }
