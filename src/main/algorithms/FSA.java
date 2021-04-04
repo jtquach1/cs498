@@ -1,3 +1,5 @@
+package algorithms;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;

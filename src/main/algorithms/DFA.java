@@ -1,3 +1,5 @@
+package algorithms;
+
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -54,7 +56,7 @@ class DFA extends NFA {
         return validTos;
     }
 
-    static DFA nfaToDfa(NFA nfa) {
+    static DFA NFAtoDFA(NFA nfa) {
         return new DFA();
     }
 

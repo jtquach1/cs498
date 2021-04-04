@@ -1,3 +1,5 @@
+package algorithms;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,43 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class FSATest {
     FSA fsa;
-
-    private static void addSymbols(FSA fsa, Character... symbols) {
-        for (Character symbol : symbols) {
-            fsa.addSymbol(symbol);
-        }
-    }
-
-    private static void addStates(FSA fsa, Integer... stateIds) {
-        for (Integer id : stateIds) {
-            fsa.addState(new State(id));
-        }
-    }
-
-    private static void addFinalStates(FSA fsa, Integer... stateIds) {
-        for (Integer id : stateIds) {
-            fsa.addFinalState(new State(id));
-        }
-    }
-
-    private static void addMoves(FSA fsa, Move... moves) {
-        for (Move move : moves) {
-            fsa.addMove(move);
-        }
-    }
-
-    private static Move makeMove(Integer fromId, Character consumed, Integer toId) {
-        return new Move(new State(fromId), consumed, new State(toId));
-    }
-
-    private static FSA makeFSA(Integer stateId) {
-        return new FSA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(stateId),
-                new TreeSet<>(), new TreeSet<>()
-        );
-    }
 
     @BeforeEach
     void setUp() {
@@ -244,25 +209,25 @@ class FSATest {
                 "\tENTRY -> 4;\n" +
                 "}\n";
 
-        FSA fsa = makeFSA(4);
-        addSymbols(fsa, 'a', 'b');
-        addStates(fsa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-        addFinalStates(fsa, 11);
-        addMoves(fsa,
-                makeMove(0, 'a', 1),
-                makeMove(1, FSA.EPSILON, 5),
-                makeMove(2, 'b', 3),
-                makeMove(3, FSA.EPSILON, 5),
-                makeMove(4, FSA.EPSILON, 0),
-                makeMove(4, FSA.EPSILON, 2),
-                makeMove(5, FSA.EPSILON, 8),
-                makeMove(6, 'a', 7),
-                makeMove(7, FSA.EPSILON, 6),
-                makeMove(7, FSA.EPSILON, 9),
-                makeMove(8, FSA.EPSILON, 6),
-                makeMove(8, FSA.EPSILON, 9),
-                makeMove(9, FSA.EPSILON, 10),
-                makeMove(10, 'b', 11));
+        FSA fsa = Utility.makeFSA(4);
+        Utility.addSymbols(fsa, 'a', 'b');
+        Utility.addStates(fsa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        Utility.addFinalStates(fsa, 11);
+        Utility.addMoves(fsa,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, FSA.EPSILON, 5),
+                Utility.makeMove(2, 'b', 3),
+                Utility.makeMove(3, FSA.EPSILON, 5),
+                Utility.makeMove(4, FSA.EPSILON, 0),
+                Utility.makeMove(4, FSA.EPSILON, 2),
+                Utility.makeMove(5, FSA.EPSILON, 8),
+                Utility.makeMove(6, 'a', 7),
+                Utility.makeMove(7, FSA.EPSILON, 6),
+                Utility.makeMove(7, FSA.EPSILON, 9),
+                Utility.makeMove(8, FSA.EPSILON, 6),
+                Utility.makeMove(8, FSA.EPSILON, 9),
+                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(10, 'b', 11));
         String actual = fsa.toDOT();
 
         assertEquals(expected, actual);

@@ -1,3 +1,5 @@
+package algorithms;
+
 import java.util.ArrayList;
 
 class Queue<T> extends ArrayList<T> {

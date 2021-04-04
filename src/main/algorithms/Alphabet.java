@@ -1,3 +1,5 @@
+package algorithms;
+
 import java.util.TreeSet;
 
 class Alphabet extends TreeSet<Character> {
