@@ -85,8 +85,8 @@ class DFATest {
                 makeMove(10, 'b', 11));
 
         Set<State> expected = new TreeSet<>();
-        addStates(expected, 0, 4, 2);
-        Set<State> actual = DFA.epsilonClosure(new State(4), moves);
+        addStates(expected, 1, 5, 6, 8, 9, 10);
+        Set<State> actual = DFA.epsilonClosure(new State(1), moves);
         assertEquals(expected, actual);
     }
 
@@ -109,13 +109,32 @@ class DFATest {
                 makeMove(9, DFA.EPSILON, 10),
                 makeMove(10, 'b', 11));
 
-        Set<State> startClosure = new TreeSet<>();
-        addStates(startClosure, 0, 2, 4);
-        startClosure = DFA.getReachableStates(startClosure, moves, 'a');
+        Set<State> states = new TreeSet<>();
+        addStates(states, 4, 7);
 
         Set<State> expected = new TreeSet<>();
-        addStates(expected, 1, 5, 6, 8, 9, 10);
-        Set<State> actual = DFA.epsilonClosure(startClosure, moves);
+        addStates(expected, 0, 2, 4, 6, 7, 9, 10);
+        Set<State> actual = DFA.epsilonClosure(states, moves);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void getReachableStates() {
+        Set<Move> moves = new TreeSet<>();
+        addMoves(moves,
+                makeMove(0, 'a', 1),
+                makeMove(1, DFA.EPSILON, 5),
+                makeMove(2, 'b', 3),
+                makeMove(3, DFA.EPSILON, 5),
+                makeMove(4, DFA.EPSILON, 0),
+                makeMove(4, DFA.EPSILON, 2),
+                makeMove(5, DFA.EPSILON, 8),
+                makeMove(6, 'a', 7),
+                makeMove(7, DFA.EPSILON, 6),
+                makeMove(7, DFA.EPSILON, 9),
+                makeMove(8, DFA.EPSILON, 6),
+                makeMove(8, DFA.EPSILON, 9),
+                makeMove(9, DFA.EPSILON, 10),
+                makeMove(10, 'b', 11));
     }
 }
