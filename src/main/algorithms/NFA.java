@@ -83,7 +83,7 @@ class NFA extends FSA {
         return result;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         String infix = "(a|b)a*b";
         NFA nfa = NFA.regexToNFA(infix);
         String json = nfa.toJSON();
