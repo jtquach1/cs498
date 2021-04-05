@@ -75,17 +75,17 @@ class DFA extends NFA {
 
             for (Character consumed : nfaAlphabet) {
                 Set<State> reachableStates = getReachableStates(fromClosure, nfaMoves, consumed);
-                Set<State> closureTo = epsilonClosure(reachableStates, nfaMoves);
+                Set<State> toClosure = epsilonClosure(reachableStates, nfaMoves);
 
-                if (!closureTo.isEmpty()) {
+                if (!toClosure.isEmpty()) {
                     State to = new State();
-                    boolean isNewState = !dfaStates.contains(to);
+                    boolean isNewState = !closureMap.containsValue(toClosure);
 
                     if (isNewState) {
                         dfaStates.add(to);
                         stack.push(to);
                         dfaMoves.add(new Move(from, consumed, to));
-                        closureMap.put(to, closureTo);
+                        closureMap.put(to, toClosure);
                     } else {
                         State.setIdCounter(to.getId() - 1);
                         dfaMoves.add(new Move(from, consumed, to));
@@ -107,6 +107,15 @@ class DFA extends NFA {
 
         return new DFA(nfaAlphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves);
     }
+
+    private static Set<Integer> convertToIds(Set<State> states) {
+        return states.stream().map(State::getId).collect(Collectors.toSet());
+    }
+
+    private static Integer convertToId(State state) {
+        return state.getId();
+    }
+
 
     private static boolean stateAlreadyExists(Set<State> dfaStates, Map<State, Set<State>> closureMap) {
         for (State dfaState : dfaStates) {

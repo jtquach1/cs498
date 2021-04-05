@@ -138,7 +138,7 @@ class DFATest {
         Utility.addSymbols(expected, 'a', 'b');
         Utility.addStates(expected, 0, 1);
         Utility.addFinalStates(expected, 1);
-        Utility.addMoves(nfa,
+        Utility.addMoves(expected,
                 Utility.makeMove(0, 'a', 0),
                 Utility.makeMove(0, 'b', 1),
                 Utility.makeMove(1, 'a', 0),
