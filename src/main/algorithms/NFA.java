@@ -89,6 +89,9 @@ class NFA extends FSA {
         String json = nfa.toJSON();
         String dot = nfa.toDOT();
 
+
+        // best to let the user run this separately
+        // do a java command or provide a shell script
         try {
             File output = new File("nfa.json");
             FileWriter writer = new FileWriter(output);

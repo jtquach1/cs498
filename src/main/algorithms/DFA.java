@@ -6,9 +6,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class DFA extends NFA {
-    DFA() {
-        super();
-    }
 
     DFA(Alphabet alphabet, Set<State> states, State start,
         Set<State> finalStates, Set<Move> moves) {
@@ -81,12 +78,16 @@ class DFA extends NFA {
                     State to = new State();
                     boolean isNewState = !closureMap.containsValue(toClosure);
 
+                    // sDi+1 ∈/ SD
                     if (isNewState) {
                         dfaStates.add(to);
                         stack.push(to);
                         dfaMoves.add(new Move(from, consumed, to));
                         closureMap.put(to, toClosure);
-                    } else {
+                    }
+                    // this was originally else if
+                    // ∃sj ∈ SD such that sDi+1 = sj
+                    else {
                         State.setIdCounter(to.getId() - 1);
                         dfaMoves.add(new Move(from, consumed, to));
                     }
