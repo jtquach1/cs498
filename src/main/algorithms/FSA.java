@@ -1,10 +1,13 @@
 package algorithms;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
 import java.io.StringWriter;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -218,4 +221,109 @@ class FSA {
     }
 }
 
+class Alphabet extends TreeSet<Character> {
+    Alphabet() {
+        super();
+    }
+
+    Alphabet(Alphabet alphabet) {
+        addAll(alphabet);
+    }
+
+    void addSymbol(Character newSymbol) {
+        this.add(newSymbol);
+    }
+}
+
+class State implements Comparable<State>  {
+    private static int idCounter;
+    private final int id;
+
+    State() {
+        this.id = idCounter++;
+    }
+
+    State(int id) {
+        this.id = id;
+    }
+
+    static void setIdCounter(int idCounter) {
+        State.idCounter = idCounter;
+    }
+
+    int getId() {
+        return this.id;
+    }
+
+    @Override
+    public int compareTo(@NotNull State other) {
+        return Comparator.comparing(State::getId)
+                .compare(this, other);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        State state = (State) o;
+        return id == state.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return id + "";
+    }
+}
+
+class Move implements Comparable<Move> {
+    private final State from;
+    private final Character consumed;
+    private final State to;
+
+    Move(State from, Character consumed, State to) {
+        this.from = from;
+        this.consumed = consumed;
+        this.to = to;
+    }
+
+    State getFrom() {
+        return this.from;
+    }
+
+    Character getConsumed() {
+        return this.consumed;
+    }
+
+    State getTo() {
+        return this.to;
+    }
+
+    @Override
+    public int compareTo(@NotNull Move other) {
+        return Comparator.comparing(Move::getFrom)
+                .thenComparing(Move::getConsumed)
+                .thenComparing(Move::getTo)
+                .compare(this, other);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Move move = (Move) o;
+        return Objects.equals(from, move.from)
+                && Objects.equals(consumed, move.consumed)
+                && Objects.equals(to, move.to);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(from, consumed, to);
+    }
+}
 

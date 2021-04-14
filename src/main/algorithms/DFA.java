@@ -2,7 +2,8 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
+import java.util.Comparator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -107,8 +108,10 @@ class DFA extends NFA {
                         dfaStates.add(to);
                         stack.push(to);
                     } else {
-                        to.setId(to.getId() - 1);
-                        DFAState.setIdCounter(to.getId());
+                        // label DFA state with existing label
+                        int id = to.getId() - 1;
+                        to.setId(id);
+                        DFAState.setIdCounter(id);
                     }
 
                     dfaMoves.add(new DFAMove(from, consumed, to));
@@ -151,6 +154,115 @@ class DFA extends NFA {
         moves.addAll(this.getMoves());
 
         return new DFA(alphabet, states, start, finalStates, moves);
+    }
+
+}
+
+class DFAMove implements Comparable<DFAMove> {
+    private final DFAState from;
+    private final Character consumed;
+    private final DFAState to;
+
+    DFAMove(DFAState from, Character consumed, DFAState to) {
+        this.from = from;
+        this.consumed = consumed;
+        this.to = to;
+    }
+
+    DFAState getFrom() {
+        return this.from;
+    }
+
+    Character getConsumed() {
+        return this.consumed;
+    }
+
+    DFAState getTo() {
+        return this.to;
+    }
+
+    @Override
+    public int compareTo(@NotNull DFAMove other) {
+        return Comparator.comparing(DFAMove::getFrom)
+                .thenComparing(DFAMove::getConsumed)
+                .thenComparing(DFAMove::getTo)
+                .compare(this, other);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DFAMove move = (DFAMove) o;
+        return Objects.equals(from, move.from)
+                && Objects.equals(consumed, move.consumed)
+                && Objects.equals(to, move.to);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(from, consumed, to);
+    }
+}
+
+
+class DFAState implements Comparable<DFAState> {
+    private static int idCounter;
+    private final TreeSet<State> states;
+    private int id;
+
+    DFAState() {
+        this.id = idCounter++;
+        this.states = new TreeSet<>();
+    }
+
+    static void setIdCounter(int idCounter) {
+        DFAState.idCounter = idCounter;
+    }
+
+    int getId() {
+        return this.id;
+    }
+
+    void setId(int id) {
+        this.id = id;
+    }
+
+    TreeSet<State> getStates() {
+        return this.states;
+    }
+
+    void addAll(Set<State> closure) {
+        states.addAll(closure);
+    }
+
+    boolean isEmpty() {
+        return states.isEmpty();
+    }
+
+    @Override
+    public int compareTo(@NotNull DFAState other) {
+        return Comparator.comparing(DFAState::getId)
+                .thenComparing(s -> s.getStates().toString())
+                .compare(this, other);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DFAState state = (DFAState) o;
+        return this.states.equals(state.states);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, states);
+    }
+
+    @Override
+    public String toString() {
+        return id + "";
     }
 
 }

@@ -16,7 +16,7 @@ class Utility {
         }
     }
 
-    static void addStates(Set states, Integer... stateIds) {
+    static void addStates(Set<State> states, Integer... stateIds) {
         for (Integer id : stateIds) {
             states.add(new State(id));
         }
@@ -34,7 +34,7 @@ class Utility {
         }
     }
 
-    static void addMoves(Set set, Move... moves) {
+    static void addMoves(Set<Move> set, Move... moves) {
         for (Move move : moves) {
             set.add(move);
         }

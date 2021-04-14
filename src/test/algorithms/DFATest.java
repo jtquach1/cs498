@@ -103,8 +103,7 @@ class DFATest {
     }
 
     @Test
-    void NFAtoDFA() {
-
+    void alternate() {
         NFA nfa = NFATest.makeNFA(0);
         Utility.addSymbols(nfa, 'a', 'b');
         Utility.addStates(nfa, 0, 1, 2, 3, 4);
@@ -128,4 +127,83 @@ class DFATest {
         DFA actual = DFA.NFAtoDFA(nfa);
         assertEquals(expected, actual);
     }
+
+    @Test
+    void normal() {
+        NFA nfa = NFATest.makeNFA(0);
+        Utility.addSymbols(nfa, 'a');
+        Utility.addStates(nfa, 0, 1);
+        Utility.addFinalStates(nfa, 1);
+        Utility.addMoves(nfa,
+                Utility.makeMove(0, 'a', 0),
+                Utility.makeMove(0, 'a', 1)
+        );
+
+        DFA expected = makeDFA(0);
+        Utility.addSymbols(expected, 'a');
+        Utility.addStates(expected, 0, 1);
+        Utility.addFinalStates(expected, 1);
+        Utility.addMoves(expected,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, 'a', 1)
+        );
+
+        DFA actual = DFA.NFAtoDFA(nfa);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void kleeneStar() {
+        NFA nfa = NFATest.makeNFA(2);
+        Utility.addSymbols(nfa, 'a');
+        Utility.addStates(nfa, 0, 1, 2, 3);
+        Utility.addFinalStates(nfa, 3);
+        Utility.addMoves(nfa,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, FSA.EPSILON, 0),
+                Utility.makeMove(1, FSA.EPSILON, 3),
+                Utility.makeMove(2, FSA.EPSILON, 0),
+                Utility.makeMove(2, FSA.EPSILON, 3)
+        );
+
+        DFA expected = makeDFA(0);
+        Utility.addSymbols(expected, 'a');
+        Utility.addStates(expected, 0, 1);
+        Utility.addFinalStates(expected, 0, 1);
+        Utility.addMoves(expected,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, 'a', 1)
+        );
+
+        DFA actual = DFA.NFAtoDFA(nfa);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void concatenate() {
+        NFA nfa = NFATest.makeNFA(0);
+        Utility.addSymbols(nfa, 'a', 'b');
+        Utility.addStates(nfa, 0, 1, 2, 3);
+        Utility.addFinalStates(nfa, 3);
+        Utility.addMoves(nfa,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, FSA.EPSILON, 2),
+                Utility.makeMove(2, 'b', 3)
+        );
+
+        DFA expected = makeDFA(0);
+        Utility.addSymbols(expected, 'a', 'b');
+        Utility.addStates(expected, 0, 1, 2);
+        Utility.addFinalStates(expected, 2);
+        Utility.addMoves(expected,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, 'b', 2)
+        );
+
+        DFA actual = DFA.NFAtoDFA(nfa);
+        assertEquals(expected, actual);
+        // test fails because finalState is 4, not 2
+        // result is equivalent though, just has the wrong label for final state
+    }
+
 }
