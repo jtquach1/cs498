@@ -104,25 +104,6 @@ class DFATest {
 
     @Test
     void NFAtoDFA() {
-//        NFA nfa = NFATest.makeNFA(4);
-//        Utility.addSymbols(nfa, 'a', 'b');
-//        Utility.addStates(nfa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-//        Utility.addFinalStates(nfa, 11);
-//        Utility.addMoves(nfa,
-//                Utility.makeMove(0, 'a', 1),
-//                Utility.makeMove(1, NFA.EPSILON, 5),
-//                Utility.makeMove(2, 'b', 3),
-//                Utility.makeMove(3, NFA.EPSILON, 5),
-//                Utility.makeMove(4, NFA.EPSILON, 0),
-//                Utility.makeMove(4, NFA.EPSILON, 2),
-//                Utility.makeMove(5, NFA.EPSILON, 8),
-//                Utility.makeMove(6, 'a', 7),
-//                Utility.makeMove(7, NFA.EPSILON, 6),
-//                Utility.makeMove(7, NFA.EPSILON, 9),
-//                Utility.makeMove(8, NFA.EPSILON, 6),
-//                Utility.makeMove(8, NFA.EPSILON, 9),
-//                Utility.makeMove(9, NFA.EPSILON, 10),
-//                Utility.makeMove(10, 'b', 11));
 
         NFA nfa = NFATest.makeNFA(0);
         Utility.addSymbols(nfa, 'a', 'b');

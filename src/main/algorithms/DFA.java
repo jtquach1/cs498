@@ -2,10 +2,15 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 class DFA extends NFA {
+    DFA() {
+        super();
+    }
 
     DFA(Alphabet alphabet, Set<State> states, State start,
         Set<State> finalStates, Set<Move> moves) {
@@ -41,6 +46,24 @@ class DFA extends NFA {
         return closure;
     }
 
+    static DFAState epsilonClosureDFA(Set<State> states, Set<Move> moves) {
+        Set<State> closure = epsilonClosure(states, moves);
+        DFAState state = new DFAState();
+        state.addAll(closure);
+        return state;
+    }
+
+    static DFAState epsilonClosureDFA(State states, Set<Move> moves) {
+        Set<State> closure = epsilonClosure(states, moves);
+        DFAState state = new DFAState();
+        state.addAll(closure);
+        return state;
+    }
+
+    static Set<State> getReachableStates(DFAState states, Set<Move> moves, Character consumed) {
+        return getReachableStates(states.getStates(), moves, consumed);
+    }
+
     static Set<State> getReachableStates(Set<State> states, Set<Move> moves, Character consumed) {
         Set<State> validTos = new TreeSet<>();
         for (State from : states) {
@@ -55,58 +78,68 @@ class DFA extends NFA {
     }
 
     static DFA NFAtoDFA(NFA nfa) {
-        State dfaStart = new State();
-        Map<State, Set<State>> closureMap = new TreeMap<>();
-        Set<State> dfaStates = new TreeSet<>(Collections.singletonList(dfaStart));
-        Set<Move> dfaMoves = new TreeSet<>();
-        Stack<State> stack = new Stack<>(dfaStart);
-
-        closureMap.put(dfaStart, getDFAStart(nfa));
-
         Alphabet nfaAlphabet = nfa.getAlphabet();
         Set<Move> nfaMoves = nfa.getMoves();
+        State nfaStart = nfa.getStart();
+
+        DFAState dfaStart = epsilonClosureDFA(nfaStart, nfaMoves);
+        Set<DFAState> dfaStates = new TreeSet<>();
+        dfaStates.add(dfaStart);
+        Set<DFAMove> dfaMoves = new TreeSet<>();
+        Stack<DFAState> stack = new Stack<>();
+        stack.push(dfaStart);
+
 
         while (!stack.isEmpty()) {
-            State from = stack.pop();
-            Set<State> fromClosure = closureMap.get(from);
+            DFAState from = stack.pop();
 
             for (Character consumed : nfaAlphabet) {
-                Set<State> reachableStates = getReachableStates(fromClosure, nfaMoves, consumed);
-                Set<State> toClosure = epsilonClosure(reachableStates, nfaMoves);
+                Set<State> reachableStates = getReachableStates(from, nfaMoves, consumed);
+                DFAState to = epsilonClosureDFA(reachableStates, nfaMoves);
 
-                if (!toClosure.isEmpty()) {
-                    State to = new State();
-                    boolean isNewState = !closureMap.containsValue(toClosure);
+                if (!to.isEmpty()) {
+                    boolean isNewState = dfaStates
+                            .stream()
+                            .noneMatch(s -> s.getStates().equals(to.getStates()));
 
-                    // sDi+1 ∈/ SD
                     if (isNewState) {
                         dfaStates.add(to);
                         stack.push(to);
-                        dfaMoves.add(new Move(from, consumed, to));
-                        closureMap.put(to, toClosure);
+                    } else {
+                        int label = Integer.parseInt(dfaStates
+                                .stream()
+                                .filter(s -> s.getStates().equals(to.getStates()))
+                                .distinct()
+                                .toArray()[0]
+                                .toString());
+//                        DFAState.setIdCounter(label);
                     }
-                    // this was originally else if
-                    // ∃sj ∈ SD such that sDi+1 = sj
-                    else {
-                        State.setIdCounter(to.getId() - 1);
-                        dfaMoves.add(new Move(from, consumed, to));
-                    }
+
+                    dfaMoves.add(new DFAMove(from, consumed, to));
                 }
             }
         }
+
 
         Set<State> dfaFinalStates = new TreeSet<>();
         Set<State> nfaFinalStates = nfa.getFinalStates();
 
-        for (State dfaState : dfaStates) {
-            for (State nfaState : closureMap.get(dfaState)) {
+        for (DFAState dfaState : dfaStates) {
+            for (State nfaState : dfaState.getStates()) {
                 if (nfaFinalStates.contains(nfaState)) {
-                    dfaFinalStates.add(dfaState);
+                    dfaFinalStates.add(new State(dfaState.getId()));
                 }
             }
         }
 
-        return new DFA(nfaAlphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves);
+        return new DFA(nfaAlphabet,
+                dfaStates.stream().map(d -> new State(d.getId())).collect(Collectors.toSet()),
+                new State(dfaStart.getId()),
+                dfaFinalStates,
+                dfaMoves.stream().map(m -> new Move(
+                        new State(m.getFrom().getId()),
+                        m.getConsumed(),
+                        new State(m.getTo().getId()))).collect(Collectors.toSet()));
     }
 
     private static Set<Integer> convertToIds(Set<State> states) {
