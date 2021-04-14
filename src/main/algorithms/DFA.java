@@ -98,6 +98,7 @@ class DFA extends NFA {
                 DFAState to = epsilonClosureDFA(reachableStates, nfaMoves);
 
                 if (!to.isEmpty()) {
+                    // doing TreeSet.contains() causes an infinite loop
                     boolean isNewState = dfaStates
                             .stream()
                             .noneMatch(s -> s.getStates().equals(to.getStates()));
@@ -106,13 +107,8 @@ class DFA extends NFA {
                         dfaStates.add(to);
                         stack.push(to);
                     } else {
-                        int label = Integer.parseInt(dfaStates
-                                .stream()
-                                .filter(s -> s.getStates().equals(to.getStates()))
-                                .distinct()
-                                .toArray()[0]
-                                .toString());
-//                        DFAState.setIdCounter(label);
+                        to.setId(to.getId() - 1);
+                        DFAState.setIdCounter(to.getId());
                     }
 
                     dfaMoves.add(new DFAMove(from, consumed, to));
@@ -140,33 +136,6 @@ class DFA extends NFA {
                         new State(m.getFrom().getId()),
                         m.getConsumed(),
                         new State(m.getTo().getId()))).collect(Collectors.toSet()));
-    }
-
-    private static Set<Integer> convertToIds(Set<State> states) {
-        return states.stream().map(State::getId).collect(Collectors.toSet());
-    }
-
-    private static Integer convertToId(State state) {
-        return state.getId();
-    }
-
-
-    private static boolean stateAlreadyExists(Set<State> dfaStates, Map<State, Set<State>> closureMap) {
-        for (State dfaState : dfaStates) {
-            for (State nfaState : closureMap.get(dfaState)) {
-
-            }
-        }
-
-        return true;
-    }
-
-    @NotNull
-    private static Set<State> getDFAStart(NFA nfa) {
-        State nfaStart = nfa.getStart();
-        Set<Move> nfaMoves = nfa.getMoves();
-        Set<State> dfaStart = epsilonClosure(nfaStart, nfaMoves);
-        return dfaStart;
     }
 
     DFA deepClone() {

@@ -107,23 +107,22 @@ class DFATest {
 
         NFA nfa = NFATest.makeNFA(0);
         Utility.addSymbols(nfa, 'a', 'b');
-        Utility.addStates(nfa, 0, 1);
-        Utility.addFinalStates(nfa, 1);
+        Utility.addStates(nfa, 0, 1, 2, 3, 4);
+        Utility.addFinalStates(nfa, 2, 4);
         Utility.addMoves(nfa,
-                Utility.makeMove(0, 'a', 0),
-                Utility.makeMove(0, 'b', 0),
-                Utility.makeMove(0, 'b', 1)
+                Utility.makeMove(0, FSA.EPSILON, 1),
+                Utility.makeMove(1, 'a', 2),
+                Utility.makeMove(0, FSA.EPSILON, 3),
+                Utility.makeMove(3, 'b', 4)
         );
 
         DFA expected = makeDFA(0);
         Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1);
-        Utility.addFinalStates(expected, 1);
+        Utility.addStates(expected, 0, 1, 2);
+        Utility.addFinalStates(expected, 1, 2);
         Utility.addMoves(expected,
-                Utility.makeMove(0, 'a', 0),
-                Utility.makeMove(0, 'b', 1),
-                Utility.makeMove(1, 'a', 0),
-                Utility.makeMove(1, 'b', 1)
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(0, 'b', 2)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);

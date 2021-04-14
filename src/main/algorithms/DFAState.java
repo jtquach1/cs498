@@ -9,7 +9,7 @@ import java.util.TreeSet;
 
 class DFAState implements Comparable<DFAState> {
     private static int idCounter;
-    private final int id;
+    private int id;
     private TreeSet<State> states;
 
     DFAState() {
@@ -24,6 +24,8 @@ class DFAState implements Comparable<DFAState> {
     int getId() {
         return this.id;
     }
+
+    void setId(int id) { this.id = id; }
 
     TreeSet<State> getStates() {
         return this.states;
