@@ -202,8 +202,6 @@ class DFATest {
 
         DFA actual = DFA.NFAtoDFA(nfa);
         assertEquals(expected, actual);
-        // test fails because finalState is 4, not 2
-        // result is equivalent though, just has the wrong label for final state
     }
 
 }
