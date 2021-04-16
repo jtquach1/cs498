@@ -41,7 +41,7 @@ class DFA extends FSA {
                 convertToMoves(dfaMoves)
         );
         this.nil = nil;
-        this.addState(nil);
+        boolean everyStateConsumesEntireAlphabet = true;
         for (State from : this.getStates()) {
             Set<Character> consumedChars = this.getMoves()
                     .stream()
@@ -51,7 +51,14 @@ class DFA extends FSA {
             for (Character consumed : this.getAlphabet()) {
                 if (!consumedChars.contains(consumed)) {
                     this.addMove(from, consumed, nil);
+                    everyStateConsumesEntireAlphabet = false;
                 }
+            }
+        }
+        if (!everyStateConsumesEntireAlphabet) {
+            this.addState(nil);
+            for (Character consumed : this.getAlphabet()) {
+                this.addMove(nil, consumed, nil);
             }
         }
     }
