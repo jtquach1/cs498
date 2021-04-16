@@ -52,15 +52,28 @@ class DFA extends FSA {
         Alphabet alphabet = nfa.getAlphabet();
         State nfaStart = nfa.getStart();
         Set<Move> nfaMoves = nfa.getMoves();
+        Set<State> nfaFinalStates = nfa.getFinalStates();
 
         int index = 0;
-        DFAState dfaStart = epsilonClosure(nfaStart, nfaMoves, index++);
+        DFAState dfaStart = epsilonClosure(nfaStart, nfaMoves, index);
         Set<DFAState> dfaStates = new TreeSet<>();
         dfaStates.add(dfaStart);
         Set<DFAMove> dfaMoves = new TreeSet<>();
         Stack<DFAState> stack = new Stack<>();
         stack.push(dfaStart);
+        index++;
 
+        computeDFAStates(alphabet, nfaMoves, index, dfaStates, dfaMoves, stack);
+        Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
+
+        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves);
+    }
+
+    private static void computeDFAStates(
+            Alphabet alphabet, Set<Move> nfaMoves,
+            int index, Set<DFAState> dfaStates,
+            Set<DFAMove> dfaMoves, Stack<DFAState> stack
+    ) {
         while (!stack.isEmpty()) {
             DFAState from = stack.pop();
 
@@ -74,6 +87,7 @@ class DFA extends FSA {
                         dfaStates.add(to);
                         stack.push(to);
                         index++;
+
                     } else {
                         to.updateWithExistingId(dfaStates);
                     }
@@ -82,15 +96,13 @@ class DFA extends FSA {
                 }
             }
         }
-
-        Set<State> nfaFinalStates = nfa.getFinalStates();
-        Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
-
-        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves);
     }
 
     @NotNull
-    private static Set<DFAState> getDFAFinalStates(Set<DFAState> dfaStates, Set<State> nfaFinalStates) {
+    private static Set<DFAState> getDFAFinalStates(
+            Set<DFAState> dfaStates,
+            Set<State> nfaFinalStates
+    ) {
         Set<DFAState> dfaFinalStates = new TreeSet<>();
 
         for (DFAState dfaState : dfaStates) {
@@ -104,11 +116,19 @@ class DFA extends FSA {
         return dfaFinalStates;
     }
 
-    private static Set<State> getReachableStates(DFAState states, Set<Move> moves, Character consumed) {
+    private static Set<State> getReachableStates(
+            DFAState states,
+            Set<Move> moves,
+            Character consumed
+    ) {
         return getReachableStates(states.getStates(), moves, consumed);
     }
 
-    private static Set<State> getReachableStates(Set<State> states, Set<Move> moves, Character consumed) {
+    private static Set<State> getReachableStates(
+            Set<State> states,
+            Set<Move> moves,
+            Character consumed
+    ) {
         Set<State> validTos = new TreeSet<>();
         for (State from : states) {
             Set<State> validStates = moves

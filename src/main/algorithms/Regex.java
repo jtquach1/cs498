@@ -96,7 +96,11 @@ class Regex {
         return c == '.' | c == '*' | c == '|';
     }
 
-    private static void handleOperator(Stack<Character> postfix, Stack<Character> operators, char token) {
+    private static void handleOperator(
+            Stack<Character> postfix,
+            Stack<Character> operators,
+            char token
+    ) {
         Character top = operators.peek();
         boolean existsTopOperator = top != null;
         while (existsTopOperator
@@ -152,7 +156,10 @@ class Regex {
         return token == '(';
     }
 
-    private static void handleLeftParenthesis(Stack<Character> operators, char token) {
+    private static void handleLeftParenthesis(
+            Stack<Character> operators,
+            char token
+    ) {
         operators.push(token);
     }
 
@@ -160,7 +167,10 @@ class Regex {
         return token == ')';
     }
 
-    private static void handleRightParenthesis(Stack<Character> postfix, Stack<Character> operators) {
+    private static void handleRightParenthesis(
+            Stack<Character> postfix,
+            Stack<Character> operators
+    ) {
         Character top = operators.peek();
         while (!isLeftParenthesis(top)) {
             postfix.push(operators.pop());
@@ -172,7 +182,10 @@ class Regex {
         }
     }
 
-    private static void handleRemainingOperators(Stack<Character> postfix, Stack<Character> operators) {
+    private static void handleRemainingOperators(
+            Stack<Character> postfix,
+            Stack<Character> operators
+    ) {
         while (!operators.isEmpty()) {
             postfix.push(operators.pop());
         }
