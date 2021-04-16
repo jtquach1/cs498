@@ -10,16 +10,29 @@ import static algorithms.DFAState.convertToState;
 import static algorithms.DFAState.convertToStates;
 
 class DFA extends FSA {
-    Map<State, DFAState> closureMap;
+    private final State nil;
 
-    DFA(Alphabet alphabet, Set<State> states, State start,
-        Set<State> finalStates, Set<Move> moves) {
+    // For unit testing
+    DFA(
+            Alphabet alphabet,
+            Set<State> states,
+            State start,
+            Set<State> finalStates,
+            Set<Move> moves,
+            State nil
+    ) {
         super(alphabet, states, start, finalStates, moves);
-        this.closureMap = new TreeMap<>();
+        this.nil = nil;
     }
 
-    DFA(Alphabet alphabet, Set<DFAState> dfaStates, DFAState dfaStart,
-        Set<DFAState> dfaFinalStates, Set<DFAMove> dfaMoves) {
+    DFA(
+            Alphabet alphabet,
+            Set<DFAState> dfaStates,
+            DFAState dfaStart,
+            Set<DFAState> dfaFinalStates,
+            Set<DFAMove> dfaMoves,
+            State nil
+    ) {
         super(
                 alphabet,
                 convertToStates(dfaStates),
@@ -27,10 +40,19 @@ class DFA extends FSA {
                 convertToStates(dfaFinalStates),
                 convertToMoves(dfaMoves)
         );
-
-        this.closureMap = new TreeMap<>();
-        for (DFAState dfaState : dfaStates) {
-            closureMap.put(convertToState(dfaState), dfaState);
+        this.nil = nil;
+        this.addState(nil);
+        for (State from : this.getStates()) {
+            Set<Character> consumedChars = this.getMoves()
+                    .stream()
+                    .filter(move -> move.hasFrom(from))
+                    .map(Move::getConsumed)
+                    .collect(Collectors.toSet());
+            for (Character consumed : this.getAlphabet()) {
+                if (!consumedChars.contains(consumed)) {
+                    this.addMove(from, consumed, nil);
+                }
+            }
         }
     }
 
@@ -63,16 +85,20 @@ class DFA extends FSA {
         stack.push(dfaStart);
         index++;
 
-        computeDFAStates(alphabet, nfaMoves, index, dfaStates, dfaMoves, stack);
+        index = updateIndexAndComputeStates(alphabet, nfaMoves, index, dfaStates, dfaMoves, stack);
         Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
+        State nil = new State(index);
 
-        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves);
+        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, nil);
     }
 
-    private static void computeDFAStates(
-            Alphabet alphabet, Set<Move> nfaMoves,
-            int index, Set<DFAState> dfaStates,
-            Set<DFAMove> dfaMoves, Stack<DFAState> stack
+    private static int updateIndexAndComputeStates(
+            Alphabet alphabet,
+            Set<Move> nfaMoves,
+            Integer index,
+            Set<DFAState> dfaStates,
+            Set<DFAMove> dfaMoves,
+            Stack<DFAState> stack
     ) {
         while (!stack.isEmpty()) {
             DFAState from = stack.pop();
@@ -96,6 +122,7 @@ class DFA extends FSA {
                 }
             }
         }
+        return index;
     }
 
     @NotNull

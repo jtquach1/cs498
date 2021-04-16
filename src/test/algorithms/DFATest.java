@@ -11,12 +11,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DFATest {
 
-    private static DFA makeDFA(Integer stateId) {
+    private static DFA makeDFA(Integer start) {
         return new DFA(
                 new Alphabet(),
                 new TreeSet<>(),
-                new State(stateId),
-                new TreeSet<>(), new TreeSet<>()
+                new State(start),
+                new TreeSet<>(),
+                new TreeSet<>(),
+                null
+        );
+    }
+
+    private static DFA makeDFA(Integer start, Integer nil) {
+        return new DFA(
+                new Alphabet(),
+                new TreeSet<>(),
+                new State(start),
+                new TreeSet<>(),
+                new TreeSet<>(),
+                new State(nil)
         );
     }
 
@@ -98,13 +111,19 @@ class DFATest {
                 Utility.makeMove(2, 'b', 3)
         );
 
-        DFA expected = makeDFA(0);
+        DFA expected = makeDFA(0, 3);
         Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2);
+        Utility.addStates(expected, 0, 1, 2, 3);
         Utility.addFinalStates(expected, 2);
         Utility.addMoves(expected,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, 'b', 2)
+                Utility.makeMove(0, 'b', 3),
+                Utility.makeMove(1, 'b', 2),
+                Utility.makeMove(1, 'a', 3),
+                Utility.makeMove(2, 'a', 3),
+                Utility.makeMove(2, 'b', 3),
+                Utility.makeMove(3, 'a', 3),
+                Utility.makeMove(3, 'b', 3)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);

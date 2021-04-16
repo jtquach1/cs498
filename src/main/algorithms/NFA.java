@@ -11,8 +11,13 @@ class NFA extends FSA {
         super();
     }
 
-    NFA(Alphabet alphabet, Set<State> states, State start,
-        Set<State> finalStates, Set<Move> moves) {
+    NFA(
+            Alphabet alphabet,
+            Set<State> states,
+            State start,
+            Set<State> finalStates,
+            Set<Move> moves
+    ) {
         super(alphabet, states, start, finalStates, moves);
     }
 

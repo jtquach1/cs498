@@ -31,8 +31,13 @@ class FSA {
         states.add(start);
     }
 
-    FSA(Alphabet alphabet, Set<State> states, State start,
-        Set<State> finalStates, Set<Move> moves) {
+    FSA(
+            Alphabet alphabet,
+            Set<State> states,
+            State start,
+            Set<State> finalStates,
+            Set<Move> moves
+    ) {
         this.alphabet = alphabet;
         this.states = states;
         this.start = start;
@@ -214,10 +219,6 @@ class FSA {
 class Alphabet extends TreeSet<Character> {
     Alphabet() {
         super();
-    }
-
-    Alphabet(Alphabet alphabet) {
-        addAll(alphabet);
     }
 
     void addSymbol(Character newSymbol) {
