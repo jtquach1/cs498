@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 class DFA extends NFA {
+
     DFA() {
         super();
     }
@@ -16,6 +17,18 @@ class DFA extends NFA {
     DFA(Alphabet alphabet, Set<State> states, State start,
         Set<State> finalStates, Set<Move> moves) {
         super(alphabet, states, start, finalStates, moves);
+    }
+
+    DFA(Alphabet alphabet, Set<DFAState> dfaStates, DFAState dfaStart,
+        Set<DFAState> dfaFinalStates, Set<DFAMove> dfaMoves) {
+        super(alphabet,
+                dfaStates.stream().map(state -> new State(state.getId())).collect(Collectors.toSet()),
+                new State(dfaStart.getId()),
+                dfaFinalStates.stream().map(state -> new State(state.getId())).collect(Collectors.toSet()),
+                dfaMoves.stream().map(move -> new Move(
+                        new State(move.getFrom().getId()),
+                        move.getConsumed(),
+                        new State(move.getTo().getId()))).collect(Collectors.toSet()));
     }
 
     static Set<State> epsilonClosure(State state, Set<Move> moves) {
@@ -127,25 +140,24 @@ class DFA extends NFA {
         }
 
 
-        Set<State> dfaFinalStates = new TreeSet<>();
+        Set<DFAState> dfaFinalStates = new TreeSet<>();
         Set<State> nfaFinalStates = nfa.getFinalStates();
 
         for (DFAState dfaState : dfaStates) {
             for (State nfaState : dfaState.getStates()) {
                 if (nfaFinalStates.contains(nfaState)) {
-                    dfaFinalStates.add(new State(dfaState.getId()));
+                    dfaFinalStates.add(dfaState);
                 }
             }
         }
 
-        return new DFA(nfaAlphabet,
-                dfaStates.stream().map(d -> new State(d.getId())).collect(Collectors.toSet()),
-                new State(dfaStart.getId()),
+        return new DFA(
+                nfaAlphabet,
+                dfaStates,
+                dfaStart,
                 dfaFinalStates,
-                dfaMoves.stream().map(m -> new Move(
-                        new State(m.getFrom().getId()),
-                        m.getConsumed(),
-                        new State(m.getTo().getId()))).collect(Collectors.toSet()));
+                dfaMoves
+        );
     }
 
     DFA deepClone() {
