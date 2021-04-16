@@ -30,10 +30,9 @@ class DFA extends FSA {
 
         this.closureMap = new TreeMap<>();
         for (DFAState dfaState : dfaStates) {
-            closureMap.put(new State(dfaState.getId()), dfaState);
+            closureMap.put(convertToState(dfaState), dfaState);
         }
     }
-
 
     static DFAState epsilonClosure(Set<State> states, Set<Move> moves, int index) {
         Set<State> closure = epsilonClosure(states, moves);
@@ -47,23 +46,6 @@ class DFA extends FSA {
         DFAState dfaState = new DFAState(index);
         dfaState.addAll(closure);
         return dfaState;
-    }
-
-    static Set<State> getReachableStates(DFAState states, Set<Move> moves, Character consumed) {
-        return getReachableStates(states.getStates(), moves, consumed);
-    }
-
-    static Set<State> getReachableStates(Set<State> states, Set<Move> moves, Character consumed) {
-        Set<State> validTos = new TreeSet<>();
-        for (State from : states) {
-            Set<State> validStates = moves
-                    .stream()
-                    .filter(move -> move.hasFrom(from) && move.hasConsumed(consumed))
-                    .map(Move::getTo)
-                    .collect(Collectors.toSet());
-            validTos.addAll(validStates);
-        }
-        return validTos;
     }
 
     static DFA NFAtoDFA(NFA nfa) {
@@ -122,6 +104,23 @@ class DFA extends FSA {
         return dfaFinalStates;
     }
 
+    private static Set<State> getReachableStates(DFAState states, Set<Move> moves, Character consumed) {
+        return getReachableStates(states.getStates(), moves, consumed);
+    }
+
+    private static Set<State> getReachableStates(Set<State> states, Set<Move> moves, Character consumed) {
+        Set<State> validTos = new TreeSet<>();
+        for (State from : states) {
+            Set<State> validStates = moves
+                    .stream()
+                    .filter(move -> move.hasFrom(from) && move.hasConsumed(consumed))
+                    .map(Move::getTo)
+                    .collect(Collectors.toSet());
+            validTos.addAll(validStates);
+        }
+        return validTos;
+    }
+
     private static Set<State> epsilonClosure(State state, Set<Move> moves) {
         Set<State> states = new TreeSet<>();
         states.add(state);
@@ -150,7 +149,6 @@ class DFA extends FSA {
 
         return closure;
     }
-
 }
 
 class DFAMove implements Comparable<DFAMove> {
@@ -222,8 +220,8 @@ class DFAState implements Comparable<DFAState> {
     }
 
     @NotNull
-    static State convertToState(DFAState dfaStart) {
-        return new State(dfaStart.getId());
+    static State convertToState(DFAState dfaState) {
+        return new State(dfaState.getId());
     }
 
     @NotNull

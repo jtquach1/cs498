@@ -1,6 +1,5 @@
 package algorithms;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,10 +22,6 @@ class NFATest {
     @BeforeEach
     void setUp() {
         State.setIdCounter(0);
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @Test
