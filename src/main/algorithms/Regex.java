@@ -50,8 +50,8 @@ class Regex {
         return false;
     }
 
-    private static boolean isStar(Character top) {
-        return top == '*';
+    private static boolean isStar(Character token) {
+        return token == '*';
     }
 
     @NotNull
@@ -85,7 +85,7 @@ class Regex {
     }
 
     private static boolean isOperand(char c) {
-        return Character.isAlphabetic(c) || Character.isDigit(c);
+        return !(isOperator(c) || isLeftParenthesis(c) || isRightParenthesis(c));
     }
 
     private static void handleOperand(Stack<Character> postfix, char token) {
@@ -148,16 +148,16 @@ class Regex {
         return precedence;
     }
 
-    private static boolean isLeftParenthesis(Character top) {
-        return top == '(';
+    private static boolean isLeftParenthesis(Character token) {
+        return token == '(';
     }
 
     private static void handleLeftParenthesis(Stack<Character> operators, char token) {
         operators.push(token);
     }
 
-    private static boolean isRightParenthesis(Character top) {
-        return top == ')';
+    private static boolean isRightParenthesis(Character token) {
+        return token == ')';
     }
 
     private static void handleRightParenthesis(Stack<Character> postfix, Stack<Character> operators) {

@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class FSATest {
     FSA fsa;
@@ -35,20 +34,6 @@ class FSATest {
     @AfterEach
     void tearDown() {
         fsa = null;
-    }
-
-    @Test
-    void deepClone() {
-        FSA expected = fsa;
-        FSA actual = fsa.deepClone();
-        assertEquals(expected, actual);
-
-        FSA unexpected = fsa;
-        unexpected.addSymbol('b');
-        unexpected.addFinalState(new State(2));
-        unexpected.addState(new State(2));
-        unexpected.addMove(new State(0), 'b', new State(2));
-        assertNotEquals(unexpected, actual);
     }
 
     @Test

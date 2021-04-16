@@ -75,16 +75,6 @@ class FSA {
         return sb.toString();
     }
 
-    FSA deepClone() {
-        Alphabet alphabet = new Alphabet(this.getAlphabet());
-        Set<State> states = new TreeSet<>(this.getStates());
-        State start = this.getStart();
-        Set<State> finalStates = new TreeSet<>(this.getFinalStates());
-        Set<Move> moves = new TreeSet<>(this.getMoves());
-
-        return new FSA(alphabet, states, start, finalStates, moves);
-    }
-
     void addSymbol(Character newSymbol) {
         alphabet.addSymbol(newSymbol);
     }
@@ -235,7 +225,7 @@ class Alphabet extends TreeSet<Character> {
     }
 }
 
-class State implements Comparable<State>  {
+class State implements Comparable<State> {
     private static int idCounter;
     private final int id;
 
@@ -301,6 +291,14 @@ class Move implements Comparable<Move> {
 
     State getTo() {
         return this.to;
+    }
+
+    boolean hasConsumed(Character consumed) {
+        return this.consumed.equals(consumed);
+    }
+
+    boolean hasFrom(State from) {
+        return this.from.equals(from);
     }
 
     @Override
