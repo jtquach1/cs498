@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 class FSA {
     static final char EPSILON = '\u025B';
+    static final char PHI = '\u03C6';
 
     private final Alphabet alphabet;
     private final Set<State> states;
@@ -70,7 +71,17 @@ class FSA {
             int fromId = move.getFrom().getId();
             String consumed = move.getConsumed().toString();
             int toId = move.getTo().getId();
-            sb.append("\t" + fromId + " -> " + toId + " [label = \"" + consumed + "\"];\n");
+            if (this instanceof DFA && ((DFA) this).getPhi() != null) {
+                String from = fromId == ((DFA) this).getPhi().getId()
+                        ? Character.toString(PHI)
+                        : Integer.toString(fromId);
+                String to = toId == ((DFA) this).getPhi().getId()
+                        ? Character.toString(PHI)
+                        : Integer.toString(toId);
+                sb.append("\t" + from + " -> " + to + " [label = \"" + consumed + "\"];\n");
+            } else {
+                sb.append("\t" + fromId + " -> " + toId + " [label = \"" + consumed + "\"];\n");
+            }
         }
         sb.append("\n");
         sb.append("\tnode [shape = none, label =\"\"];\n");

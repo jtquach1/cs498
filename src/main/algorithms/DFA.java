@@ -2,7 +2,10 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
@@ -10,7 +13,8 @@ import static algorithms.DFAState.convertToState;
 import static algorithms.DFAState.convertToStates;
 
 class DFA extends FSA {
-    private final State nil;
+    // For printing DOT output
+    private State phi;
 
     // For unit testing
     DFA(
@@ -19,10 +23,10 @@ class DFA extends FSA {
             State start,
             Set<State> finalStates,
             Set<Move> moves,
-            State nil
+            State phi
     ) {
         super(alphabet, states, start, finalStates, moves);
-        this.nil = nil;
+        this.phi = phi;
     }
 
     DFA(
@@ -31,7 +35,7 @@ class DFA extends FSA {
             DFAState dfaStart,
             Set<DFAState> dfaFinalStates,
             Set<DFAMove> dfaMoves,
-            State nil
+            State phi
     ) {
         super(
                 alphabet,
@@ -40,7 +44,6 @@ class DFA extends FSA {
                 convertToStates(dfaFinalStates),
                 convertToMoves(dfaMoves)
         );
-        this.nil = nil;
         boolean everyStateConsumesEntireAlphabet = true;
         for (State from : this.getStates()) {
             Set<Character> consumedChars = this.getMoves()
@@ -50,15 +53,16 @@ class DFA extends FSA {
                     .collect(Collectors.toSet());
             for (Character consumed : this.getAlphabet()) {
                 if (!consumedChars.contains(consumed)) {
-                    this.addMove(from, consumed, nil);
+                    this.addMove(from, consumed, phi);
                     everyStateConsumesEntireAlphabet = false;
                 }
             }
         }
         if (!everyStateConsumesEntireAlphabet) {
-            this.addState(nil);
+            this.phi = phi;
+            this.addState(phi);
             for (Character consumed : this.getAlphabet()) {
-                this.addMove(nil, consumed, nil);
+                this.addMove(phi, consumed, phi);
             }
         }
     }
@@ -97,6 +101,10 @@ class DFA extends FSA {
         State nil = new State(index);
 
         return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, nil);
+    }
+
+    State getPhi() {
+        return this.phi;
     }
 
     private static int updateIndexAndComputeStates(
