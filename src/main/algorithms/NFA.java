@@ -123,7 +123,7 @@ class NFA extends FSA {
 
     }
 
-    NFA deepClone() {
+    private NFA deepClone() {
         Alphabet alphabet = new Alphabet();
         Set<State> states = new TreeSet<>();
         State start = this.getStart();

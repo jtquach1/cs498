@@ -7,10 +7,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
 import java.io.StringWriter;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class FSA {
@@ -67,10 +64,24 @@ class FSA {
         sb.append(";\n");
         sb.append("\n");
         sb.append("\tnode [shape = circle];\n");
+
+        Map<Move, String> moveToLabel = new TreeMap<>();
         for (Move move : moves) {
+            Move key = new Move(move.getFrom(), '\u0000', move.getTo());
+            String label;
+            if (moveToLabel.containsKey(key)) {
+                label = moveToLabel.get(key) + ", " + move.getConsumed().toString();
+            } else {
+                label = move.getConsumed().toString();
+            }
+            moveToLabel.put(key, label);
+        }
+
+        for (Move move : moveToLabel.keySet()) {
             int fromId = move.getFrom().getId();
-            String consumed = move.getConsumed().toString();
+            String label = moveToLabel.get(move);
             int toId = move.getTo().getId();
+
             if (this instanceof DFA && ((DFA) this).getPhi() != null) {
                 String from = fromId == ((DFA) this).getPhi().getId()
                         ? Character.toString(PHI)
@@ -78,11 +89,12 @@ class FSA {
                 String to = toId == ((DFA) this).getPhi().getId()
                         ? Character.toString(PHI)
                         : Integer.toString(toId);
-                sb.append("\t" + from + " -> " + to + " [label = \"" + consumed + "\"];\n");
+                sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
             } else {
-                sb.append("\t" + fromId + " -> " + toId + " [label = \"" + consumed + "\"];\n");
+                sb.append("\t" + fromId + " -> " + toId + " [label = \"" + label + "\"];\n");
             }
         }
+
         sb.append("\n");
         sb.append("\tnode [shape = none, label =\"\"];\n");
         sb.append("\tENTRY -> " + startId + ";\n");
