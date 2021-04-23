@@ -44,63 +44,94 @@ class FSA {
     }
 
     public String toDOT() {
-        int startId = getStart().getId();
-        Set<Integer> finalStateIds = getFinalStates()
+        int startId = start.getId();
+        Set<Integer> finalStateIds = finalStates
                 .stream()
                 .map(State::getId)
                 .collect(Collectors.toSet());
-        Set<Move> moves = getMoves();
+        Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("digraph finite_state_machine {\n");
-        sb.append("\trankdir=LR;\n");
-        sb.append("\tsize=\"8,5\";\n");
-        sb.append("\n");
-        sb.append("\tnode [shape = doublecircle];\n");
-        sb.append("\t");
+        printFinalStates(finalStateIds, sb);
+        printMoves(moveToLabel, sb);
+        printStartState(startId, sb);
+
+        return sb.toString();
+    }
+
+    private void printStartState(int startId, StringBuilder sb) {
+        sb.append("\n" +
+                "\tnode [shape = none, label =\"\"];\n" +
+                "\tENTRY -> " + startId + ";\n" +
+                "}\n"
+        );
+    }
+
+    private void printFinalStates(Set<Integer> finalStateIds, StringBuilder sb) {
+        sb.append("digraph finite_state_machine {\n" +
+                "\trankdir=LR;\n" +
+                "\tsize=\"8,5\";\n" +
+                "\n" +
+                "\tnode [shape = doublecircle];\n" +
+                "\t"
+        );
         for (Integer id : finalStateIds) {
             sb.append(id + " ");
         }
-        sb.append(";\n");
-        sb.append("\n");
-        sb.append("\tnode [shape = circle];\n");
+    }
 
-        Map<Move, String> moveToLabel = new TreeMap<>();
-        for (Move move : moves) {
-            Move key = new Move(move.getFrom(), '\u0000', move.getTo());
-            String label;
-            if (moveToLabel.containsKey(key)) {
-                label = moveToLabel.get(key) + ", " + move.getConsumed().toString();
-            } else {
-                label = move.getConsumed().toString();
-            }
-            moveToLabel.put(key, label);
-        }
+    private void printMoves(
+            Map<Move, Set<Character>> moveToLabel,
+            StringBuilder sb
+    ) {
+        sb.append(";\n" +
+                "\n" +
+                "\tnode [shape = circle];" +
+                "\n"
+        );
 
         for (Move move : moveToLabel.keySet()) {
-            int fromId = move.getFrom().getId();
-            String label = moveToLabel.get(move);
-            int toId = move.getTo().getId();
+            String originalLabel = moveToLabel.get(move).toString();
+            String label = originalLabel.substring(1, originalLabel.length() - 1);
 
-            if (this instanceof DFA && ((DFA) this).getPhi() != null) {
-                String from = fromId == ((DFA) this).getPhi().getId()
-                        ? Character.toString(PHI)
-                        : Integer.toString(fromId);
-                String to = toId == ((DFA) this).getPhi().getId()
-                        ? Character.toString(PHI)
-                        : Integer.toString(toId);
-                sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
-            } else {
-                sb.append("\t" + fromId + " -> " + toId + " [label = \"" + label + "\"];\n");
+            int fromId = move.getFrom().getId();
+            int toId = move.getTo().getId();
+            String from = getStateLabel(fromId);
+            String to = getStateLabel(toId);
+
+            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
+        }
+    }
+
+    private String getStateLabel(int stateId) {
+        boolean isDFAWithPhiState = this instanceof DFA && ((DFA) this).getPhi() != null;
+
+        if (isDFAWithPhiState) {
+            boolean hasPhi = stateId == ((DFA) this).getPhi().getId();
+
+            if (hasPhi) {
+                return Character.toString(PHI);
             }
         }
 
-        sb.append("\n");
-        sb.append("\tnode [shape = none, label =\"\"];\n");
-        sb.append("\tENTRY -> " + startId + ";\n");
-        sb.append("}\n");
+        return Integer.toString(stateId);
+    }
 
-        return sb.toString();
+    @NotNull
+    private Map<Move, Set<Character>> getMoveToLabel() {
+        Map<Move, Set<Character>> moveToLabel = new TreeMap<>();
+        for (Move move : moves) {
+            Move key = new Move(move.getFrom(), '\u0000', move.getTo());
+            Set<Character> label;
+            if (moveToLabel.containsKey(key)) {
+                label = moveToLabel.get(key);
+            } else {
+                label = new TreeSet<>();
+            }
+            label.add(move.getConsumed());
+            moveToLabel.put(key, label);
+        }
+        return moveToLabel;
     }
 
     void addSymbol(Character newSymbol) {

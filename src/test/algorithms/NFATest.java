@@ -3,21 +3,10 @@ package algorithms;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.TreeSet;
-
+import static algorithms.Utility.makeNFA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NFATest {
-
-    static NFA makeNFA(Integer stateId) {
-        return new NFA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(stateId),
-                new TreeSet<>(),
-                new TreeSet<>()
-        );
-    }
 
     @BeforeEach
     void setUp() {

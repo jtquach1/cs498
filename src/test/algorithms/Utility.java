@@ -52,4 +52,37 @@ class Utility {
                 new TreeSet<>(), new TreeSet<>()
         );
     }
+
+
+    static DFA makeDFA(Integer start) {
+        return new DFA(
+                new Alphabet(),
+                new TreeSet<>(),
+                new State(start),
+                new TreeSet<>(),
+                new TreeSet<>(),
+                null
+        );
+    }
+
+    static DFA makeDFA(Integer start, Integer nil) {
+        return new DFA(
+                new Alphabet(),
+                new TreeSet<>(),
+                new State(start),
+                new TreeSet<>(),
+                new TreeSet<>(),
+                new State(nil)
+        );
+    }
+
+    static NFA makeNFA(Integer stateId) {
+        return new NFA(
+                new Alphabet(),
+                new TreeSet<>(),
+                new State(stateId),
+                new TreeSet<>(),
+                new TreeSet<>()
+        );
+    }
 }

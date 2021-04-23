@@ -6,32 +6,11 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static algorithms.NFATest.makeNFA;
+import static algorithms.Utility.makeDFA;
+import static algorithms.Utility.makeNFA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DFATest {
-
-    private static DFA makeDFA(Integer start) {
-        return new DFA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(start),
-                new TreeSet<>(),
-                new TreeSet<>(),
-                null
-        );
-    }
-
-    private static DFA makeDFA(Integer start, Integer nil) {
-        return new DFA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(start),
-                new TreeSet<>(),
-                new TreeSet<>(),
-                new State(nil)
-        );
-    }
 
     @BeforeEach
     void setUp() {
