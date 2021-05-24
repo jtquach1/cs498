@@ -1,3 +1,7 @@
+<!--
+can keep in algorithms package, then pull into jminusminus
+future meeting: talk about what kind of standalone programs we want
+-->
 <project default="jar">
 
     <property name="APP_FULL_NAME" value="Algorithms from Introduction to Compiler Construction in a Java World (ICCJW)" />

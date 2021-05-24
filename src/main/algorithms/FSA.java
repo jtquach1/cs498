@@ -43,6 +43,8 @@ class FSA {
         this.moves = moves;
     }
 
+    // can have a flag to determine whether you want to show garbage state for DFA
+    // or actually don't suppress the garbage state
     public String toDOT() {
         int startId = start.getId();
         Set<Integer> finalStateIds = finalStates
@@ -187,6 +189,8 @@ class FSA {
         return toJSON();
     }
 
+    // it's okay to get rid of JSON, since the DFA takes an NFA object to convert it
+    // both DFA and NFA produce a dot output we can visualize
     String toJSON() {
         JsonArrayBuilder alphabet = createJSONAlphabet();
         JsonArrayBuilder states = createJSONStates();
