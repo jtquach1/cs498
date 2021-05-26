@@ -94,9 +94,9 @@ class DFA extends FSA {
 
         index = updateIndexAndComputeStates(alphabet, nfaMoves, index, dfaStates, dfaMoves, stack);
         Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
-        State nil = new State(index);
+        State phi = new State(index);
 
-        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, nil);
+        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, phi);
     }
 
     static DFA DFAtoMinDFA(DFA dfa) {
@@ -267,7 +267,7 @@ class DFA extends FSA {
         Set<DFAState> dfaStates = partition.convertToDfaStates();
 
         DFAState start = findDFAState(dfaStates, this.getStart());
-        State phi = new State(findDFAState(dfaStates, this.getPhi()).getId());
+        State phi = findDFAState(dfaStates, this.getPhi()).convertToState();
 
         Set<DFAState> finalDfaStates = this
                 .getFinalStates()
@@ -450,7 +450,7 @@ class DFAState implements Comparable<DFAState> {
     }
 }
 
-class Partition extends HashSet<PSet> {
+class Partition extends TreeSet<PSet> {
     Partition() {
         super();
     }
@@ -480,7 +480,7 @@ class Partition extends HashSet<PSet> {
 
 }
 
-class PSet extends TreeSet<State> {
+class PSet extends TreeSet<State> implements Comparable<PSet> {
     PSet() {
         super();
     }
@@ -515,5 +515,11 @@ class PSet extends TreeSet<State> {
             }
         }
         return excluded;
+    }
+
+    @Override
+    public int compareTo(@NotNull PSet other) {
+        return Comparator.comparing(PSet::toString)
+                .compare(this, other);
     }
 }
