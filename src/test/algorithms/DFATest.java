@@ -293,7 +293,7 @@ class DFATest {
     }
 
     @Test
-    void DFAtoMinDFA() {
+    void getPartition() {
         Partition expected = new Partition();
         Utility.addPSets(expected,
                 Utility.makePSet(0),
@@ -320,7 +320,47 @@ class DFATest {
                 Utility.makeMove(0, 'a', 1),
                 Utility.makeMove(0, 'b', 2)
         );
-        Partition actual = DFA.DFAtoMinDFA(dfa);
+        Partition actual = dfa.getPartition();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void DFAtoMinDFA() {
+        DFA dfa = makeDFA(0, 5);
+        Utility.addSymbols(dfa, 'a', 'b');
+        Utility.addStates(dfa, 0, 1, 2, 3, 4, 5);
+        Utility.addFinalStates(dfa, 4);
+        Utility.addMoves(dfa,
+                Utility.makeMove(1, 'a', 3),
+                Utility.makeMove(1, 'b', 4),
+                Utility.makeMove(2, 'a', 3),
+                Utility.makeMove(2, 'b', 4),
+                Utility.makeMove(3, 'a', 3),
+                Utility.makeMove(3, 'b', 4),
+                Utility.makeMove(4, 'a', 5),
+                Utility.makeMove(5, 'b', 5),
+                Utility.makeMove(4, 'b', 5),
+                Utility.makeMove(5, 'a', 5),
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(0, 'b', 2)
+        );
+        DFA actual = DFA.DFAtoMinDFA(dfa);
+
+        DFA expected = makeDFA(0, 3);
+        Utility.addSymbols(expected, 'a', 'b');
+        Utility.addStates(expected, 0, 1, 2, 3);
+        Utility.addFinalStates(expected, 2);
+        Utility.addMoves(expected,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(0, 'b', 1),
+                Utility.makeMove(1, 'a', 1),
+                Utility.makeMove(1, 'b', 2),
+                Utility.makeMove(2, 'a', 3),
+                Utility.makeMove(2, 'b', 3),
+                Utility.makeMove(3, 'a', 3),
+                Utility.makeMove(3, 'b', 3)
+        );
 
         assertEquals(expected, actual);
     }

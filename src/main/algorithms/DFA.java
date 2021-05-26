@@ -99,57 +99,9 @@ class DFA extends FSA {
         return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, nil);
     }
 
-    static Partition DFAtoMinDFA(DFA dfa) {
-        Set<Move> moves = dfa.getMoves();
-
-        Partition partition = initializePartition(dfa);
-        Partition previous;
-
-        boolean splittingOccurs = true;
-        while (splittingOccurs) {
-            // Iterating over partition while mutating it will throw a concurrency exception
-            previous = (Partition) partition.clone();
-
-            for (PSet set : previous) {
-                if (set.size() > 1) {
-                    for (Character consumed : dfa.getAlphabet()) {
-                        for (State from : set) {
-                            State to = from.getTo(moves, consumed);
-                            PSet targetSet = partition.getSetContainingState(to);
-                            PSet included = targetSet.getInboundStates(moves, set, consumed);
-                            PSet excluded = targetSet.getOutboundStates(moves, set, consumed);
-                            if (!excluded.isEmpty()) {
-                                partition.remove(set);
-                                partition.add(included);
-                                partition.add(excluded);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            if (partition.equals(previous)) {
-                splittingOccurs = false;
-            }
-        }
-
-        return partition;
-//        return dfa.createDFAFromPartition(partition);
-    }
-
-    @NotNull
-    private static Partition initializePartition(DFA dfa) {
-        Partition partition = new Partition();
-        PSet finalStates = new PSet();
-        finalStates.addAll(dfa.getFinalStates());
-
-        PSet S = new PSet();
-        S.addAll(dfa.getStates());
-        S.removeAll(finalStates);
-
-        partition.add(S);
-        partition.add(finalStates);
-        return partition;
+    static DFA DFAtoMinDFA(DFA dfa) {
+        Partition partition = dfa.getPartition();
+        return dfa.createDFAFromPartition(partition);
     }
 
     private static int updateIndexAndComputeStates(
@@ -257,15 +209,94 @@ class DFA extends FSA {
         return closure;
     }
 
+    @NotNull
+    Partition getPartition() {
+        Set<Move> moves = this.getMoves();
+
+        Partition partition = this.initializePartition();
+        Partition previous;
+
+        boolean splittingOccurs = true;
+        while (splittingOccurs) {
+            // Iterating over partition while mutating it will throw a concurrency exception
+            previous = (Partition) partition.clone();
+
+            for (PSet set : previous) {
+                if (set.size() > 1) {
+                    for (Character consumed : this.getAlphabet()) {
+                        for (State from : set) {
+                            State to = from.getTo(moves, consumed);
+                            PSet targetSet = partition.getSetContainingState(to);
+                            PSet included = targetSet.getInboundStates(moves, set, consumed);
+                            PSet excluded = targetSet.getOutboundStates(moves, set, consumed);
+                            if (!excluded.isEmpty()) {
+                                partition.remove(set);
+                                partition.add(included);
+                                partition.add(excluded);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (partition.equals(previous)) {
+                splittingOccurs = false;
+            }
+        }
+
+        return partition;
+    }
+
+    @NotNull
+    private Partition initializePartition() {
+        Partition partition = new Partition();
+        PSet finalStates = new PSet();
+        finalStates.addAll(this.getFinalStates());
+
+        PSet S = new PSet();
+        S.addAll(this.getStates());
+        S.removeAll(finalStates);
+
+        partition.add(S);
+        partition.add(finalStates);
+        return partition;
+    }
+
     private DFA createDFAFromPartition(Partition partition) {
         Alphabet alphabet = this.getAlphabet();
-        Set<State> states = new TreeSet<>();
-        State start = partition.getStart(this.getStart());
-        Set<State> finalStates = new TreeSet<>();
-        Set<Move> moves = new TreeSet<>();
-        State phi = partition.getPhi(this.getPhi());
+        Set<DFAState> dfaStates = partition.convertToDfaStates();
 
-        return new DFA(alphabet, states, start, finalStates, moves, phi);
+        DFAState start = findDFAState(dfaStates, this.getStart());
+        State phi = new State(findDFAState(dfaStates, this.getPhi()).getId());
+
+        Set<DFAState> finalDfaStates = this
+                .getFinalStates()
+                .stream()
+                .map((state) -> findDFAState(dfaStates, state))
+                .collect(Collectors.toSet());
+
+        Set<DFAMove> moves = this
+                .getMoves()
+                .stream()
+                .map((move) -> new DFAMove(
+                        findDFAState(dfaStates, move.getFrom()),
+                        move.getConsumed(),
+                        findDFAState(dfaStates, move.getTo())
+                ))
+                .collect(Collectors.toSet());
+
+        return new DFA(alphabet, dfaStates, start, finalDfaStates, moves, phi);
+    }
+
+    private DFAState findDFAState(Set<DFAState> dfaStates, State state) {
+        DFAState converted = null;
+
+        for (DFAState dfaState : dfaStates) {
+            if (dfaState.getStates().contains(state)) {
+                converted = dfaState;
+            }
+        }
+        return converted;
     }
 
     State getPhi() {
@@ -347,16 +378,16 @@ class DFAState implements Comparable<DFAState> {
     }
 
     @NotNull
-    State convertToState() {
-        return new State(this.getId());
-    }
-
-    @NotNull
     static Set<State> convertToStates(Set<DFAState> dfaStates) {
         return dfaStates
                 .stream()
                 .map(DFAState::convertToState)
                 .collect(Collectors.toSet());
+    }
+
+    @NotNull
+    State convertToState() {
+        return new State(this.getId());
     }
 
     int getId() {
@@ -434,30 +465,19 @@ class Partition extends HashSet<PSet> {
         return targetSet;
     }
 
-    State getStart(State start) {
-        State newStart = null;
-
+    @NotNull
+    Set<DFAState> convertToDfaStates() {
+        Set<DFAState> dfaStates = new TreeSet<>();
+        int id = 0;
         for (PSet set : this) {
-            if (set.contains(start)) {
-                newStart = new State(0);
-            }
+            DFAState dfaState = new DFAState(id);
+            dfaState.addAll(set);
+            dfaStates.add(dfaState);
+            id++;
         }
-
-        return newStart;
+        return dfaStates;
     }
 
-    State getPhi(State phi) {
-        State newPhi = null;
-        int length = this.size();
-
-        for (PSet set : this) {
-            if (set.contains(phi)) {
-                newPhi = new State(length - 1);
-            }
-        }
-
-        return newPhi;
-    }
 }
 
 class PSet extends TreeSet<State> {
