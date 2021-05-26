@@ -47,7 +47,7 @@ class DFATest {
     }
 
     @Test
-    void testEpsilonClosureForSetOfStates() {
+    void epsilonClosureForSetOfStates() {
         int id = 0;
         Set<Move> moves = new TreeSet<>();
         Utility.addMoves(moves,
@@ -640,6 +640,33 @@ class DFATest {
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void DFAtoMinDFA() {
+        DFA dfa = makeDFA(0, 5);
+        Utility.addSymbols(dfa, 'a', 'b');
+        Utility.addStates(dfa, 0, 1, 2, 3, 4, 5);
+        Utility.addFinalStates(dfa, 4);
+        Utility.addMoves(dfa,
+                Utility.makeMove(1, 'a', 3),
+                Utility.makeMove(1, 'b', 4),
+                Utility.makeMove(2, 'a', 3),
+                Utility.makeMove(2, 'b', 4),
+                Utility.makeMove(3, 'a', 3),
+                Utility.makeMove(3, 'b', 4),
+                Utility.makeMove(4, 'a', 5),
+                Utility.makeMove(5, 'b', 5),
+                Utility.makeMove(4, 'b', 5),
+                Utility.makeMove(5, 'a', 5),
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(0, 'b', 2)
+        );
+
+
+        Partition expected = new Partition();
+        Partition actual = DFA.DFAtoMinDFA(dfa);
         assertEquals(expected, actual);
     }
 }

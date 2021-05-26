@@ -97,6 +97,7 @@ class NFA extends FSA {
 
         // best to let the user run this separately
         // do a java command or provide a shell script
+        /// this doesn't work yet, scrap?
         try {
             File output = new File("nfa.json");
             FileWriter writer = new FileWriter(output);

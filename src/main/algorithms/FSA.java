@@ -186,7 +186,7 @@ class FSA {
 
     @Override
     public String toString() {
-        return toJSON();
+        return toDOT();
     }
 
     // it's okay to get rid of JSON, since the DFA takes an NFA object to convert it
@@ -302,6 +302,18 @@ class State implements Comparable<State> {
 
     int getId() {
         return this.id;
+    }
+
+    State getTo(Set<Move> moves, Character consumed) {
+        State to = null;
+        for (Move move : moves) {
+            State from = move.getFrom();
+            Character otherConsumed = move.getConsumed();
+            if (this.equals(from) && consumed.equals(otherConsumed)) {
+                to = move.getTo();
+            }
+        }
+        return to;
     }
 
     @Override

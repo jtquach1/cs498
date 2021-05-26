@@ -103,8 +103,54 @@ class DFA extends FSA {
         return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, nil);
     }
 
-    State getPhi() {
-        return this.phi;
+    static Partition DFAtoMinDFA(DFA dfa) {
+        Set<Move> moves = dfa.getMoves();
+        Partition partition = initializePartition(dfa);
+        Partition previous;
+
+        boolean splittingOccurs = true;
+        while (splittingOccurs) {
+            previous = partition;
+
+            for (PSet set : partition) {
+                if (set.size() > 1) {
+                    for (Character consumed : dfa.getAlphabet()) {
+                        for (State from : set) {
+                            State to = from.getTo(moves, consumed);
+                            PSet targetSet = partition.getSetContainingState(to);
+                            PSet included = targetSet.getAllFromWhoseToIsInTargetSet(moves, set, consumed);
+                            PSet excluded = targetSet.getAllFromWhoseToIsNotInTargetSet(moves, set, consumed);
+                            if (!excluded.isEmpty()) {
+                                partition.remove(set);
+                                partition.add(included);
+                                partition.add(excluded);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (partition.equals(previous)) {
+                splittingOccurs = false;
+            }
+        }
+
+        return partition;
+    }
+
+    @NotNull
+    private static Partition initializePartition(DFA dfa) {
+        Partition partition = new Partition();
+        PSet finalStates = new PSet();
+        finalStates.addAll(dfa.getFinalStates());
+
+        PSet S = new PSet();
+        S.addAll(dfa.getStates());
+        S.removeAll(finalStates);
+
+        partition.add(S);
+        partition.add(finalStates);
+        return partition;
     }
 
     private static int updateIndexAndComputeStates(
@@ -210,6 +256,10 @@ class DFA extends FSA {
         }
 
         return closure;
+    }
+
+    State getPhi() {
+        return this.phi;
     }
 }
 
@@ -351,5 +401,60 @@ class DFAState implements Comparable<DFAState> {
     @Override
     public String toString() {
         return id + "";
+    }
+}
+
+class Partition extends TreeSet<PSet> {
+    Partition() {
+        super();
+    }
+
+    PSet getSetContainingState(State from) {
+        PSet targetSet = new PSet();
+        for (PSet set : this) {
+            if (set.contains(from)) {
+                targetSet = set;
+            }
+        }
+        return targetSet;
+    }
+
+}
+
+class PSet extends TreeSet<State> {
+    PSet() {
+        super();
+    }
+
+    PSet getAllFromWhoseToIsInTargetSet(Set<Move> moves, PSet set, Character consumed) {
+        PSet included = new PSet();
+        for (State from : set) {
+            State to = null;
+            for (Move move : moves) {
+                if (move.getFrom().equals(from) && move.getConsumed().equals(consumed)) {
+                    to = move.getTo();
+                }
+            }
+            if (this.contains(to)) {
+                included.add(from);
+            }
+        }
+        return included;
+    }
+
+    PSet getAllFromWhoseToIsNotInTargetSet(Set<Move> moves, PSet set, Character consumed) {
+        PSet excluded = new PSet();
+        for (State from : set) {
+            State to = null;
+            for (Move move : moves) {
+                if (move.getFrom().equals(from) && move.getConsumed().equals(consumed)) {
+                    to = move.getTo();
+                }
+            }
+            if (!this.contains(to)) {
+                excluded.add(from);
+            }
+        }
+        return excluded;
     }
 }

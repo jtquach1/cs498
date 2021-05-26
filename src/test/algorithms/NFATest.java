@@ -93,8 +93,6 @@ class NFATest {
                 Utility.makeMove(24, FSA.EPSILON, 25)
         );
 
-        // use a surrogate instead of spelling out all the letters, like s to mean it's any char from a-z
-        // and S to mean A-Z
         NFA actual = NFA.regexToNFA("($|_|s|S)" +
                 "(s|S|d)*");
 
