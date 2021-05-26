@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
@@ -110,7 +111,7 @@ class DFA extends FSA {
 
         boolean splittingOccurs = true;
         while (splittingOccurs) {
-            previous = partition;
+            previous = (Partition) partition.clone();
 
             for (PSet set : partition) {
                 if (set.size() > 1) {
@@ -404,21 +405,30 @@ class DFAState implements Comparable<DFAState> {
     }
 }
 
-class Partition extends TreeSet<PSet> {
+class Partition {
+    Set<PSet> pSets;
+
     Partition() {
-        super();
+        this.pSets = ConcurrentHashMap.newKeySet();
+    }
+
+    void add(PSet set) {
+        this.pSets.add(set);
+    }
+
+    void remove(PSet set) {
+        this.pSets.remove(set);
     }
 
     PSet getSetContainingState(State from) {
         PSet targetSet = new PSet();
-        for (PSet set : this) {
+        for (PSet set : this.pSets) {
             if (set.contains(from)) {
                 targetSet = set;
             }
         }
         return targetSet;
     }
-
 }
 
 class PSet extends TreeSet<State> {
