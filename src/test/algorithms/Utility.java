@@ -1,5 +1,6 @@
 package algorithms;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -84,5 +85,19 @@ class Utility {
                 new TreeSet<>(),
                 new TreeSet<>()
         );
+    }
+
+    static PSet makePSet(Integer... stateIds) {
+        PSet set = new PSet();
+        for (Integer stateId : stateIds) {
+            set.add(new State(stateId));
+        }
+        return set;
+    }
+
+    static void addPSets(Partition partition, PSet... sets) {
+        for (PSet set : sets) {
+            partition.add(set);
+        }
     }
 }

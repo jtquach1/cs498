@@ -2,15 +2,10 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
-import static algorithms.DFAState.convertToState;
 import static algorithms.DFAState.convertToStates;
 
 class DFA extends FSA {
@@ -41,7 +36,7 @@ class DFA extends FSA {
         super(
                 alphabet,
                 convertToStates(dfaStates),
-                convertToState(dfaStart),
+                dfaStart.convertToState(),
                 convertToStates(dfaFinalStates),
                 convertToMoves(dfaMoves)
         );
@@ -106,21 +101,23 @@ class DFA extends FSA {
 
     static Partition DFAtoMinDFA(DFA dfa) {
         Set<Move> moves = dfa.getMoves();
+
         Partition partition = initializePartition(dfa);
         Partition previous;
 
         boolean splittingOccurs = true;
         while (splittingOccurs) {
+            // Iterating over partition while mutating it will throw a concurrency exception
             previous = (Partition) partition.clone();
 
-            for (PSet set : partition) {
+            for (PSet set : previous) {
                 if (set.size() > 1) {
                     for (Character consumed : dfa.getAlphabet()) {
                         for (State from : set) {
                             State to = from.getTo(moves, consumed);
                             PSet targetSet = partition.getSetContainingState(to);
-                            PSet included = targetSet.getAllFromWhoseToIsInTargetSet(moves, set, consumed);
-                            PSet excluded = targetSet.getAllFromWhoseToIsNotInTargetSet(moves, set, consumed);
+                            PSet included = targetSet.getInboundStates(moves, set, consumed);
+                            PSet excluded = targetSet.getOutboundStates(moves, set, consumed);
                             if (!excluded.isEmpty()) {
                                 partition.remove(set);
                                 partition.add(included);
@@ -137,6 +134,7 @@ class DFA extends FSA {
         }
 
         return partition;
+//        return dfa.createDFAFromPartition(partition);
     }
 
     @NotNull
@@ -259,6 +257,17 @@ class DFA extends FSA {
         return closure;
     }
 
+    private DFA createDFAFromPartition(Partition partition) {
+        Alphabet alphabet = this.getAlphabet();
+        Set<State> states = new TreeSet<>();
+        State start = partition.getStart(this.getStart());
+        Set<State> finalStates = new TreeSet<>();
+        Set<Move> moves = new TreeSet<>();
+        State phi = partition.getPhi(this.getPhi());
+
+        return new DFA(alphabet, states, start, finalStates, moves, phi);
+    }
+
     State getPhi() {
         return this.phi;
     }
@@ -279,11 +288,16 @@ class DFAMove implements Comparable<DFAMove> {
     static Set<Move> convertToMoves(Set<DFAMove> dfaMoves) {
         return dfaMoves
                 .stream()
-                .map(dfaMove -> new Move(
-                        convertToState(dfaMove.getFrom()),
-                        dfaMove.getConsumed(),
-                        convertToState(dfaMove.getTo())))
+                .map(DFAMove::convertToMove)
                 .collect(Collectors.toSet());
+    }
+
+    Move convertToMove() {
+        return new Move(
+                this.getFrom().convertToState(),
+                this.getConsumed(),
+                this.getTo().convertToState()
+        );
     }
 
     DFAState getFrom() {
@@ -333,8 +347,8 @@ class DFAState implements Comparable<DFAState> {
     }
 
     @NotNull
-    static State convertToState(DFAState dfaState) {
-        return new State(dfaState.getId());
+    State convertToState() {
+        return new State(this.getId());
     }
 
     @NotNull
@@ -405,29 +419,44 @@ class DFAState implements Comparable<DFAState> {
     }
 }
 
-class Partition {
-    Set<PSet> pSets;
-
+class Partition extends HashSet<PSet> {
     Partition() {
-        this.pSets = ConcurrentHashMap.newKeySet();
-    }
-
-    void add(PSet set) {
-        this.pSets.add(set);
-    }
-
-    void remove(PSet set) {
-        this.pSets.remove(set);
+        super();
     }
 
     PSet getSetContainingState(State from) {
         PSet targetSet = new PSet();
-        for (PSet set : this.pSets) {
+        for (PSet set : this) {
             if (set.contains(from)) {
                 targetSet = set;
             }
         }
         return targetSet;
+    }
+
+    State getStart(State start) {
+        State newStart = null;
+
+        for (PSet set : this) {
+            if (set.contains(start)) {
+                newStart = new State(0);
+            }
+        }
+
+        return newStart;
+    }
+
+    State getPhi(State phi) {
+        State newPhi = null;
+        int length = this.size();
+
+        for (PSet set : this) {
+            if (set.contains(phi)) {
+                newPhi = new State(length - 1);
+            }
+        }
+
+        return newPhi;
     }
 }
 
@@ -436,7 +465,7 @@ class PSet extends TreeSet<State> {
         super();
     }
 
-    PSet getAllFromWhoseToIsInTargetSet(Set<Move> moves, PSet set, Character consumed) {
+    PSet getInboundStates(Set<Move> moves, PSet set, Character consumed) {
         PSet included = new PSet();
         for (State from : set) {
             State to = null;
@@ -452,7 +481,7 @@ class PSet extends TreeSet<State> {
         return included;
     }
 
-    PSet getAllFromWhoseToIsNotInTargetSet(Set<Move> moves, PSet set, Character consumed) {
+    PSet getOutboundStates(Set<Move> moves, PSet set, Character consumed) {
         PSet excluded = new PSet();
         for (State from : set) {
             State to = null;
