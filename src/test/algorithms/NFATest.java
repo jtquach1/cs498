@@ -33,8 +33,35 @@ class NFATest {
                 Utility.makeMove(8, FSA.EPSILON, 6),
                 Utility.makeMove(8, FSA.EPSILON, 9),
                 Utility.makeMove(9, FSA.EPSILON, 10),
-                Utility.makeMove(10, 'b', 11));
+                Utility.makeMove(10, 'b', 11)
+        );
         NFA actual = NFA.regexToNFA("(a|b)a*b");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void regexToNFABasic2() {
+        NFA expected = makeNFA(0);
+        Utility.addSymbols(expected, 'a', 'b');
+        Utility.addStates(expected, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        Utility.addFinalStates(expected, 11);
+        Utility.addMoves(expected,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, FSA.EPSILON, 8),
+                Utility.makeMove(2, 'a', 3),
+                Utility.makeMove(3, FSA.EPSILON, 7),
+                Utility.makeMove(4, 'b', 5),
+                Utility.makeMove(5, FSA.EPSILON, 7),
+                Utility.makeMove(6, FSA.EPSILON, 2),
+                Utility.makeMove(6, FSA.EPSILON, 4),
+                Utility.makeMove(7, FSA.EPSILON, 6),
+                Utility.makeMove(7, FSA.EPSILON, 9),
+                Utility.makeMove(8, FSA.EPSILON, 6),
+                Utility.makeMove(8, FSA.EPSILON, 9),
+                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(10, 'b', 11)
+        );
+        NFA actual = NFA.regexToNFA("a(a|b)*b");
         assertEquals(expected, actual);
     }
 
@@ -92,10 +119,7 @@ class NFATest {
                 Utility.makeMove(24, FSA.EPSILON, 22),
                 Utility.makeMove(24, FSA.EPSILON, 25)
         );
-
-        NFA actual = NFA.regexToNFA("($|_|s|S)" +
-                "(s|S|d)*");
-
+        NFA actual = NFA.regexToNFA("($|_|s|S)(s|S|d)*");
         assertEquals(expected, actual);
     }
 

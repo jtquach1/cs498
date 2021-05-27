@@ -257,10 +257,10 @@ class FSA {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FSA fsa = (FSA) o;
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        FSA fsa = (FSA) other;
         return Objects.equals(alphabet, fsa.alphabet)
                 && Objects.equals(states, fsa.states)
                 && Objects.equals(finalStates, fsa.finalStates)
