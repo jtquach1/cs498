@@ -66,14 +66,14 @@ class Utility {
         );
     }
 
-    static DFA makeDFA(Integer start, Integer nil) {
+    static DFA makeDFA(Integer start, Integer phi) {
         return new DFA(
                 new Alphabet(),
                 new TreeSet<>(),
                 new State(start),
                 new TreeSet<>(),
                 new TreeSet<>(),
-                new State(nil)
+                new State(phi)
         );
     }
 

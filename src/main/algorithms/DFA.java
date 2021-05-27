@@ -2,7 +2,10 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
@@ -31,7 +34,8 @@ class DFA extends FSA {
             DFAState dfaStart,
             Set<DFAState> dfaFinalStates,
             Set<DFAMove> dfaMoves,
-            State phi
+            State phi,
+            boolean convertingFromMinDFA
     ) {
         super(
                 alphabet,
@@ -54,13 +58,7 @@ class DFA extends FSA {
                 }
             }
         }
-        if (!everyStateConsumesEntireAlphabet) {
-            this.phi = phi;
-            this.addState(phi);
-            for (Character consumed : this.getAlphabet()) {
-                this.addMove(phi, consumed, phi);
-            }
-        }
+        setPhi(phi, convertingFromMinDFA, everyStateConsumesEntireAlphabet);
     }
 
     static DFAState epsilonClosure(Set<State> states, Set<Move> moves, int index) {
@@ -96,7 +94,15 @@ class DFA extends FSA {
         Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
         State phi = new State(index);
 
-        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, phi);
+        return new DFA(
+                alphabet,
+                dfaStates,
+                dfaStart,
+                dfaFinalStates,
+                dfaMoves,
+                phi,
+                false
+        );
     }
 
     static DFA DFAtoMinDFA(DFA dfa) {
@@ -209,16 +215,44 @@ class DFA extends FSA {
         return closure;
     }
 
+    private static boolean isStillSplitting(Partition partition, Partition previous) {
+        return !partition.equals(previous);
+    }
+
+    private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
+        DFAState converted = null;
+
+        for (DFAState dfaState : dfaStates) {
+            if (dfaState.getStates().contains(state)) {
+                converted = dfaState;
+            }
+        }
+        return converted;
+    }
+
+    private void setPhi(
+            State phi,
+            boolean convertingFromMinDFA,
+            boolean everyStateConsumesEntireAlphabet
+    ) {
+        if (!everyStateConsumesEntireAlphabet || convertingFromMinDFA) {
+            this.phi = phi;
+            this.addState(phi);
+            for (Character consumed : this.getAlphabet()) {
+                this.addMove(phi, consumed, phi);
+            }
+        }
+    }
+
     @NotNull
     Partition getPartition() {
         Set<Move> moves = this.getMoves();
-
         Partition partition = this.initializePartition();
         Partition previous;
 
         boolean splittingOccurs = true;
         while (splittingOccurs) {
-            // Iterating over partition while mutating it will throw a concurrency exception
+            // Iterating over the partition while mutating it will throw a concurrency exception
             previous = (Partition) partition.clone();
 
             for (PSet set : previous) {
@@ -226,22 +260,18 @@ class DFA extends FSA {
                     for (Character consumed : this.getAlphabet()) {
                         for (State from : set) {
                             State to = from.getTo(moves, consumed);
-                            PSet targetSet = partition.getSetContainingState(to);
+                            PSet targetSet = partition.getExistingSetContainingState(to);
                             PSet included = targetSet.getInboundStates(moves, set, consumed);
                             PSet excluded = targetSet.getOutboundStates(moves, set, consumed);
                             if (!excluded.isEmpty()) {
-                                partition.remove(set);
-                                partition.add(included);
-                                partition.add(excluded);
+                                partition.replaceSet(set, included, excluded);
                                 break;
                             }
                         }
                     }
                 }
             }
-            if (partition.equals(previous)) {
-                splittingOccurs = false;
-            }
+            splittingOccurs = isStillSplitting(partition, previous);
         }
 
         return partition;
@@ -285,18 +315,16 @@ class DFA extends FSA {
                 ))
                 .collect(Collectors.toSet());
 
-        return new DFA(alphabet, dfaStates, start, finalDfaStates, moves, phi);
-    }
-
-    private DFAState findDFAState(Set<DFAState> dfaStates, State state) {
-        DFAState converted = null;
-
-        for (DFAState dfaState : dfaStates) {
-            if (dfaState.getStates().contains(state)) {
-                converted = dfaState;
-            }
-        }
-        return converted;
+        // DFA states already consume every letter of the alphabet
+        return new DFA(
+                alphabet,
+                dfaStates,
+                start,
+                finalDfaStates,
+                moves,
+                phi,
+                true
+        );
     }
 
     State getPhi() {
@@ -446,7 +474,7 @@ class DFAState implements Comparable<DFAState> {
 
     @Override
     public String toString() {
-        return id + "";
+        return Integer.toString(id);
     }
 }
 
@@ -455,7 +483,7 @@ class Partition extends TreeSet<PSet> {
         super();
     }
 
-    PSet getSetContainingState(State from) {
+    PSet getExistingSetContainingState(State from) {
         PSet targetSet = new PSet();
         for (PSet set : this) {
             if (set.contains(from)) {
@@ -478,6 +506,11 @@ class Partition extends TreeSet<PSet> {
         return dfaStates;
     }
 
+    void replaceSet(PSet set, PSet included, PSet excluded) {
+        this.remove(set);
+        this.add(included);
+        this.add(excluded);
+    }
 }
 
 class PSet extends TreeSet<State> implements Comparable<PSet> {
