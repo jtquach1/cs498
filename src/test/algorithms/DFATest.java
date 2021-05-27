@@ -572,4 +572,61 @@ class DFATest {
 
         assertEquals(expected, actual);
     }
+
+    @Test
+    void DFAtoMinDFAIntegers() {
+        String regex = "0|((1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*)";
+        NFA nfa = NFA.regexToNFA(regex);
+        DFA dfa = DFA.NFAtoDFA(nfa);
+        DFA actual = DFA.DFAtoMinDFA(dfa);
+
+        DFA expected = makeDFA(0, 3);
+        Utility.addSymbols(expected, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        Utility.addStates(expected, 0, 1, 2, 3);
+        Utility.addFinalStates(expected, 1, 2);
+        Utility.addMoves(expected,
+                Utility.makeMove(0, '9', 2),
+                Utility.makeMove(0, '7', 2),
+                Utility.makeMove(1, '9', 3),
+                Utility.makeMove(2, '9', 2),
+                Utility.makeMove(0, '5', 2),
+                Utility.makeMove(1, '7', 3),
+                Utility.makeMove(2, '7', 2),
+                Utility.makeMove(3, '9', 3),
+                Utility.makeMove(0, '3', 2),
+                Utility.makeMove(1, '5', 3),
+                Utility.makeMove(2, '5', 2),
+                Utility.makeMove(3, '7', 3),
+                Utility.makeMove(0, '1', 2),
+                Utility.makeMove(1, '3', 3),
+                Utility.makeMove(2, '3', 2),
+                Utility.makeMove(3, '5', 3),
+                Utility.makeMove(2, '1', 2),
+                Utility.makeMove(3, '3', 3),
+                Utility.makeMove(1, '1', 3),
+                Utility.makeMove(3, '1', 3),
+                Utility.makeMove(0, '8', 2),
+                Utility.makeMove(0, '6', 2),
+                Utility.makeMove(1, '8', 3),
+                Utility.makeMove(2, '8', 2),
+                Utility.makeMove(3, '8', 3),
+                Utility.makeMove(0, '4', 2),
+                Utility.makeMove(1, '6', 3),
+                Utility.makeMove(2, '6', 2),
+                Utility.makeMove(3, '6', 3),
+                Utility.makeMove(0, '2', 2),
+                Utility.makeMove(1, '4', 3),
+                Utility.makeMove(2, '4', 2),
+                Utility.makeMove(0, '0', 1),
+                Utility.makeMove(3, '4', 3),
+                Utility.makeMove(1, '2', 3),
+                Utility.makeMove(2, '2', 2),
+                Utility.makeMove(3, '2', 3),
+                Utility.makeMove(1, '0', 3),
+                Utility.makeMove(2, '0', 2),
+                Utility.makeMove(3, '0', 3)
+        );
+
+        assertEquals(expected, actual);
+    }
 }
