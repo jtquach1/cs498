@@ -122,9 +122,13 @@ class FSA {
     @NotNull
     private Map<Move, Set<Character>> getMoveToLabel() {
         Map<Move, Set<Character>> moveToLabel = new TreeMap<>();
+
+        // Display multiple characters for one arrow
         for (Move move : moves) {
             Move key = new Move(move.getFrom(), '\u0000', move.getTo());
             Set<Character> label;
+
+            // Does the arrow already exist?
             if (moveToLabel.containsKey(key)) {
                 label = moveToLabel.get(key);
             } else {
@@ -305,14 +309,12 @@ class State implements Comparable<State> {
     }
 
     State getTo(Set<Move> moves, Character consumed) {
-        State to = null;
-        for (Move move : moves) {
-            State from = move.getFrom();
-            Character otherConsumed = move.getConsumed();
-            if (this.equals(from) && consumed.equals(otherConsumed)) {
-                to = move.getTo();
-            }
-        }
+        Move move = moves
+                .stream()
+                .filter((m) -> this.equals(m.getFrom()) && consumed.equals(m.getConsumed()))
+                .findFirst()
+                .orElse(null);
+        State to = move != null ? move.getTo() : null;
         return to;
     }
 

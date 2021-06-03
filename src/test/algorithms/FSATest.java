@@ -161,7 +161,7 @@ class FSATest {
                 "\"finalStates\":[1]," +
                 "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
                 "}";
-        String actual = fsa.toString();
+        String actual = fsa.toJSON();
         assertEquals(expected, actual);
     }
 

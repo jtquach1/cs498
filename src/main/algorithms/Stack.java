@@ -1,7 +1,6 @@
 package algorithms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 class Stack<T> extends ArrayList<T> {
@@ -11,10 +10,6 @@ class Stack<T> extends ArrayList<T> {
 
     Stack(Collection<T> items) {
         this.addAll(items);
-    }
-
-    Stack(T... items) {
-        this.addAll(Arrays.asList(items));
     }
 
     T pop() {

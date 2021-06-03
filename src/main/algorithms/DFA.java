@@ -1,6 +1,7 @@
 package algorithms;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -149,7 +150,6 @@ class DFA extends FSA {
             Set<State> nfaFinalStates
     ) {
         Set<DFAState> dfaFinalStates = new TreeSet<>();
-
         for (DFAState dfaState : dfaStates) {
             for (State nfaState : dfaState.getStates()) {
                 if (nfaFinalStates.contains(nfaState)) {
@@ -220,14 +220,12 @@ class DFA extends FSA {
     }
 
     private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
-        DFAState converted = null;
-
-        for (DFAState dfaState : dfaStates) {
-            if (dfaState.getStates().contains(state)) {
-                converted = dfaState;
-            }
-        }
-        return converted;
+        DFAState found = dfaStates
+                .stream()
+                .filter((dfaState) -> dfaState.getStates().contains(state))
+                .findAny()
+                .orElse(null);
+        return found;
     }
 
     private void setPhi(
@@ -261,8 +259,8 @@ class DFA extends FSA {
                         for (State from : set) {
                             State to = from.getTo(moves, consumed);
                             PSet targetSet = partition.getExistingSetContainingState(to);
-                            PSet included = targetSet.getInboundStates(moves, set, consumed);
-                            PSet excluded = targetSet.getOutboundStates(moves, set, consumed);
+                            PSet included = targetSet.getIncludedStates(moves, set, consumed);
+                            PSet excluded = targetSet.getExcludedStates(moves, set, consumed);
                             if (!excluded.isEmpty()) {
                                 partition.replaceSet(set, included, excluded);
                                 break;
@@ -503,36 +501,39 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
         super();
     }
 
-    PSet getInboundStates(Set<Move> moves, PSet set, Character consumed) {
+    PSet getIncludedStates(Set<Move> moves, PSet set, Character consumed) {
         PSet included = new PSet();
-        for (State from : set) {
-            State to = null;
-            for (Move move : moves) {
-                if (move.getFrom().equals(from) && move.getConsumed().equals(consumed)) {
-                    to = move.getTo();
-                }
-            }
-            if (this.contains(to)) {
-                included.add(from);
-            }
-        }
+        included.addAll(set
+                .stream()
+                .filter((from) -> {
+                    State to = getTo(moves, consumed, from);
+                    return this.contains(to);
+                })
+                .collect(Collectors.toSet()));
         return included;
     }
 
-    PSet getOutboundStates(Set<Move> moves, PSet set, Character consumed) {
+    PSet getExcludedStates(Set<Move> moves, PSet set, Character consumed) {
         PSet excluded = new PSet();
-        for (State from : set) {
-            State to = null;
-            for (Move move : moves) {
-                if (move.getFrom().equals(from) && move.getConsumed().equals(consumed)) {
-                    to = move.getTo();
-                }
-            }
-            if (!this.contains(to)) {
-                excluded.add(from);
-            }
-        }
+        excluded.addAll(set
+                .stream()
+                .filter((from) -> {
+                    State to = getTo(moves, consumed, from);
+                    return !this.contains(to);
+                })
+                .collect(Collectors.toSet()));
         return excluded;
+    }
+
+    @Nullable
+    private State getTo(Set<Move> moves, Character consumed, State from) {
+        Move move = moves
+                .stream()
+                .filter((m) -> m.getFrom().equals(from) && m.getConsumed().equals(consumed))
+                .findFirst()
+                .orElse(null);
+        State to = move != null ? move.getTo() : null;
+        return to;
     }
 
     @Override
