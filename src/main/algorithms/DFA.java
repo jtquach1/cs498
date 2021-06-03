@@ -388,11 +388,6 @@ class DFAMove implements Comparable<DFAMove> {
                 && Objects.equals(consumed, move.consumed)
                 && Objects.equals(to, move.to);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(from, consumed, to);
-    }
 }
 
 
@@ -426,8 +421,8 @@ class DFAState implements Comparable<DFAState> {
         return this.states;
     }
 
-    void addAll(Set<State> closure) {
-        states.addAll(closure);
+    void addAll(Set<State> set) {
+        states.addAll(set);
     }
 
     boolean isEmpty() {
@@ -441,7 +436,7 @@ class DFAState implements Comparable<DFAState> {
                 .toArray();
 
         if (match.length != 0) {
-            int id = Integer.parseInt(match[0].toString());
+            int id = ((DFAState) match[0]).getId();
             this.id = id;
         }
     }
@@ -465,16 +460,6 @@ class DFAState implements Comparable<DFAState> {
         if (o == null || getClass() != o.getClass()) return false;
         DFAState state = (DFAState) o;
         return this.states.equals(state.states);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, states);
-    }
-
-    @Override
-    public String toString() {
-        return Integer.toString(id);
     }
 }
 
