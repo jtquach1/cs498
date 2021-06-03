@@ -467,12 +467,11 @@ class Partition extends TreeSet<PSet> {
     }
 
     PSet getExistingSetContainingState(State from) {
-        PSet targetSet = new PSet();
-        for (PSet set : this) {
-            if (set.contains(from)) {
-                targetSet = set;
-            }
-        }
+        PSet targetSet = this
+                .stream()
+                .filter((set) -> set.contains(from))
+                .findFirst()
+                .orElse(null);
         return targetSet;
     }
 
@@ -505,10 +504,7 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
         PSet included = new PSet();
         included.addAll(set
                 .stream()
-                .filter((from) -> {
-                    State to = getTo(moves, consumed, from);
-                    return this.contains(to);
-                })
+                .filter((from) -> this.contains(getTo(moves, consumed, from)))
                 .collect(Collectors.toSet()));
         return included;
     }
@@ -517,10 +513,7 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
         PSet excluded = new PSet();
         excluded.addAll(set
                 .stream()
-                .filter((from) -> {
-                    State to = getTo(moves, consumed, from);
-                    return !this.contains(to);
-                })
+                .filter((from) -> !this.contains(getTo(moves, consumed, from)))
                 .collect(Collectors.toSet()));
         return excluded;
     }
@@ -529,7 +522,7 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
     private State getTo(Set<Move> moves, Character consumed, State from) {
         Move move = moves
                 .stream()
-                .filter((m) -> m.getFrom().equals(from) && m.getConsumed().equals(consumed))
+                .filter((m) -> m.hasFrom(from) && m.hasConsumed(consumed))
                 .findFirst()
                 .orElse(null);
         State to = move != null ? move.getTo() : null;

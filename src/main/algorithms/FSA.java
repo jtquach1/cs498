@@ -311,7 +311,7 @@ class State implements Comparable<State> {
     State getTo(Set<Move> moves, Character consumed) {
         Move move = moves
                 .stream()
-                .filter((m) -> this.equals(m.getFrom()) && consumed.equals(m.getConsumed()))
+                .filter((m) -> m.hasFrom(this) && m.hasConsumed(consumed))
                 .findFirst()
                 .orElse(null);
         State to = move != null ? move.getTo() : null;
