@@ -15,27 +15,22 @@ class FSA {
     private final Set<Move> moves;
     private State start;
 
-    FSA() {
-        alphabet = new Alphabet();
-        states = new TreeSet<>();
-        start = new State();
-        finalStates = new TreeSet<>();
-        moves = new TreeSet<>();
-        states.add(start);
-    }
-
-    FSA(
-            Alphabet alphabet,
-            Set<State> states,
-            State start,
-            Set<State> finalStates,
-            Set<Move> moves
-    ) {
+    FSA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
+        Set<Move> moves) {
         this.alphabet = alphabet;
         this.states = states;
         this.start = start;
         this.finalStates = finalStates;
         this.moves = moves;
+    }
+
+    FSA(State start) {
+        alphabet = new Alphabet();
+        states = new TreeSet<>();
+        finalStates = new TreeSet<>();
+        moves = new TreeSet<>();
+        states.add(start);
+        this.start = start;
     }
 
     void addSymbol(Character symbol) {

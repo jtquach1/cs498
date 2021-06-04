@@ -1,7 +1,7 @@
 package algorithms;
 
+import java.util.Arrays;
 import java.util.Set;
-import java.util.TreeSet;
 
 class Utility {
     static void addSymbols(FSA fsa, Character... symbols) {
@@ -35,9 +35,7 @@ class Utility {
     }
 
     static void addMoves(Set<Move> set, Move... moves) {
-        for (Move move : moves) {
-            set.add(move);
-        }
+        set.addAll(Arrays.asList(moves));
     }
 
     static Move makeMove(Integer fromId, Character consumed, Integer toId) {
@@ -45,45 +43,20 @@ class Utility {
     }
 
     static FSA makeFSA(Integer stateId) {
-        return new FSA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(stateId),
-                new TreeSet<>(), new TreeSet<>()
-        );
+        return new FSA(new State(stateId));
     }
 
 
     static DFA makeDFA(Integer start) {
-        return new DFA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(start),
-                new TreeSet<>(),
-                new TreeSet<>(),
-                null
-        );
+        return new DFA(new State(start), null);
     }
 
     static DFA makeDFA(Integer start, Integer phi) {
-        return new DFA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(start),
-                new TreeSet<>(),
-                new TreeSet<>(),
-                new State(phi)
-        );
+        return new DFA(new State(start), new State(phi));
     }
 
     static NFA makeNFA(Integer stateId) {
-        return new NFA(
-                new Alphabet(),
-                new TreeSet<>(),
-                new State(stateId),
-                new TreeSet<>(),
-                new TreeSet<>()
-        );
+        return new NFA(new State(stateId));
     }
 
     static PSet makePSet(Integer... stateIds) {
@@ -95,8 +68,6 @@ class Utility {
     }
 
     static void addPSets(Partition partition, PSet... sets) {
-        for (PSet set : sets) {
-            partition.add(set);
-        }
+        partition.addAll(Arrays.asList(sets));
     }
 }
