@@ -220,12 +220,11 @@ class DFA extends FSA {
     }
 
     private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
-        DFAState found = dfaStates
+        return dfaStates
                 .stream()
                 .filter((dfaState) -> dfaState.getStates().contains(state))
                 .findAny()
                 .orElse(null);
-        return found;
     }
 
     private void setPhi(
@@ -378,6 +377,11 @@ class DFAMove implements Comparable<DFAMove> {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(from, consumed, to);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -386,6 +390,7 @@ class DFAMove implements Comparable<DFAMove> {
                 && Objects.equals(consumed, move.consumed)
                 && Objects.equals(to, move.to);
     }
+
 }
 
 
@@ -455,6 +460,11 @@ class DFAState implements Comparable<DFAState> {
         DFAState dfaState = (DFAState) o;
         return this.states.equals(dfaState.states);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(states, id);
+    }
 }
 
 class Partition extends TreeSet<PSet> {
@@ -463,12 +473,11 @@ class Partition extends TreeSet<PSet> {
     }
 
     PSet getExistingSetContainingState(State from) {
-        PSet targetSet = this
+        return this
                 .stream()
                 .filter((set) -> set.contains(from))
                 .findFirst()
                 .orElse(null);
-        return targetSet;
     }
 
     @NotNull

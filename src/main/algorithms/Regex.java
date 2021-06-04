@@ -23,22 +23,6 @@ class Regex {
         return generateInfixString(temp);
     }
 
-    // standalone programs:
-    // all this becomes eventually j--.jar
-    // and then run these programs like
-    // java -cp .:./lib/j--.jar Regex2NFA
-    // -cp is just classpath. look at curr dir and in addition j--.jar
-    // tells java where to look at for the classes
-    public static void main(String[] args) {
-        String originalInfix = "(cd*|b)*a";
-        System.out.println("infix: " + Regex.markWithConcatenation(originalInfix));
-        System.out.println("postfix: " + Regex.infixToPostfix(originalInfix));
-
-        originalInfix = "a(bb)a";
-        System.out.println("infix: " + Regex.markWithConcatenation(originalInfix));
-        System.out.println("postfix: " + Regex.infixToPostfix(originalInfix));
-    }
-
     private static boolean canConcatenate(char[] infixArray, int limit, int index) {
         boolean existsNextChar = index + 1 < limit;
         char current = infixArray[index];

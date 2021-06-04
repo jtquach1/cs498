@@ -40,7 +40,7 @@ class FSA {
 
     // can have a flag to determine whether you want to show garbage state for DFA
     // or actually don't suppress the garbage state
-    public String toDOT() {
+    private String toDOT() {
         int startId = start.getId();
         Set<Integer> finalStateIds = finalStates
                 .stream()
@@ -263,11 +263,6 @@ class State implements Comparable<State> {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return id + "";
     }
 }
 

@@ -47,13 +47,13 @@ class NFA extends FSA {
         return nfaStack.pop();
     }
 
-    static NFA makeSingle(Character c) {
+    static NFA makeSingle(Character consumed) {
         NFA nfa = new NFA();
         State finalState = new State();
         nfa.addState(finalState);
         nfa.addFinalState(finalState);
-        nfa.addMove(nfa.getStart(), c, finalState);
-        nfa.addSymbol(c);
+        nfa.addMove(nfa.getStart(), consumed, finalState);
+        nfa.addSymbol(consumed);
         return nfa;
     }
 
@@ -92,7 +92,7 @@ class NFA extends FSA {
         String infix = args[0];
         try {
             NFA nfa = NFA.regexToNFA(infix);
-            String dot = nfa.toDOT();
+            String dot = nfa.toString();
             System.out.println(dot);
         }
         catch (Exception e) {

@@ -153,7 +153,7 @@ class FSATest {
     }
 
     @Test
-    void toDOT() {
+    void testToString() {
         String expected = "digraph finite_state_machine {\n" +
                 "\trankdir=LR;\n" +
                 "\tsize=\"8,5\";\n" +
@@ -200,7 +200,7 @@ class FSATest {
                 Utility.makeMove(8, FSA.EPSILON, 9),
                 Utility.makeMove(9, FSA.EPSILON, 10),
                 Utility.makeMove(10, 'b', 11));
-        String actual = fsa.toDOT();
+        String actual = fsa.toString();
 
         assertEquals(expected, actual);
     }
