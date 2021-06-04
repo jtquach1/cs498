@@ -216,4 +216,18 @@ class NFATest {
         NFA actual = NFA.alternate(first, second);
         assertEquals(expected, actual);
     }
+
+    @Test
+    void infixToPostfix() {
+        String expected = "ab|a*.b.";
+        String actual = Regex.infixToPostfix("(a|b)a*b");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void markWithConcatenation() {
+        String expected = "(a|b).a*.b";
+        String actual = Regex.markWithConcatenation("(a|b)a*b");
+        assertEquals(expected, actual);
+    }
 }
