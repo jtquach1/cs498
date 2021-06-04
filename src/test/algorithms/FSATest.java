@@ -153,19 +153,6 @@ class FSATest {
     }
 
     @Test
-    void toJSON() {
-        String expected = "{" +
-                "\"alphabet\":[\"a\"]," +
-                "\"states\":[0,1]," +
-                "\"start\":0," +
-                "\"finalStates\":[1]," +
-                "\"moves\":[{\"from\":0,\"consumed\":\"a\",\"to\":1}]" +
-                "}";
-        String actual = fsa.toJSON();
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void toDOT() {
         String expected = "digraph finite_state_machine {\n" +
                 "\trankdir=LR;\n" +

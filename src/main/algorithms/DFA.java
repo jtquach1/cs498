@@ -358,15 +358,15 @@ class DFAMove implements Comparable<DFAMove> {
     }
 
     DFAState getFrom() {
-        return this.from;
+        return from;
     }
 
     Character getConsumed() {
-        return this.consumed;
+        return consumed;
     }
 
     DFAState getTo() {
-        return this.to;
+        return to;
     }
 
     @Override
@@ -408,15 +408,15 @@ class DFAState implements Comparable<DFAState> {
 
     @NotNull
     State convertToState() {
-        return new State(this.getId());
+        return new State(id);
     }
 
     int getId() {
-        return this.id;
+        return id;
     }
 
     TreeSet<State> getStates() {
-        return this.states;
+        return states;
     }
 
     void addAll(Set<State> set) {
@@ -428,21 +428,17 @@ class DFAState implements Comparable<DFAState> {
     }
 
     void updateWithExistingId(Set<DFAState> dfaStates) {
-        Object[] match = dfaStates.stream()
-                .filter(s -> s.states.equals(this.states))
-                .distinct()
-                .toArray();
-
-        if (match.length != 0) {
-            int id = ((DFAState) match[0]).getId();
-            this.id = id;
-        }
+        dfaStates
+                .stream()
+                .filter(dfaState -> dfaState.states.equals(states))
+                .findFirst()
+                .ifPresent(match -> this.id = match.getId());
     }
 
     boolean isNewState(Set<DFAState> dfaStates) {
         return dfaStates
                 .stream()
-                .noneMatch(s -> s.states.equals(this.states));
+                .noneMatch(dfaState -> dfaState.states.equals(states));
     }
 
     @Override
@@ -456,8 +452,8 @@ class DFAState implements Comparable<DFAState> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DFAState state = (DFAState) o;
-        return this.states.equals(state.states);
+        DFAState dfaState = (DFAState) o;
+        return this.states.equals(dfaState.states);
     }
 }
 
@@ -525,8 +521,7 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
                 .filter((m) -> m.hasFrom(from) && m.hasConsumed(consumed))
                 .findFirst()
                 .orElse(null);
-        State to = move != null ? move.getTo() : null;
-        return to;
+        return move != null ? move.getTo() : null;
     }
 
     @Override

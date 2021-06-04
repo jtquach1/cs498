@@ -2,11 +2,6 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -193,73 +188,6 @@ class FSA {
         return toDOT();
     }
 
-    // it's okay to get rid of JSON, since the DFA takes an NFA object to convert it
-    // both DFA and NFA produce a dot output we can visualize
-    String toJSON() {
-        JsonArrayBuilder alphabet = createJSONAlphabet();
-        JsonArrayBuilder states = createJSONStates();
-        JsonArrayBuilder finalStates = createJSONFinalStates();
-        JsonArrayBuilder moves = createJSONMoves();
-        JsonObject fsa = createJSONFSA(alphabet, states, finalStates, moves);
-
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = Json.createWriter(stringWriter);
-        jsonWriter.writeObject(fsa);
-        jsonWriter.close();
-        return stringWriter.getBuffer().toString();
-    }
-
-    private JsonObject createJSONFSA(JsonArrayBuilder alphabet,
-                                     JsonArrayBuilder states,
-                                     JsonArrayBuilder finalStates,
-                                     JsonArrayBuilder moves) {
-        JsonObject fsa = Json.createObjectBuilder()
-                .add("alphabet", alphabet)
-                .add("states", states)
-                .add("start", this.start.getId())
-                .add("finalStates", finalStates)
-                .add("moves", moves)
-                .build();
-        return fsa;
-    }
-
-    private JsonArrayBuilder createJSONMoves() {
-        JsonArrayBuilder moves = Json.createArrayBuilder();
-        for (Move m : this.moves) {
-            JsonObject move = Json.createObjectBuilder()
-                    .add("from", m.getFrom().getId())
-                    .add("consumed", m.getConsumed().toString())
-                    .add("to", m.getTo().getId())
-                    .build();
-            moves.add(move);
-        }
-        return moves;
-    }
-
-    private JsonArrayBuilder createJSONFinalStates() {
-        JsonArrayBuilder finalStates = Json.createArrayBuilder();
-        for (State s : this.finalStates) {
-            finalStates.add(s.getId());
-        }
-        return finalStates;
-    }
-
-    private JsonArrayBuilder createJSONStates() {
-        JsonArrayBuilder states = Json.createArrayBuilder();
-        for (State s : this.states) {
-            states.add(s.getId());
-        }
-        return states;
-    }
-
-    private JsonArrayBuilder createJSONAlphabet() {
-        JsonArrayBuilder alphabet = Json.createArrayBuilder();
-        for (Character c : this.alphabet) {
-            alphabet.add(c.toString());
-        }
-        return alphabet;
-    }
-
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -284,7 +212,7 @@ class Alphabet extends TreeSet<Character> {
     }
 
     void addSymbol(Character newSymbol) {
-        this.add(newSymbol);
+        add(newSymbol);
     }
 }
 
@@ -293,7 +221,7 @@ class State implements Comparable<State> {
     private final int id;
 
     State() {
-        this.id = idCounter++;
+        id = idCounter++;
     }
 
     State(int id) {
@@ -305,7 +233,7 @@ class State implements Comparable<State> {
     }
 
     int getId() {
-        return this.id;
+        return id;
     }
 
     State getTo(Set<Move> moves, Character consumed) {
@@ -355,15 +283,15 @@ class Move implements Comparable<Move> {
     }
 
     State getFrom() {
-        return this.from;
+        return from;
     }
 
     Character getConsumed() {
-        return this.consumed;
+        return consumed;
     }
 
     State getTo() {
-        return this.to;
+        return to;
     }
 
     boolean hasConsumed(Character consumed) {

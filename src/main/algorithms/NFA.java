@@ -89,39 +89,15 @@ class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-        String infix = "(a|b)a*b";
-        NFA nfa = NFA.regexToNFA(infix);
-        String json = nfa.toJSON();
-        String dot = nfa.toDOT();
-
-
-        // best to let the user run this separately
-        // do a java command or provide a shell script
-        /// this doesn't work yet, scrap?
+        String infix = args[0];
         try {
-            File output = new File("nfa.json");
-            FileWriter writer = new FileWriter(output);
-            writer.write(json);
-            writer.flush();
-            writer.close();
-
-            output = new File("nfa.dot");
-            writer = new FileWriter(output);
-            writer.write(dot);
-            writer.flush();
-            writer.close();
-
-            String[] commands = {
-                    "dot -Tpdf nfa.dot > nfa.pdf"
-            };
-
-            Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(commands);
-            process.waitFor();
-        } catch (IOException | InterruptedException exception) {
-            System.err.println(exception);
+            NFA nfa = NFA.regexToNFA(infix);
+            String dot = nfa.toDOT();
+            System.out.println(dot);
         }
-
+        catch (Exception e) {
+            System.out.println("Invalid regular expression");
+        }
     }
 
     private NFA deepClone() {
