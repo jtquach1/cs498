@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class FSATest {
     FSA fsa;
@@ -34,6 +35,7 @@ class FSATest {
     @AfterEach
     void tearDown() {
         fsa = null;
+        assertNull(fsa);
     }
 
     @Test
@@ -106,7 +108,7 @@ class FSATest {
 
     @Test
     void getAlphabet() {
-        Alphabet expected = (new Alphabet());
+        Alphabet expected = new Alphabet();
         expected.add('a');
         Alphabet actual = fsa.getAlphabet();
         assertEquals(expected, actual);

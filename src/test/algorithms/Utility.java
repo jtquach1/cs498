@@ -42,8 +42,8 @@ class Utility {
         return new Move(new State(fromId), consumed, new State(toId));
     }
 
-    static FSA makeFSA(Integer stateId) {
-        return new FSA(new State(stateId));
+    static FSA makeFSA(Integer start) {
+        return new FSA(new State(start));
     }
 
 
@@ -55,8 +55,8 @@ class Utility {
         return new DFA(new State(start), new State(phi));
     }
 
-    static NFA makeNFA(Integer stateId) {
-        return new NFA(new State(stateId));
+    static NFA makeNFA(Integer start) {
+        return new NFA(new State(start));
     }
 
     static PSet makePSet(Integer... stateIds) {
