@@ -3,6 +3,16 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.Collection;
 
+class Queue<T> extends ArrayList<T> {
+    void queue(T item) {
+        this.add(0, item);
+    }
+
+    T dequeue() {
+        return this.remove(0);
+    }
+}
+
 class Stack<T> extends ArrayList<T> {
     Stack() {
         super();
