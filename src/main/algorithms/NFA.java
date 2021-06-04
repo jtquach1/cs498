@@ -18,6 +18,22 @@ class NFA extends FSA {
         super(alphabet, states, start, finalStates, moves);
     }
 
+    public static void main(String[] args) {
+        String infix;
+        try {
+            if (args.length == 0) {
+                infix = "";
+            } else {
+                infix = args[0];
+            }
+            NFA nfa = NFA.regexToNFA(infix);
+            String dot = nfa.toString();
+            System.out.println(dot);
+        } catch (Exception e) {
+            System.out.println("Invalid regular expression");
+        }
+    }
+
     static NFA regexToNFA(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
         Stack<NFA> nfaStack = new Stack<>();
@@ -70,42 +86,6 @@ class NFA extends FSA {
         return result;
     }
 
-    static NFA kleeneStar(NFA first) {
-        NFA result = first.deepClone();
-        result.connectOriginalFinalStatesToOriginalStart();
-        result.addNewStartForKleeneStar();
-        result.addNewFinal();
-        result.connectNewStartToNewFinal();
-        return result;
-    }
-
-    static NFA alternate(NFA first, NFA second) {
-        NFA result = first.deepClone();
-        result.addNewStartForAlternation(second);
-        result.copyAlphabet(second);
-        result.copyStates(second);
-        result.copyMoves(second);
-        result.copyFinalStates(second);
-        result.addNewFinal();
-        return result;
-    }
-
-    public static void main(String[] args) {
-        String infix;
-        try {
-            if (args.length == 0) {
-                infix = "";
-            } else {
-                infix = args[0];
-            }
-            NFA nfa = NFA.regexToNFA(infix);
-            String dot = nfa.toString();
-            System.out.println(dot);
-        } catch (Exception e) {
-            System.out.println("Invalid regular expression");
-        }
-    }
-
     private NFA deepClone() {
         Alphabet alphabet = new Alphabet();
         Set<State> states = new TreeSet<>();
@@ -121,20 +101,16 @@ class NFA extends FSA {
         return new NFA(alphabet, states, start, finalStates, moves);
     }
 
-    private void copyFinalStates(NFA other) {
-        for (State state : other.getFinalStates()) {
-            this.addFinalState(state);
+    private void connectOriginalFinalStatesToOtherStart(NFA other) {
+        Set<State> finalStates = this.getFinalStates();
+        State otherStart = other.getStart();
+        for (State finalState : finalStates) {
+            this.addMove(finalState, EPSILON, otherStart);
         }
     }
 
     private void removeOriginalFinalStates() {
         this.removeFinalStates();
-    }
-
-    private void copyAlphabet(NFA other) {
-        for (Character consumed : other.getAlphabet()) {
-            this.addSymbol(consumed);
-        }
     }
 
     private void copyStates(NFA other) {
@@ -143,11 +119,9 @@ class NFA extends FSA {
         }
     }
 
-    private void connectOriginalFinalStatesToOtherStart(NFA other) {
-        Set<State> finalStates = this.getFinalStates();
-        State otherStart = other.getStart();
-        for (State finalState : finalStates) {
-            this.addMove(finalState, EPSILON, otherStart);
+    private void copyAlphabet(NFA other) {
+        for (Character consumed : other.getAlphabet()) {
+            this.addSymbol(consumed);
         }
     }
 
@@ -158,11 +132,32 @@ class NFA extends FSA {
         }
     }
 
-    private void connectNewStartToNewFinal() {
-        // There is only one new final state, but this is more convenient to write.
-        for (State newFinalState : getFinalStates()) {
-            addMove(getStart(), EPSILON, newFinalState);
+    private void copyFinalStates(NFA other) {
+        for (State state : other.getFinalStates()) {
+            this.addFinalState(state);
         }
+    }
+
+    static NFA alternate(NFA first, NFA second) {
+        NFA result = first.deepClone();
+        result.addNewStartForAlternation(second);
+        result.copyAlphabet(second);
+        result.copyStates(second);
+        result.copyMoves(second);
+        result.copyFinalStates(second);
+        result.addNewFinal();
+        return result;
+    }
+
+    private void addNewStartForAlternation(NFA other) {
+        State newStart = new State();
+        State firstStart = this.getStart();
+        State secondStart = other.getStart();
+
+        addState(newStart);
+        setStart(newStart);
+        addMove(newStart, EPSILON, firstStart);
+        addMove(newStart, EPSILON, secondStart);
     }
 
     private void addNewFinal() {
@@ -174,6 +169,15 @@ class NFA extends FSA {
         removeFinalStates();
         addFinalState(newFinal);
         addState(newFinal);
+    }
+
+    static NFA kleeneStar(NFA first) {
+        NFA result = first.deepClone();
+        result.connectOriginalFinalStatesToOriginalStart();
+        result.addNewStartForKleeneStar();
+        result.addNewFinal();
+        result.connectNewStartToNewFinal();
+        return result;
     }
 
     private void connectOriginalFinalStatesToOriginalStart() {
@@ -192,15 +196,11 @@ class NFA extends FSA {
         setStart(newStart);
     }
 
-    private void addNewStartForAlternation(NFA other) {
-        State newStart = new State();
-        State firstStart = this.getStart();
-        State secondStart = other.getStart();
-
-        addState(newStart);
-        setStart(newStart);
-        addMove(newStart, EPSILON, firstStart);
-        addMove(newStart, EPSILON, secondStart);
+    private void connectNewStartToNewFinal() {
+        // There is only one new final state, but this is more convenient to write.
+        for (State newFinalState : getFinalStates()) {
+            addMove(getStart(), EPSILON, newFinalState);
+        }
     }
 
     private void removeEpsilonFromAlphabet() {

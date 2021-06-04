@@ -59,23 +59,42 @@ class DFA extends FSA {
         setPhi(phi, convertingFromMinDFA, everyStateConsumesEntireAlphabet);
     }
 
-    static DFAState epsilonClosure(Set<State> states, Set<Move> moves, int index) {
-        Set<State> closure = epsilonClosure(states, moves);
-        DFAState state = new DFAState(index);
-        state.addAll(closure);
-        return state;
+    private void setPhi(
+            State phi,
+            boolean convertingFromMinDFA,
+            boolean everyStateConsumesEntireAlphabet
+    ) {
+        if (!everyStateConsumesEntireAlphabet || convertingFromMinDFA) {
+            this.phi = phi;
+            this.addState(phi);
+            for (Character consumed : this.getAlphabet()) {
+                this.addMove(phi, consumed, phi);
+            }
+        }
     }
 
-    static DFAState epsilonClosure(State state, Set<Move> moves, int index) {
-        Set<State> closure = epsilonClosure(state, moves);
-        DFAState dfaState = new DFAState(index);
-        dfaState.addAll(closure);
-        return dfaState;
-    }
-
-    private static boolean representsEmptyLanguage(NFA nfa) {
-        Alphabet alphabet = new Alphabet();
-        return nfa.getAlphabet().equals(alphabet);
+    public static void main(String[] args) {
+        String flag = Arrays
+                .stream(args)
+                .filter(arg -> arg.startsWith("-"))
+                .findFirst()
+                .orElse(null);
+        String infix = Arrays
+                .stream(args)
+                .filter(arg -> !arg.startsWith("-"))
+                .findFirst()
+                .orElse("");
+        try {
+            NFA nfa = NFA.regexToNFA(infix);
+            DFA dfa = DFA.NFAtoDFA(nfa);
+            if (flag != null && flag.equals("-m")) {
+                dfa = DFA.DFAtoMinDFA(dfa);
+            }
+            String dot = dfa.toString();
+            System.out.println(dot);
+        } catch (Exception e) {
+            System.out.println("Invalid regular expression");
+        }
     }
 
     static DFA NFAtoDFA(NFA nfa) {
@@ -103,6 +122,11 @@ class DFA extends FSA {
         return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, phi, false);
     }
 
+    private static boolean representsEmptyLanguage(NFA nfa) {
+        Alphabet alphabet = new Alphabet();
+        return nfa.getAlphabet().equals(alphabet);
+    }
+
     @NotNull
     private static DFA dfaRepresentingEmptyLanguage() {
         Alphabet alphabet = new Alphabet();
@@ -117,37 +141,40 @@ class DFA extends FSA {
         return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, null);
     }
 
-    static DFA DFAtoMinDFA(DFA dfa) {
-        if (dfa.equals(dfaRepresentingEmptyLanguage())) {
-            return dfa;
-        }
-
-        Partition partition = dfa.getPartition();
-        return dfa.createDFAFromPartition(partition);
+    static DFAState epsilonClosure(State state, Set<Move> moves, int index) {
+        Set<State> closure = epsilonClosure(state, moves);
+        DFAState dfaState = new DFAState(index);
+        dfaState.addAll(closure);
+        return dfaState;
     }
 
-    public static void main(String[] args) {
-        String flag = Arrays
-                .stream(args)
-                .filter(arg -> arg.startsWith("-"))
-                .findFirst()
-                .orElse(null);
-        String infix = Arrays
-                .stream(args)
-                .filter(arg -> !arg.startsWith("-"))
-                .findFirst()
-                .orElse("");
-        try {
-            NFA nfa = NFA.regexToNFA(infix);
-            DFA dfa = DFA.NFAtoDFA(nfa);
-            if (flag != null && flag.equals("-m")) {
-                dfa = DFA.DFAtoMinDFA(dfa);
+    private static Set<State> epsilonClosure(State state, Set<Move> moves) {
+        Set<State> states = new TreeSet<>();
+        states.add(state);
+        return epsilonClosure(states, moves);
+    }
+
+    private static Set<State> epsilonClosure(Set<State> states, Set<Move> moves) {
+        Stack<State> stack = new Stack<>(states);
+        Set<State> closure = new TreeSet<>(states);
+
+        while (!stack.isEmpty()) {
+            State from = stack.pop();
+            Set<State> validTos = moves
+                    .stream()
+                    .filter(move -> move.hasFrom(from) && move.hasConsumed(EPSILON))
+                    .map(Move::getTo)
+                    .collect(Collectors.toSet());
+
+            for (State to : validTos) {
+                if (!closure.contains(to)) {
+                    stack.push(to);
+                    closure.add(to);
+                }
             }
-            String dot = dfa.toString();
-            System.out.println(dot);
-        } catch (Exception e) {
-            System.out.println("Invalid regular expression");
         }
+
+        return closure;
     }
 
     private static int updateIndexAndComputeStates(
@@ -182,23 +209,6 @@ class DFA extends FSA {
         return index;
     }
 
-    @NotNull
-    private static Set<DFAState> getDFAFinalStates(
-            Set<DFAState> dfaStates,
-            Set<State> nfaFinalStates
-    ) {
-        Set<DFAState> dfaFinalStates = new TreeSet<>();
-        for (DFAState dfaState : dfaStates) {
-            for (State nfaState : dfaState.getStates()) {
-                if (nfaFinalStates.contains(nfaState)) {
-                    dfaFinalStates.add(dfaState);
-                }
-            }
-        }
-
-        return dfaFinalStates;
-    }
-
     private static Set<State> getReachableStates(
             DFAState states,
             Set<Move> moves,
@@ -224,63 +234,37 @@ class DFA extends FSA {
         return validTos;
     }
 
-    private static Set<State> epsilonClosure(State state, Set<Move> moves) {
-        Set<State> states = new TreeSet<>();
-        states.add(state);
-        return epsilonClosure(states, moves);
+    static DFAState epsilonClosure(Set<State> states, Set<Move> moves, int index) {
+        Set<State> closure = epsilonClosure(states, moves);
+        DFAState state = new DFAState(index);
+        state.addAll(closure);
+        return state;
     }
 
-    private static Set<State> epsilonClosure(Set<State> states, Set<Move> moves) {
-        Stack<State> stack = new Stack<>(states);
-        Set<State> closure = new TreeSet<>(states);
-
-        while (!stack.isEmpty()) {
-            State from = stack.pop();
-            Set<State> validTos = moves
-                    .stream()
-                    .filter(move -> move.hasFrom(from) && move.hasConsumed(EPSILON))
-                    .map(Move::getTo)
-                    .collect(Collectors.toSet());
-
-            for (State to : validTos) {
-                if (!closure.contains(to)) {
-                    stack.push(to);
-                    closure.add(to);
+    @NotNull
+    private static Set<DFAState> getDFAFinalStates(
+            Set<DFAState> dfaStates,
+            Set<State> nfaFinalStates
+    ) {
+        Set<DFAState> dfaFinalStates = new TreeSet<>();
+        for (DFAState dfaState : dfaStates) {
+            for (State nfaState : dfaState.getStates()) {
+                if (nfaFinalStates.contains(nfaState)) {
+                    dfaFinalStates.add(dfaState);
                 }
             }
         }
 
-        return closure;
+        return dfaFinalStates;
     }
 
-    private static boolean isStillSplitting(Partition partition, Partition previous) {
-        return !partition.equals(previous);
-    }
-
-    private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
-        return dfaStates
-                .stream()
-                .filter((dfaState) -> dfaState.getStates().contains(state))
-                .findAny()
-                .orElse(null);
-    }
-
-    State getPhi() {
-        return this.phi;
-    }
-
-    private void setPhi(
-            State phi,
-            boolean convertingFromMinDFA,
-            boolean everyStateConsumesEntireAlphabet
-    ) {
-        if (!everyStateConsumesEntireAlphabet || convertingFromMinDFA) {
-            this.phi = phi;
-            this.addState(phi);
-            for (Character consumed : this.getAlphabet()) {
-                this.addMove(phi, consumed, phi);
-            }
+    static DFA DFAtoMinDFA(DFA dfa) {
+        if (dfa.equals(dfaRepresentingEmptyLanguage())) {
+            return dfa;
         }
+
+        Partition partition = dfa.getPartition();
+        return dfa.createDFAFromPartition(partition);
     }
 
     @NotNull
@@ -331,6 +315,10 @@ class DFA extends FSA {
         return partition;
     }
 
+    private static boolean isStillSplitting(Partition partition, Partition previous) {
+        return !partition.equals(previous);
+    }
+
     private DFA createDFAFromPartition(Partition partition) {
         Alphabet alphabet = this.getAlphabet();
         Set<DFAState> dfaStates = partition.convertToDfaStates();
@@ -364,6 +352,18 @@ class DFA extends FSA {
                 phi,
                 true
         );
+    }
+
+    private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
+        return dfaStates
+                .stream()
+                .filter((dfaState) -> dfaState.getStates().contains(state))
+                .findAny()
+                .orElse(null);
+    }
+
+    State getPhi() {
+        return this.phi;
     }
 
 
@@ -456,14 +456,6 @@ class DFAState implements Comparable<DFAState> {
         return new State(id);
     }
 
-    int getId() {
-        return id;
-    }
-
-    TreeSet<State> getStates() {
-        return states;
-    }
-
     void addAll(Set<State> set) {
         states.addAll(set);
     }
@@ -477,7 +469,7 @@ class DFAState implements Comparable<DFAState> {
                 .stream()
                 .filter(dfaState -> dfaState.states.equals(states))
                 .findFirst()
-                .ifPresent(match -> this.id = match.getId());
+                .ifPresent(match -> this.id = match.id);
     }
 
     boolean isNewState(Set<DFAState> dfaStates) {
@@ -493,17 +485,25 @@ class DFAState implements Comparable<DFAState> {
                 .compare(this, other);
     }
 
+    int getId() {
+        return id;
+    }
+
+    TreeSet<State> getStates() {
+        return states;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(states, id);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DFAState dfaState = (DFAState) o;
         return this.states.equals(dfaState.states);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(states, id);
     }
 }
 
@@ -554,15 +554,6 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
         return included;
     }
 
-    PSet getExcludedStates(Set<Move> moves, PSet set, Character consumed) {
-        PSet excluded = new PSet();
-        excluded.addAll(set
-                .stream()
-                .filter((from) -> !this.contains(getTo(moves, consumed, from)))
-                .collect(Collectors.toSet()));
-        return excluded;
-    }
-
     @Nullable
     private State getTo(Set<Move> moves, Character consumed, State from) {
         Move move = moves
@@ -571,6 +562,15 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
                 .findFirst()
                 .orElse(null);
         return move != null ? move.getTo() : null;
+    }
+
+    PSet getExcludedStates(Set<Move> moves, PSet set, Character consumed) {
+        PSet excluded = new PSet();
+        excluded.addAll(set
+                .stream()
+                .filter((from) -> !this.contains(getTo(moves, consumed, from)))
+                .collect(Collectors.toSet()));
+        return excluded;
     }
 
     @Override

@@ -68,7 +68,6 @@ class NFATest {
     @Test
     void regexToNFAEmpty() {
         NFA expected = makeNFA(0);
-        Utility.addSymbols(expected, FSA.EPSILON);
         Utility.addStates(expected, 0, 1);
         Utility.addFinalStates(expected, 1);
         Utility.addMoves(expected, Utility.makeMove(0, FSA.EPSILON, 1));

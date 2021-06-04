@@ -38,103 +38,6 @@ class FSA {
         this.moves = moves;
     }
 
-    // can have a flag to determine whether you want to show garbage state for DFA
-    // or actually don't suppress the garbage state
-    private String toDOT() {
-        int startId = start.getId();
-        Set<Integer> finalStateIds = finalStates
-                .stream()
-                .map(State::getId)
-                .collect(Collectors.toSet());
-        Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
-
-        StringBuilder sb = new StringBuilder();
-        printFinalStates(finalStateIds, sb);
-        printMoves(moveToLabel, sb);
-        printStartState(startId, sb);
-
-        return sb.toString();
-    }
-
-    private void printStartState(int startId, StringBuilder sb) {
-        sb.append("\n" +
-                "\tnode [shape = none, label =\"\"];\n" +
-                "\tENTRY -> " + startId + ";\n" +
-                "}\n"
-        );
-    }
-
-    private void printFinalStates(Set<Integer> finalStateIds, StringBuilder sb) {
-        sb.append("digraph finite_state_machine {\n" +
-                "\trankdir=LR;\n" +
-                "\tsize=\"8,5\";\n" +
-                "\n" +
-                "\tnode [shape = doublecircle];\n" +
-                "\t"
-        );
-        for (Integer id : finalStateIds) {
-            sb.append(id + " ");
-        }
-    }
-
-    private void printMoves(
-            Map<Move, Set<Character>> moveToLabel,
-            StringBuilder sb
-    ) {
-        sb.append(";\n" +
-                "\n" +
-                "\tnode [shape = circle];" +
-                "\n"
-        );
-
-        for (Move move : moveToLabel.keySet()) {
-            String originalLabel = moveToLabel.get(move).toString();
-            String label = originalLabel.substring(1, originalLabel.length() - 1);
-
-            int fromId = move.getFrom().getId();
-            int toId = move.getTo().getId();
-            String from = getStateLabel(fromId);
-            String to = getStateLabel(toId);
-
-            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
-        }
-    }
-
-    private String getStateLabel(int stateId) {
-        boolean isDFAWithPhiState = this instanceof DFA && ((DFA) this).getPhi() != null;
-
-        if (isDFAWithPhiState) {
-            boolean hasPhi = stateId == ((DFA) this).getPhi().getId();
-
-            if (hasPhi) {
-                return Character.toString(PHI);
-            }
-        }
-
-        return Integer.toString(stateId);
-    }
-
-    @NotNull
-    private Map<Move, Set<Character>> getMoveToLabel() {
-        Map<Move, Set<Character>> moveToLabel = new TreeMap<>();
-
-        // Display multiple characters for one arrow
-        for (Move move : moves) {
-            Move key = new Move(move.getFrom(), '\u0000', move.getTo());
-            Set<Character> label;
-
-            // Does the arrow already exist?
-            if (moveToLabel.containsKey(key)) {
-                label = moveToLabel.get(key);
-            } else {
-                label = new TreeSet<>();
-            }
-            label.add(move.getConsumed());
-            moveToLabel.put(key, label);
-        }
-        return moveToLabel;
-    }
-
     void addSymbol(Character symbol) {
         alphabet.add(symbol);
     }
@@ -188,8 +91,8 @@ class FSA {
     }
 
     @Override
-    public String toString() {
-        return toDOT();
+    public int hashCode() {
+        return Objects.hash(alphabet, states, finalStates, moves, start);
     }
 
     @Override
@@ -205,8 +108,103 @@ class FSA {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(alphabet, states, finalStates, moves, start);
+    public String toString() {
+        return toDOT();
+    }
+
+    private String toDOT() {
+        int startId = start.getId();
+        Set<Integer> finalStateIds = finalStates
+                .stream()
+                .map(State::getId)
+                .collect(Collectors.toSet());
+        Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
+
+        StringBuilder sb = new StringBuilder();
+        printFinalStates(finalStateIds, sb);
+        printMoves(moveToLabel, sb);
+        printStartState(startId, sb);
+
+        return sb.toString();
+    }
+
+    @NotNull
+    private Map<Move, Set<Character>> getMoveToLabel() {
+        Map<Move, Set<Character>> moveToLabel = new TreeMap<>();
+
+        // Display multiple characters for one arrow
+        for (Move move : moves) {
+            Move key = new Move(move.getFrom(), '\u0000', move.getTo());
+            Set<Character> label;
+
+            // Does the arrow already exist?
+            if (moveToLabel.containsKey(key)) {
+                label = moveToLabel.get(key);
+            } else {
+                label = new TreeSet<>();
+            }
+            label.add(move.getConsumed());
+            moveToLabel.put(key, label);
+        }
+        return moveToLabel;
+    }
+
+    private void printFinalStates(Set<Integer> finalStateIds, StringBuilder sb) {
+        sb.append("digraph finite_state_machine {\n" +
+                "\trankdir=LR;\n" +
+                "\tsize=\"8,5\";\n" +
+                "\n" +
+                "\tnode [shape = doublecircle];\n" +
+                "\t"
+        );
+        for (Integer id : finalStateIds) {
+            sb.append(id + " ");
+        }
+    }
+
+    private void printMoves(
+            Map<Move, Set<Character>> moveToLabel,
+            StringBuilder sb
+    ) {
+        sb.append(";\n" +
+                "\n" +
+                "\tnode [shape = circle];" +
+                "\n"
+        );
+
+        for (Move move : moveToLabel.keySet()) {
+            String originalLabel = moveToLabel.get(move).toString();
+            String label = originalLabel.substring(1, originalLabel.length() - 1);
+
+            int fromId = move.getFrom().getId();
+            int toId = move.getTo().getId();
+            String from = getStateLabel(fromId);
+            String to = getStateLabel(toId);
+
+            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
+        }
+    }
+
+    private String getStateLabel(int stateId) {
+        boolean isDFAWithPhiState = this instanceof DFA && ((DFA) this).getPhi() != null;
+
+        if (isDFAWithPhiState) {
+            boolean hasPhi = stateId == ((DFA) this).getPhi().getId();
+
+            if (hasPhi) {
+                return Character.toString(PHI);
+            }
+        }
+
+        return Integer.toString(stateId);
+    }
+
+    private void printStartState(int startId, StringBuilder sb) {
+        sb.append("\n" +
+                "\tnode [shape = none, label =\"\"];\n" +
+                "\tENTRY -> " + startId + ";\n" +
+                "}\n"
+        );
     }
 }
 
@@ -232,10 +230,6 @@ class State implements Comparable<State> {
         State.idCounter = idCounter;
     }
 
-    int getId() {
-        return id;
-    }
-
     State getTo(Set<Move> moves, Character consumed) {
         Move move = moves
                 .stream()
@@ -252,17 +246,21 @@ class State implements Comparable<State> {
                 .compare(this, other);
     }
 
+    int getId() {
+        return id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         State state = (State) o;
         return id == state.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
 
@@ -275,18 +273,6 @@ class Move implements Comparable<Move> {
         this.from = from;
         this.consumed = consumed;
         this.to = to;
-    }
-
-    State getFrom() {
-        return from;
-    }
-
-    Character getConsumed() {
-        return consumed;
-    }
-
-    State getTo() {
-        return to;
     }
 
     boolean hasConsumed(Character consumed) {
@@ -305,6 +291,23 @@ class Move implements Comparable<Move> {
                 .compare(this, other);
     }
 
+    State getFrom() {
+        return from;
+    }
+
+    Character getConsumed() {
+        return consumed;
+    }
+
+    State getTo() {
+        return to;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(from, consumed, to);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -313,11 +316,6 @@ class Move implements Comparable<Move> {
         return Objects.equals(from, move.from)
                 && Objects.equals(consumed, move.consumed)
                 && Objects.equals(to, move.to);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(from, consumed, to);
     }
 }
 
