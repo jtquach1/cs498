@@ -1,8 +1,5 @@
 package algorithms;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -24,27 +21,32 @@ class NFA extends FSA {
     static NFA regexToNFA(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
         Stack<NFA> nfaStack = new Stack<>();
+        NFA result;
 
-        if (postfix.length == 0)
-            return makeSingle(EPSILON);
-
-        for (char c : postfix) {
-            if (c == '.') {
-                NFA second = nfaStack.pop();
-                NFA first = nfaStack.pop();
-                nfaStack.push(concatenate(first, second));
-            } else if (c == '|') {
-                NFA second = nfaStack.pop();
-                NFA first = nfaStack.pop();
-                nfaStack.push(alternate(first, second));
-            } else if (c == '*') {
-                NFA first = nfaStack.pop();
-                nfaStack.push(kleeneStar(first));
-            } else {
-                nfaStack.push(makeSingle(c));
+        if (postfix.length == 0) {
+            result = makeSingle(EPSILON);
+        } else {
+            for (char c : postfix) {
+                if (c == '.') {
+                    NFA second = nfaStack.pop();
+                    NFA first = nfaStack.pop();
+                    nfaStack.push(concatenate(first, second));
+                } else if (c == '|') {
+                    NFA second = nfaStack.pop();
+                    NFA first = nfaStack.pop();
+                    nfaStack.push(alternate(first, second));
+                } else if (c == '*') {
+                    NFA first = nfaStack.pop();
+                    nfaStack.push(kleeneStar(first));
+                } else {
+                    nfaStack.push(makeSingle(c));
+                }
             }
+            result = nfaStack.pop();
         }
-        return nfaStack.pop();
+
+        result.removeEpsilonFromAlphabet();
+        return result;
     }
 
     static NFA makeSingle(Character consumed) {
@@ -89,13 +91,17 @@ class NFA extends FSA {
     }
 
     public static void main(String[] args) {
-        String infix = args[0];
+        String infix;
         try {
+            if (args.length == 0) {
+                infix = "";
+            } else {
+                infix = args[0];
+            }
             NFA nfa = NFA.regexToNFA(infix);
             String dot = nfa.toString();
             System.out.println(dot);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Invalid regular expression");
         }
     }
@@ -195,5 +201,9 @@ class NFA extends FSA {
         setStart(newStart);
         addMove(newStart, EPSILON, firstStart);
         addMove(newStart, EPSILON, secondStart);
+    }
+
+    private void removeEpsilonFromAlphabet() {
+        this.removeSymbol(EPSILON);
     }
 }

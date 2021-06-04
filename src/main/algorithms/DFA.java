@@ -3,10 +3,7 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
@@ -76,11 +73,34 @@ class DFA extends FSA {
         return dfaState;
     }
 
+    private static boolean representsEmptyLanguage(NFA nfa) {
+        Alphabet alphabet = new Alphabet();
+
+        State start = new State(0);
+        State finalState = new State(1);
+
+        Set<Move> moves = new TreeSet<>();
+        moves.add(new Move(start, EPSILON, finalState));
+
+        Set<State> finalStates = new TreeSet<>();
+        Set<State> states = new TreeSet<>();
+        states.add(start);
+        states.add(finalState);
+        finalStates.add(finalState);
+
+        NFA empty = new NFA(alphabet, states, start, finalStates, moves);
+        return nfa.equals(empty);
+    }
+
     static DFA NFAtoDFA(NFA nfa) {
         Alphabet alphabet = nfa.getAlphabet();
         State nfaStart = nfa.getStart();
         Set<Move> nfaMoves = nfa.getMoves();
         Set<State> nfaFinalStates = nfa.getFinalStates();
+
+        if (representsEmptyLanguage(nfa)) {
+            return dfaRepresentingEmptyLanguage();
+        }
 
         int index = 0;
         DFAState dfaStart = epsilonClosure(nfaStart, nfaMoves, index);
@@ -106,9 +126,51 @@ class DFA extends FSA {
         );
     }
 
+    @NotNull
+    private static DFA dfaRepresentingEmptyLanguage() {
+        Alphabet alphabet = new Alphabet();
+        State dfaStart = new State(0);
+        Set<State> dfaStates = new TreeSet<>();
+        dfaStates.add(dfaStart);
+
+        Set<State> dfaFinalStates = new TreeSet<>();
+        dfaFinalStates.add(dfaStart);
+
+        Set<Move> dfaMoves = new TreeSet<>();
+        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, null);
+    }
+
     static DFA DFAtoMinDFA(DFA dfa) {
+        if (dfa.equals(dfaRepresentingEmptyLanguage())) {
+            return dfa;
+        }
+
         Partition partition = dfa.getPartition();
         return dfa.createDFAFromPartition(partition);
+    }
+
+    public static void main(String[] args) {
+        String flag = Arrays
+                .stream(args)
+                .filter(arg -> arg.startsWith("-"))
+                .findFirst()
+                .orElse(null);
+        String infix = Arrays
+                .stream(args)
+                .filter(arg -> !arg.startsWith("-"))
+                .findFirst()
+                .orElse("");
+        try {
+            NFA nfa = NFA.regexToNFA(infix);
+            DFA dfa = DFA.NFAtoDFA(nfa);
+            if (flag != null && flag.equals("-m")) {
+                dfa = DFA.DFAtoMinDFA(dfa);
+            }
+            String dot = dfa.toString();
+            System.out.println(dot);
+        } catch (Exception e) {
+            System.out.println("Invalid regular expression");
+        }
     }
 
     private static int updateIndexAndComputeStates(
@@ -132,7 +194,6 @@ class DFA extends FSA {
                         dfaStates.add(to);
                         stack.push(to);
                         index++;
-
                     } else {
                         to.updateWithExistingId(dfaStates);
                     }
@@ -225,6 +286,10 @@ class DFA extends FSA {
                 .filter((dfaState) -> dfaState.getStates().contains(state))
                 .findAny()
                 .orElse(null);
+    }
+
+    State getPhi() {
+        return this.phi;
     }
 
     private void setPhi(
@@ -324,9 +389,7 @@ class DFA extends FSA {
         );
     }
 
-    State getPhi() {
-        return this.phi;
-    }
+
 }
 
 class DFAMove implements Comparable<DFAMove> {

@@ -22,7 +22,7 @@ class FSATest {
         Set<Move> moves = new TreeSet<>();
         Move move = new Move(start, 'a', finalState);
 
-        alphabet.addSymbol('a');
+        alphabet.add('a');
         moves.add(move);
         states.add(start);
         states.add(finalState);
@@ -41,8 +41,8 @@ class FSATest {
         fsa.addSymbol('b');
         Alphabet actual = fsa.getAlphabet();
         Alphabet expected = new Alphabet();
-        expected.addSymbol('a');
-        expected.addSymbol('b');
+        expected.add('a');
+        expected.add('b');
         assertEquals(expected, actual);
     }
 
@@ -107,7 +107,7 @@ class FSATest {
     @Test
     void getAlphabet() {
         Alphabet expected = (new Alphabet());
-        expected.addSymbol('a');
+        expected.add('a');
         Alphabet actual = fsa.getAlphabet();
         assertEquals(expected, actual);
     }

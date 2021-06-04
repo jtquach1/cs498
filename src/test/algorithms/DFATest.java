@@ -383,6 +383,23 @@ class DFATest {
     }
 
     @Test
+    void NFAtoDFAEmpty() {
+        NFA nfa = makeNFA(0);
+        Utility.addStates(nfa, 0, 1);
+        Utility.addFinalStates(nfa, 1);
+        Utility.addMoves(nfa,
+                Utility.makeMove(0, FSA.EPSILON, 1)
+        );
+
+        DFA expected = makeDFA(0);
+        Utility.addStates(expected, 0);
+        Utility.addFinalStates(expected, 0);
+
+        DFA actual = DFA.NFAtoDFA(nfa);
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void getPartition() {
         Partition expected = new Partition();
         Utility.addPSets(expected,
@@ -628,5 +645,19 @@ class DFATest {
         );
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void DFAtoMinDFAEmpty() {
+        DFA dfa = makeDFA(0);
+        Utility.addStates(dfa, 0);
+        Utility.addFinalStates(dfa, 0);
+
+        DFA expected = makeDFA(0);
+        Utility.addStates(expected, 0);
+        Utility.addFinalStates(expected, 0);
+
+        DFA actual = DFA.DFAtoMinDFA(dfa);
+        assertEquals(dfa, actual);
     }
 }

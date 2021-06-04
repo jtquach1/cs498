@@ -135,8 +135,12 @@ class FSA {
         return moveToLabel;
     }
 
-    void addSymbol(Character newSymbol) {
-        alphabet.addSymbol(newSymbol);
+    void addSymbol(Character symbol) {
+        alphabet.add(symbol);
+    }
+
+    void removeSymbol(Character symbol) {
+        alphabet.remove(symbol);
     }
 
     void addState(State state) {
@@ -209,10 +213,6 @@ class FSA {
 class Alphabet extends TreeSet<Character> {
     Alphabet() {
         super();
-    }
-
-    void addSymbol(Character newSymbol) {
-        add(newSymbol);
     }
 }
 
