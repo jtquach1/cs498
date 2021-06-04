@@ -75,21 +75,7 @@ class DFA extends FSA {
 
     private static boolean representsEmptyLanguage(NFA nfa) {
         Alphabet alphabet = new Alphabet();
-
-        State start = new State(0);
-        State finalState = new State(1);
-
-        Set<Move> moves = new TreeSet<>();
-        moves.add(new Move(start, EPSILON, finalState));
-
-        Set<State> finalStates = new TreeSet<>();
-        Set<State> states = new TreeSet<>();
-        states.add(start);
-        states.add(finalState);
-        finalStates.add(finalState);
-
-        NFA empty = new NFA(alphabet, states, start, finalStates, moves);
-        return nfa.equals(empty);
+        return nfa.getAlphabet().equals(alphabet);
     }
 
     static DFA NFAtoDFA(NFA nfa) {
@@ -101,7 +87,6 @@ class DFA extends FSA {
         if (representsEmptyLanguage(nfa)) {
             return dfaRepresentingEmptyLanguage();
         }
-
         int index = 0;
         DFAState dfaStart = epsilonClosure(nfaStart, nfaMoves, index);
         Set<DFAState> dfaStates = new TreeSet<>();
@@ -115,15 +100,7 @@ class DFA extends FSA {
         Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
         State phi = new State(index);
 
-        return new DFA(
-                alphabet,
-                dfaStates,
-                dfaStart,
-                dfaFinalStates,
-                dfaMoves,
-                phi,
-                false
-        );
+        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, phi, false);
     }
 
     @NotNull
