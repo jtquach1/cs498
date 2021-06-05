@@ -2,6 +2,8 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,57 @@ class FSA {
         moves = new TreeSet<>();
         states.add(start);
         this.start = start;
+    }
+
+    public static void main(String[] args) {
+        String inputRegex = null;
+        String outputPrefix = null;
+        try {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equals("-i")) {
+                    inputRegex = getNonFlag(args, i + 1);
+                }
+                if (args[i].equals("-o")) {
+                    outputPrefix = getNonFlag(args, i + 1);
+                }
+            }
+            if (inputRegex == null) {
+                inputRegex = "";
+            }
+
+            NFA nfa = NFA.regexToNFA(inputRegex);
+            DFA dfa = DFA.NFAtoDFA(nfa);
+            DFA minDfa = DFA.DFAtoMinDFA(dfa);
+
+            TreeMap<String, String> FSAToDOT = new TreeMap<>();
+            FSAToDOT.put("nfa", nfa.toString());
+            FSAToDOT.put("dfa", dfa.toString());
+            FSAToDOT.put("minDfa", minDfa.toString());
+
+            PrintWriter writer = null;
+            for (String fsaType : FSAToDOT.keySet()) {
+                String fileName = outputPrefix + "." + fsaType + ".dot";
+                writer = new PrintWriter(fileName, StandardCharsets.UTF_8);
+                writer.print(FSAToDOT.get(fsaType));
+            }
+
+            writer.close();
+        } catch (NullPointerException e) {
+            if (outputPrefix == null) {
+                System.out.println("ERROR: Output filename prefix not specified");
+            }
+        } catch (Exception e) {
+            System.out.println("ERROR: Invalid regular expression");
+            System.out.println(e);
+        }
+    }
+
+    private static String getNonFlag(String[] args, int index) {
+        String result = args[index];
+        if (result.startsWith("-")) {
+            return null;
+        }
+        return result;
     }
 
     void addSymbol(Character symbol) {

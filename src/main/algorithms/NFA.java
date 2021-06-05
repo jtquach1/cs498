@@ -15,22 +15,6 @@ class NFA extends FSA {
         super(start);
     }
 
-    public static void main(String[] args) {
-        String infix;
-        try {
-            if (args.length == 0) {
-                infix = "";
-            } else {
-                infix = args[0];
-            }
-            NFA nfa = NFA.regexToNFA(infix);
-            String dot = nfa.toString();
-            System.out.println(dot);
-        } catch (Exception e) {
-            System.out.println("Invalid regular expression");
-        }
-    }
-
     static NFA regexToNFA(String infix) {
         char[] postfix = Regex.infixToPostfix(infix).toCharArray();
         Stack<NFA> nfaStack = new Stack<>();

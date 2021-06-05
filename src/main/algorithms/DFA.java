@@ -3,7 +3,10 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
@@ -21,30 +24,6 @@ class DFA extends FSA {
     DFA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
         Set<Move> moves) {
         super(alphabet, states, start, finalStates, moves);
-    }
-
-    public static void main(String[] args) {
-        String flag = Arrays
-                .stream(args)
-                .filter(arg -> arg.startsWith("-"))
-                .findFirst()
-                .orElse(null);
-        String infix = Arrays
-                .stream(args)
-                .filter(arg -> !arg.startsWith("-"))
-                .findFirst()
-                .orElse("");
-        try {
-            NFA nfa = NFA.regexToNFA(infix);
-            DFA dfa = DFA.NFAtoDFA(nfa);
-            if (flag != null && flag.equals("-m")) {
-                dfa = DFA.DFAtoMinDFA(dfa);
-            }
-            String dot = dfa.toString();
-            System.out.println(dot);
-        } catch (Exception e) {
-            System.out.println("Invalid regular expression");
-        }
     }
 
     static DFA NFAtoDFA(NFA nfa) {
@@ -195,27 +174,6 @@ class DFA extends FSA {
         return dfaFinalStates;
     }
 
-    static DFA DFAtoMinDFA(DFA dfa) {
-        if (dfa.equals(dfaRepresentingEmptyLanguage())) {
-            return dfa;
-        }
-
-        Partition partition = dfa.getPartition();
-        return dfa.createDFAFromPartition(partition);
-    }
-
-    private static boolean isStillSplitting(Partition partition, Partition previous) {
-        return !partition.equals(previous);
-    }
-
-    private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
-        return dfaStates
-                .stream()
-                .filter((dfaState) -> dfaState.getStates().contains(state))
-                .findFirst()
-                .orElse(null);
-    }
-
     @NotNull
     private static DFA createDFAFromPowersetConstruction(Alphabet alphabet, Set<DFAState> dfaStates,
                                                          DFAState dfaStart, State phi,
@@ -229,6 +187,44 @@ class DFA extends FSA {
         DFA result = new DFA(alphabet, states, start, finalStates, moves);
         result.addMovesToPhi(phi, convertingFromMinDFA);
         return result;
+    }
+
+    private void addMovesToPhi(State phi, boolean convertingFromMinDFA) {
+        boolean everyStateConsumesEntireAlphabet = true;
+        for (State from : this.getStates()) {
+            Set<Character> consumedChars = this.getMoves()
+                    .stream()
+                    .filter(move -> move.hasFrom(from))
+                    .map(Move::getConsumed)
+                    .collect(Collectors.toSet());
+            for (Character consumed : this.getAlphabet()) {
+                if (!consumedChars.contains(consumed)) {
+                    this.addMove(from, consumed, phi);
+                    everyStateConsumesEntireAlphabet = false;
+                }
+            }
+        }
+        setPhi(phi, convertingFromMinDFA, everyStateConsumesEntireAlphabet);
+    }
+
+    private void setPhi(State phi, boolean convertingFromMinDFA,
+                        boolean everyStateConsumesEntireAlphabet) {
+        if (!everyStateConsumesEntireAlphabet || convertingFromMinDFA) {
+            this.phi = phi;
+            this.addState(phi);
+            for (Character consumed : this.getAlphabet()) {
+                this.addMove(phi, consumed, phi);
+            }
+        }
+    }
+
+    static DFA DFAtoMinDFA(DFA dfa) {
+        if (dfa.equals(dfaRepresentingEmptyLanguage())) {
+            return dfa;
+        }
+
+        Partition partition = dfa.getPartition();
+        return dfa.createDFAFromPartition(partition);
     }
 
     @NotNull
@@ -262,6 +258,10 @@ class DFA extends FSA {
         }
 
         return partition;
+    }
+
+    private static boolean isStillSplitting(Partition partition, Partition previous) {
+        return !partition.equals(previous);
     }
 
     @NotNull
@@ -307,37 +307,16 @@ class DFA extends FSA {
         return result;
     }
 
+    private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
+        return dfaStates
+                .stream()
+                .filter((dfaState) -> dfaState.getStates().contains(state))
+                .findFirst()
+                .orElse(null);
+    }
+
     State getPhi() {
         return this.phi;
-    }
-
-    private void addMovesToPhi(State phi, boolean convertingFromMinDFA) {
-        boolean everyStateConsumesEntireAlphabet = true;
-        for (State from : this.getStates()) {
-            Set<Character> consumedChars = this.getMoves()
-                    .stream()
-                    .filter(move -> move.hasFrom(from))
-                    .map(Move::getConsumed)
-                    .collect(Collectors.toSet());
-            for (Character consumed : this.getAlphabet()) {
-                if (!consumedChars.contains(consumed)) {
-                    this.addMove(from, consumed, phi);
-                    everyStateConsumesEntireAlphabet = false;
-                }
-            }
-        }
-        setPhi(phi, convertingFromMinDFA, everyStateConsumesEntireAlphabet);
-    }
-
-    private void setPhi(State phi, boolean convertingFromMinDFA,
-                        boolean everyStateConsumesEntireAlphabet) {
-        if (!everyStateConsumesEntireAlphabet || convertingFromMinDFA) {
-            this.phi = phi;
-            this.addState(phi);
-            for (Character consumed : this.getAlphabet()) {
-                this.addMove(phi, consumed, phi);
-            }
-        }
     }
 
 
