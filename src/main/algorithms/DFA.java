@@ -406,7 +406,7 @@ class DFAState implements Comparable<DFAState> {
 
     @NotNull
     State convertToState() {
-        return new State(id, states.toString());
+        return new State(id, states);
     }
 
     void addAll(Set<State> set) {

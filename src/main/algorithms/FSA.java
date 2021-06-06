@@ -170,6 +170,7 @@ class FSA {
 
         StringBuilder sb = new StringBuilder();
         printFinalStates(finalStateIds, sb);
+        printStates(sb);
         printMoves(moveToLabel, sb);
         printStartState(startId, sb);
 
@@ -208,29 +209,21 @@ class FSA {
         for (Integer id : finalStateIds) {
             sb.append(id + " ");
         }
+        sb.append(";\n\n");
     }
 
-    private void printMoves(
-            Map<Move, Set<Character>> moveToLabel,
-            StringBuilder sb
-    ) {
-        sb.append(";\n" +
-                "\n" +
-                "\tnode [shape = circle];" +
-                "\n"
-        );
-
-        for (Move move : moveToLabel.keySet()) {
-            String originalLabel = moveToLabel.get(move).toString();
-            String label = originalLabel.substring(1, originalLabel.length() - 1);
-
-            int fromId = move.getFrom().getId();
-            int toId = move.getTo().getId();
-            String from = getStateLabel(fromId);
-            String to = getStateLabel(toId);
-
-            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
+    private void printStates(StringBuilder sb) {
+        for (State state : states) {
+            String alternativeLabel = state.getAlternativeLabel();
+            boolean generatedFromClosureOrPartition = alternativeLabel != null;
+            if (generatedFromClosureOrPartition) {
+                String idLabel = getStateLabel(state.getId());
+                sb.append("\t " + idLabel + " [label=\"" + idLabel + "\\n" + alternativeLabel +
+                        "\"];" +
+                        "\n");
+            }
         }
+        sb.append("\n");
     }
 
     private String getStateLabel(int stateId) {
@@ -245,6 +238,27 @@ class FSA {
         }
 
         return Integer.toString(stateId);
+    }
+
+    private void printMoves(
+            Map<Move, Set<Character>> moveToLabel,
+            StringBuilder sb
+    ) {
+        sb.append("\tnode [shape = circle];" +
+                "\n"
+        );
+
+        for (Move move : moveToLabel.keySet()) {
+            String originalLabel = moveToLabel.get(move).toString();
+            String label = originalLabel.substring(1, originalLabel.length() - 1);
+
+            int fromId = move.getFrom().getId();
+            int toId = move.getTo().getId();
+            String from = getStateLabel(fromId);
+            String to = getStateLabel(toId);
+
+            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
+        }
     }
 
     private void printStartState(int startId, StringBuilder sb) {
@@ -265,7 +279,7 @@ class Alphabet extends TreeSet<Character> {
 class State implements Comparable<State> {
     private static int idCounter;
     private final int id;
-    private String closureLabel;
+    private String alternativeLabel;
 
     State() {
         id = idCounter++;
@@ -275,9 +289,11 @@ class State implements Comparable<State> {
         this.id = id;
     }
 
-    State(int id, String closureLabel) {
+    State(int id, Set<State> states) {
         this.id = id;
-        this.closureLabel = closureLabel;
+        String oldLabel = states.toString();
+        oldLabel = oldLabel.substring(1, oldLabel.length() - 1);
+        this.alternativeLabel = "{" + oldLabel + "}";
     }
 
     static void setIdCounter(int idCounter) {
@@ -304,6 +320,10 @@ class State implements Comparable<State> {
         return id;
     }
 
+    String getAlternativeLabel() {
+        return alternativeLabel;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -315,6 +335,11 @@ class State implements Comparable<State> {
         if (o == null || getClass() != o.getClass()) return false;
         State state = (State) o;
         return id == state.id;
+    }
+
+    @Override
+    public String toString() {
+        return Integer.toString(id);
     }
 }
 
