@@ -60,14 +60,14 @@ class FSA {
             FSAToDOT.put("dfa", dfa.toString());
             FSAToDOT.put("minDfa", minDfa.toString());
 
-            PrintWriter writer = null;
+            PrintWriter writer;
             for (String fsaType : FSAToDOT.keySet()) {
                 String fileName = outputPrefix + "." + fsaType + ".dot";
                 writer = new PrintWriter(fileName, StandardCharsets.UTF_8);
                 writer.print(FSAToDOT.get(fsaType));
+                writer.close();
             }
 
-            writer.close();
         } catch (NullPointerException e) {
             if (outputPrefix == null) {
                 System.out.println("ERROR: Output filename prefix not specified");
@@ -265,6 +265,7 @@ class Alphabet extends TreeSet<Character> {
 class State implements Comparable<State> {
     private static int idCounter;
     private final int id;
+    private String closureLabel;
 
     State() {
         id = idCounter++;
@@ -272,6 +273,11 @@ class State implements Comparable<State> {
 
     State(int id) {
         this.id = id;
+    }
+
+    State(int id, String closureLabel) {
+        this.id = id;
+        this.closureLabel = closureLabel;
     }
 
     static void setIdCounter(int idCounter) {
