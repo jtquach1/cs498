@@ -87,7 +87,7 @@ class Utility {
     }
 
     static Set<State> makeStates(Integer ...stateIds) {
-        Set<State> states = new TreeSet<State>();
+        Set<State> states = new TreeSet<>();
         for (int stateId : stateIds) {
             states.add(new State(stateId));
         }

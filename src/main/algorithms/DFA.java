@@ -318,8 +318,6 @@ class DFA extends FSA {
     State getPhi() {
         return this.phi;
     }
-
-
 }
 
 class DFAMove implements Comparable<DFAMove> {
