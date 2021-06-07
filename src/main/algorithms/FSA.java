@@ -144,15 +144,15 @@ class FSA {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
-        FSA fsa = (FSA) other;
-        return Objects.equals(alphabet, fsa.alphabet)
-                && Objects.equals(states, fsa.states)
-                && Objects.equals(finalStates, fsa.finalStates)
-                && Objects.equals(moves, fsa.moves)
-                && Objects.equals(start, fsa.start);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FSA other = (FSA) o;
+        return Objects.equals(alphabet, other.alphabet)
+                && Objects.equals(states, other.states)
+                && Objects.equals(finalStates, other.finalStates)
+                && Objects.equals(moves, other.moves)
+                && Objects.equals(start, other.start);
     }
 
     @Override
