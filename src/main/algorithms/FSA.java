@@ -2,6 +2,7 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,7 +36,7 @@ class FSA {
         this.start = start;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String inputRegex = null;
         String outputPrefix = null;
         try {
@@ -74,7 +75,7 @@ class FSA {
             }
         } catch (Exception e) {
             System.out.println("ERROR: Invalid regular expression");
-            System.out.println(e);
+            throw e;
         }
     }
 
@@ -169,15 +170,27 @@ class FSA {
         Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
 
         StringBuilder sb = new StringBuilder();
+        printHeader(sb);
         printFinalStates(finalStateIds, sb);
         printStates(sb);
         printMoves(moveToLabel, sb);
         printStartState(startId, sb);
+        printFooter(sb);
 
         return sb.toString();
     }
 
-    @NotNull
+    private static void printFooter(StringBuilder sb) {
+        sb.append("}\n");
+    }
+
+    private static void printHeader(StringBuilder sb) {
+        sb.append("digraph finite_state_machine {\n" +
+                "\trankdir=LR;\n" +
+                "\tsize=\"8,5\";\n" +
+                "\n");
+    }
+
     private Map<Move, Set<Character>> getMoveToLabel() {
         Map<Move, Set<Character>> moveToLabel = new TreeMap<>();
 
@@ -198,14 +211,8 @@ class FSA {
         return moveToLabel;
     }
 
-    private void printFinalStates(Set<Integer> finalStateIds, StringBuilder sb) {
-        sb.append("digraph finite_state_machine {\n" +
-                "\trankdir=LR;\n" +
-                "\tsize=\"8,5\";\n" +
-                "\n" +
-                "\tnode [shape = doublecircle];\n" +
-                "\t"
-        );
+    private static void printFinalStates(Set<Integer> finalStateIds, StringBuilder sb) {
+        sb.append("\tnode [shape = doublecircle];\n\t");
         for (Integer id : finalStateIds) {
             sb.append(id + " ");
         }
@@ -213,17 +220,14 @@ class FSA {
     }
 
     private void printStates(StringBuilder sb) {
-        sb.append("\tnode [shape = circle];" +
-                "\n"
-        );
+        sb.append("\tnode [shape = circle];\n");
         for (State state : states) {
             String alternativeLabel = state.getAlternativeLabel();
             boolean generatedFromClosureOrPartition = alternativeLabel != null;
             if (generatedFromClosureOrPartition) {
-                String idLabel = getStateLabel(state.getId());
-                sb.append("\t " + idLabel + " [label=\"" + idLabel + "\\n" + alternativeLabel +
-                        "\"];" +
-                        "\n");
+                String idLabel = this.getStateLabel(state.getId());
+                sb.append("\t" + idLabel + " [label=\"" + idLabel + "\\n" + alternativeLabel +
+                        "\"];\n");
             }
         }
         sb.append("\n");
@@ -253,19 +257,17 @@ class FSA {
 
             int fromId = move.getFrom().getId();
             int toId = move.getTo().getId();
-            String from = getStateLabel(fromId);
-            String to = getStateLabel(toId);
+            String from = this.getStateLabel(fromId);
+            String to = this.getStateLabel(toId);
 
             sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
         }
+        sb.append("\n");
     }
 
-    private void printStartState(int startId, StringBuilder sb) {
-        sb.append("\n" +
-                "\tnode [shape = none, label =\"\"];\n" +
-                "\tENTRY -> " + startId + ";\n" +
-                "}\n"
-        );
+    private static void printStartState(int startId, StringBuilder sb) {
+        sb.append("\tnode [shape = none, label =\"\"];\n" +
+                "\tENTRY -> " + startId + ";\n");
     }
 }
 
@@ -305,8 +307,7 @@ class State implements Comparable<State> {
                 .filter((m) -> m.hasFrom(this) && m.hasConsumed(consumed))
                 .findFirst()
                 .orElse(null);
-        State to = move != null ? move.getTo() : null;
-        return to;
+        return move != null ? move.getTo() : null;
     }
 
     @Override
