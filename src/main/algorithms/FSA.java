@@ -213,6 +213,9 @@ class FSA {
     }
 
     private void printStates(StringBuilder sb) {
+        sb.append("\tnode [shape = circle];" +
+                "\n"
+        );
         for (State state : states) {
             String alternativeLabel = state.getAlternativeLabel();
             boolean generatedFromClosureOrPartition = alternativeLabel != null;
@@ -244,10 +247,6 @@ class FSA {
             Map<Move, Set<Character>> moveToLabel,
             StringBuilder sb
     ) {
-        sb.append("\tnode [shape = circle];" +
-                "\n"
-        );
-
         for (Move move : moveToLabel.keySet()) {
             String originalLabel = moveToLabel.get(move).toString();
             String label = originalLabel.substring(1, originalLabel.length() - 1);
