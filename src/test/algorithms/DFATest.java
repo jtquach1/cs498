@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static algorithms.Utility.makeDFA;
-import static algorithms.Utility.makeNFA;
+import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DFATest {
@@ -659,5 +658,66 @@ class DFATest {
 
         DFA actual = DFA.DFAtoMinDFA(dfa);
         assertEquals(dfa, actual);
+    }
+
+    @Test
+    void toStringDFA() {
+        String expected = "digraph finite_state_machine {\n" +
+                "\trankdir=LR;\n" +
+                "\tsize=\"8,5\";\n" +
+                "\n" +
+                "\tnode [shape = doublecircle];\n" +
+                "\t4 ;\n" +
+                "\n" +
+                "\tnode [shape = circle];\n" +
+                "\t0 [label=\"0\\n{0, 2, 4}\"];\n" +
+                "\t1 [label=\"1\\n{1, 5, 6, 8, 9, 10}\"];\n" +
+                "\t2 [label=\"2\\n{3, 5, 6, 8, 9, 10}\"];\n" +
+                "\t3 [label=\"3\\n{6, 7, 9, 10}\"];\n" +
+                "\t4 [label=\"4\\n{11}\"];\n" +
+                "\n" +
+                "\t0 -> 1 [label = \"a\"];\n" +
+                "\t0 -> 2 [label = \"b\"];\n" +
+                "\t1 -> 3 [label = \"a\"];\n" +
+                "\t1 -> 4 [label = \"b\"];\n" +
+                "\t2 -> 3 [label = \"a\"];\n" +
+                "\t2 -> 4 [label = \"b\"];\n" +
+                "\t3 -> 3 [label = \"a\"];\n" +
+                "\t3 -> 4 [label = \"b\"];\n" +
+                "\t4 -> φ [label = \"a, b\"];\n" +
+                "\tφ -> φ [label = \"a, b\"];\n" +
+                "\n" +
+                "\tnode [shape = none, label =\"\"];\n" +
+                "\tENTRY -> 0;\n" +
+                "}\n";
+
+        DFA dfa = Utility.makeDFA(
+                makeState(0, makeStates(0, 2, 4)),
+                new State(5));
+        Utility.addSymbols(dfa, 'a', 'b');
+        Utility.addStates(dfa,
+                makeState(0, makeStates(0, 2, 4)),
+                makeState(1, makeStates(1, 5, 6, 8, 9, 10)),
+                makeState(2, makeStates(3, 5, 6, 8, 9, 10)),
+                makeState(3, makeStates(6, 7, 9, 10)),
+                makeState(4, makeStates(11)));
+        Utility.addStates(dfa, 5);
+        Utility.addFinalStates(dfa, 4);
+        Utility.addMoves(dfa,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(0, 'b', 2),
+                Utility.makeMove(1, 'a', 3),
+                Utility.makeMove(1, 'b', 4),
+                Utility.makeMove(2, 'a', 3),
+                Utility.makeMove(2, 'b', 4),
+                Utility.makeMove(3, 'a', 3),
+                Utility.makeMove(3, 'b', 4),
+                Utility.makeMove(4, 'a', 5),
+                Utility.makeMove(4, 'b', 5),
+                Utility.makeMove(5, 'a', 5),
+                Utility.makeMove(5, 'b', 5));
+        String actual = dfa.toString();
+
+        assertEquals(expected, actual);
     }
 }

@@ -90,7 +90,7 @@ class DFA extends FSA {
                     .stream()
                     .filter(move -> move.hasFrom(from) && move.hasConsumed(EPSILON))
                     .map(Move::getTo)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(TreeSet::new));
 
             for (State to : validTos) {
                 if (!closure.contains(to)) {
@@ -144,7 +144,7 @@ class DFA extends FSA {
                     .stream()
                     .filter(move -> move.hasFrom(from) && move.hasConsumed(consumed))
                     .map(Move::getTo)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(TreeSet::new));
             validTos.addAll(validStates);
         }
         return validTos;
@@ -196,7 +196,7 @@ class DFA extends FSA {
                     .stream()
                     .filter(move -> move.hasFrom(from))
                     .map(Move::getConsumed)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(TreeSet::new));
             for (Character consumed : this.getAlphabet()) {
                 if (!consumedChars.contains(consumed)) {
                     this.addMove(from, consumed, phi);
@@ -290,7 +290,7 @@ class DFA extends FSA {
                 .getFinalStates()
                 .stream()
                 .map((state) -> findDFAState(dfaStates, state))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new));
 
         Set<DFAMove> dfaMoves = this
                 .getMoves()
@@ -300,7 +300,7 @@ class DFA extends FSA {
                         move.getConsumed(),
                         findDFAState(dfaStates, move.getTo())
                 ))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new));
 
         DFA result = createDFAFromPowersetConstruction(alphabet, dfaStates, dfaStart, phi,
                 dfaFinalStates, dfaMoves, true);
@@ -338,7 +338,7 @@ class DFAMove implements Comparable<DFAMove> {
         return dfaMoves
                 .stream()
                 .map(DFAMove::convertToMove)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     Move convertToMove() {
@@ -401,7 +401,7 @@ class DFAState implements Comparable<DFAState> {
         return dfaStates
                 .stream()
                 .map(DFAState::convertToState)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @NotNull
@@ -494,17 +494,17 @@ class Partition extends TreeSet<PSet> {
 }
 
 class PSet extends TreeSet<State> implements Comparable<PSet> {
-    PSet() {
-        super();
-    }
-
     PSet getIncludedStates(Set<Move> moves, PSet set, Character consumed) {
         PSet included = new PSet();
         included.addAll(set
                 .stream()
                 .filter((from) -> this.contains(getTo(moves, consumed, from)))
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toCollection(PSet::new)));
         return included;
+    }
+
+    PSet() {
+        super();
     }
 
     @Nullable
@@ -518,12 +518,10 @@ class PSet extends TreeSet<State> implements Comparable<PSet> {
     }
 
     PSet getExcludedStates(Set<Move> moves, PSet set, Character consumed) {
-        PSet excluded = new PSet();
-        excluded.addAll(set
+        return set
                 .stream()
                 .filter((from) -> !this.contains(getTo(moves, consumed, from)))
-                .collect(Collectors.toSet()));
-        return excluded;
+                .collect(Collectors.toCollection(PSet::new));
     }
 
     @Override

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 class FSA {
     static final char EPSILON = '\u025B';
@@ -162,19 +161,12 @@ class FSA {
     }
 
     private String toDOT() {
-        int startId = start.getId();
-        Set<Integer> finalStateIds = finalStates
-                .stream()
-                .map(State::getId)
-                .collect(Collectors.toSet());
-        Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
-
         StringBuilder sb = new StringBuilder();
         printHeader(sb);
-        printFinalStates(finalStateIds, sb);
+        printFinalStates(sb);
         printStates(sb);
-        printMoves(moveToLabel, sb);
-        printStartState(startId, sb);
+        printMoves(sb);
+        printStartState(sb);
         printFooter(sb);
 
         return sb.toString();
@@ -189,6 +181,57 @@ class FSA {
                 "\trankdir=LR;\n" +
                 "\tsize=\"8,5\";\n" +
                 "\n");
+    }
+
+    private void printFinalStates(StringBuilder sb) {
+        sb.append("\tnode [shape = doublecircle];\n\t");
+        for (State finalState : finalStates) {
+            sb.append(finalState.getId() + " ");
+        }
+        sb.append(";\n\n");
+    }
+
+    private void printStates(StringBuilder sb) {
+        sb.append("\tnode [shape = circle];\n");
+        for (State state : states) {
+            String alternativeLabel = state.getAlternativeLabel();
+            boolean generatedFromClosureOrPartition = alternativeLabel != null;
+            if (generatedFromClosureOrPartition) {
+                String idLabel = this.getStateLabel(state);
+                sb.append("\t" + idLabel + " [label=\"" + idLabel + "\\n" + alternativeLabel +
+                        "\"];\n");
+            }
+        }
+        sb.append("\n");
+    }
+
+    private String getStateLabel(State state) {
+        boolean thisIsDFAWithPhiState = this instanceof DFA && ((DFA) this).getPhi() != null;
+        int stateId = state.getId();
+
+        if (thisIsDFAWithPhiState) {
+            boolean isGivenStatePhi = stateId == ((DFA) this).getPhi().getId();
+
+            if (isGivenStatePhi) {
+                return Character.toString(PHI);
+            }
+        }
+
+        return Integer.toString(stateId);
+    }
+
+    private void printMoves(StringBuilder sb) {
+        Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
+        for (Move move : moveToLabel.keySet()) {
+            String originalLabel = moveToLabel.get(move).toString();
+            String label = originalLabel.substring(1, originalLabel.length() - 1);
+
+            String from = this.getStateLabel(move.getFrom());
+            String to = this.getStateLabel(move.getTo());
+
+            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
+        }
+        sb.append("\n");
     }
 
     private Map<Move, Set<Character>> getMoveToLabel() {
@@ -211,63 +254,9 @@ class FSA {
         return moveToLabel;
     }
 
-    private static void printFinalStates(Set<Integer> finalStateIds, StringBuilder sb) {
-        sb.append("\tnode [shape = doublecircle];\n\t");
-        for (Integer id : finalStateIds) {
-            sb.append(id + " ");
-        }
-        sb.append(";\n\n");
-    }
-
-    private void printStates(StringBuilder sb) {
-        sb.append("\tnode [shape = circle];\n");
-        for (State state : states) {
-            String alternativeLabel = state.getAlternativeLabel();
-            boolean generatedFromClosureOrPartition = alternativeLabel != null;
-            if (generatedFromClosureOrPartition) {
-                String idLabel = this.getStateLabel(state.getId());
-                sb.append("\t" + idLabel + " [label=\"" + idLabel + "\\n" + alternativeLabel +
-                        "\"];\n");
-            }
-        }
-        sb.append("\n");
-    }
-
-    private String getStateLabel(int stateId) {
-        boolean isDFAWithPhiState = this instanceof DFA && ((DFA) this).getPhi() != null;
-
-        if (isDFAWithPhiState) {
-            boolean hasPhi = stateId == ((DFA) this).getPhi().getId();
-
-            if (hasPhi) {
-                return Character.toString(PHI);
-            }
-        }
-
-        return Integer.toString(stateId);
-    }
-
-    private void printMoves(
-            Map<Move, Set<Character>> moveToLabel,
-            StringBuilder sb
-    ) {
-        for (Move move : moveToLabel.keySet()) {
-            String originalLabel = moveToLabel.get(move).toString();
-            String label = originalLabel.substring(1, originalLabel.length() - 1);
-
-            int fromId = move.getFrom().getId();
-            int toId = move.getTo().getId();
-            String from = this.getStateLabel(fromId);
-            String to = this.getStateLabel(toId);
-
-            sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
-        }
-        sb.append("\n");
-    }
-
-    private static void printStartState(int startId, StringBuilder sb) {
+    private void printStartState(StringBuilder sb) {
         sb.append("\tnode [shape = none, label =\"\"];\n" +
-                "\tENTRY -> " + startId + ";\n");
+                "\tENTRY -> " + start.getId() + ";\n");
     }
 }
 
@@ -310,6 +299,10 @@ class State implements Comparable<State> {
         return move != null ? move.getTo() : null;
     }
 
+    String getAlternativeLabel() {
+        return alternativeLabel;
+    }
+
     @Override
     public int compareTo(@NotNull State other) {
         return Comparator.comparing(State::getId)
@@ -318,10 +311,6 @@ class State implements Comparable<State> {
 
     int getId() {
         return id;
-    }
-
-    String getAlternativeLabel() {
-        return alternativeLabel;
     }
 
     @Override

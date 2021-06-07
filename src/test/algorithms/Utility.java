@@ -2,6 +2,7 @@ package algorithms;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.TreeSet;
 
 class Utility {
     static void addSymbols(FSA fsa, Character... symbols) {
@@ -19,6 +20,12 @@ class Utility {
     static void addStates(Set<State> states, Integer... stateIds) {
         for (Integer id : stateIds) {
             states.add(new State(id));
+        }
+    }
+
+    static void addStates(FSA fsa, State... states) {
+        for (State state : states) {
+            fsa.addState(state);
         }
     }
 
@@ -55,6 +62,10 @@ class Utility {
         return new DFA(new State(start), new State(phi));
     }
 
+    static DFA makeDFA(State start, State phi) {
+        return new DFA(start, phi);
+    }
+
     static NFA makeNFA(Integer start) {
         return new NFA(new State(start));
     }
@@ -69,5 +80,17 @@ class Utility {
 
     static void addPSets(Partition partition, PSet... sets) {
         partition.addAll(Arrays.asList(sets));
+    }
+
+    static State makeState(Integer stateId, Set<State> states) {
+        return new State(stateId, states);
+    }
+
+    static Set<State> makeStates(Integer ...stateIds) {
+        Set<State> states = new TreeSet<State>();
+        for (int stateId : stateIds) {
+            states.add(new State(stateId));
+        }
+        return states;
     }
 }

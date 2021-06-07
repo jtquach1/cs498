@@ -230,4 +230,58 @@ class NFATest {
         String actual = Regex.markWithConcatenation("(a|b)a*b");
         assertEquals(expected, actual);
     }
+
+    @Test
+    void toStringNFA() {
+        String expected = "digraph finite_state_machine {\n" +
+                "\trankdir=LR;\n" +
+                "\tsize=\"8,5\";\n" +
+                "\n" +
+                "\tnode [shape = doublecircle];\n" +
+                "\t11 ;\n" +
+                "\n" +
+                "\tnode [shape = circle];\n" +
+                "\n" +
+                "\t0 -> 1 [label = \"a\"];\n" +
+                "\t1 -> 5 [label = \"ɛ\"];\n" +
+                "\t2 -> 3 [label = \"b\"];\n" +
+                "\t3 -> 5 [label = \"ɛ\"];\n" +
+                "\t4 -> 0 [label = \"ɛ\"];\n" +
+                "\t4 -> 2 [label = \"ɛ\"];\n" +
+                "\t5 -> 8 [label = \"ɛ\"];\n" +
+                "\t6 -> 7 [label = \"a\"];\n" +
+                "\t7 -> 6 [label = \"ɛ\"];\n" +
+                "\t7 -> 9 [label = \"ɛ\"];\n" +
+                "\t8 -> 6 [label = \"ɛ\"];\n" +
+                "\t8 -> 9 [label = \"ɛ\"];\n" +
+                "\t9 -> 10 [label = \"ɛ\"];\n" +
+                "\t10 -> 11 [label = \"b\"];\n" +
+                "\n" +
+                "\tnode [shape = none, label =\"\"];\n" +
+                "\tENTRY -> 4;\n" +
+                "}\n";
+
+        NFA nfa = Utility.makeNFA(4);
+        Utility.addSymbols(nfa, 'a', 'b');
+        Utility.addStates(nfa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        Utility.addFinalStates(nfa, 11);
+        Utility.addMoves(nfa,
+                Utility.makeMove(0, 'a', 1),
+                Utility.makeMove(1, FSA.EPSILON, 5),
+                Utility.makeMove(2, 'b', 3),
+                Utility.makeMove(3, FSA.EPSILON, 5),
+                Utility.makeMove(4, FSA.EPSILON, 0),
+                Utility.makeMove(4, FSA.EPSILON, 2),
+                Utility.makeMove(5, FSA.EPSILON, 8),
+                Utility.makeMove(6, 'a', 7),
+                Utility.makeMove(7, FSA.EPSILON, 6),
+                Utility.makeMove(7, FSA.EPSILON, 9),
+                Utility.makeMove(8, FSA.EPSILON, 6),
+                Utility.makeMove(8, FSA.EPSILON, 9),
+                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(10, 'b', 11));
+        String actual = nfa.toString();
+
+        assertEquals(expected, actual);
+    }
 }
