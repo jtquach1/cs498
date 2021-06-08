@@ -16,7 +16,7 @@ class GrammarTest {
         Grammar cfg = new Grammar("E");
         cfg.addNonTerminals("E'", "T", "T'", "F");
         Set<String> actual = cfg.getNonTerminals();
-        Set<String> expected = new TreeSet<>(Arrays.asList("E'", "T", "T'", "F"));
+        Set<String> expected = new TreeSet<>(Arrays.asList("E", "E'", "T", "T'", "F"));
         assertEquals(expected, actual);
     }
 

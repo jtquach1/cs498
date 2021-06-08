@@ -3,6 +3,7 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
 
@@ -23,31 +24,81 @@ class Grammar {
     }
 
     public static void main(String[] args) {
-        Grammar cfg = new Grammar("E");
-        cfg.addNonTerminals("E'", "T", "T'", "F");
-        cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
-        cfg.addProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "id", ")"),
-                new Production("F", "id")
-        );
-        System.out.println(cfg);
+        String inputFile = args[0]; // supply file or do redirection?
+        List<List<String[]>> parsedInput = getParsedInput(inputFile);
+        Grammar grammar = initializeGrammar(parsedInput);
+        populateGrammarWithProductions(parsedInput, grammar);
+        populateGrammarWithNonTerminals(grammar);
 
-        FirstMap firstMap = cfg.first();
+        FirstMap firstMap = grammar.first();
         System.out.println(firstMap);
     }
 
-    void addNonTerminals(String... symbols) {
-        nonTerminals.addAll(Arrays.asList(symbols));
+    @NotNull
+    private static List<List<String[]>> getParsedInput(String grammar) {
+        String g = "E ::= T E'\n" +
+                "E' ::= + T E'\n" +
+                "E' ::= ε\n" +
+                "T ::= F T'\n" +
+                "T' ::= ε\n" +
+                "F ::= ( E )\n" +
+                "F ::= id\n";
+
+        List<List<String[]>> parsedInput =
+                Arrays
+                        .stream(g.split("\r?\n|\r"))
+                        .map(prod -> Arrays
+                                .stream(prod.split("::="))
+                                .map(side -> side.trim().split(" "))
+                                .collect(Collectors.toList()))
+                        .collect(Collectors.toList());
+        return parsedInput;
+    }
+
+    @NotNull
+    private static Grammar initializeGrammar(List<List<String[]>> parsedInput) {
+        String start = parsedInput.get(0).get(0)[0];
+        return new Grammar(start);
+    }
+
+    private static void populateGrammarWithNonTerminals(Grammar cfg) {
+        Set<String> nonTerminals = cfg.getNonTerminals();
+        for (Production p : cfg.getProductions()) {
+            List<String> rhs = p.getRhs();
+            List<String> terminals = rhs
+                    .stream()
+                    .filter(symbol -> !nonTerminals.contains(symbol))
+                    .collect(Collectors.toList());
+            terminals.forEach(cfg::addTerminals);
+        }
     }
 
     void addTerminals(String... symbols) {
         terminals.addAll(Arrays.asList(symbols));
+    }
+
+    public Set<Production> getProductions() {
+        return productions;
+    }
+
+    public Set<String> getNonTerminals() {
+        return nonTerminals;
+    }
+
+    private static void populateGrammarWithProductions(List<List<String[]>> parsedInput,
+                                                       Grammar cfg) {
+        for (List<String[]> prod : parsedInput) {
+            String lhs = prod.get(0)[0];
+            String[] rhs = prod.get(1);
+
+            cfg.addNonTerminals(lhs);
+            Production p = new Production(lhs, rhs);
+            cfg.addProductions(p);
+        }
+    }
+
+    void addNonTerminals(String... symbols) {
+        nonTerminals.addAll(Arrays.asList(symbols));
     }
 
     void addProductions(Production... productions) {
@@ -78,10 +129,6 @@ class Grammar {
         return terminals;
     }
 
-    public Set<Production> getProductions() {
-        return productions;
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(nonTerminals, terminals, start, productions);
@@ -96,10 +143,6 @@ class Grammar {
                 Objects.equals(terminals, grammar.terminals) &&
                 Objects.equals(start, grammar.start) &&
                 Objects.equals(productions, grammar.productions);
-    }
-
-    public Set<String> getNonTerminals() {
-        return nonTerminals;
     }
 }
 
@@ -199,15 +242,15 @@ class FirstMap extends TreeMap<String, First> {
         this.put(lhs, set);
     }
 
-    First first(ArrayList<String> rhs) {
-        String x1 = rhs.get(0);
+    First first(ArrayList<String> sequence) {
+        String x1 = sequence.get(0);
         First F = new First();
         F.addAll(this.get(x1));
         int i = 1;
-        int n = rhs.size();
+        int n = sequence.size();
         while (F.contains(EPSILON) && i < n) {
             F.remove(EPSILON);
-            String xi = rhs.get(i);
+            String xi = sequence.get(i);
             F.addAll(this.get(xi));
             i++;
         }
