@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static algorithms.Grammar.EPSILON;
+import static algorithms.Grammar.TERMINATOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GrammarTest {
@@ -39,7 +40,7 @@ class GrammarTest {
                 new Production("T", "F", "T'"),
                 new Production("T'", "*", "F", "T'"),
                 new Production("T'", EPSILON),
-                new Production("F", "(", "id", ")"),
+                new Production("F", "(", "E", ")"),
                 new Production("F", "id")
         );
         Set<Production> actual = cfg.getProductions();
@@ -50,7 +51,7 @@ class GrammarTest {
                 new Production("T", "F", "T'"),
                 new Production("T'", "*", "F", "T'"),
                 new Production("T'", EPSILON),
-                new Production("F", "(", "id", ")"),
+                new Production("F", "(", "E", ")"),
                 new Production("F", "id")
         ));
         assertEquals(expected, actual);
@@ -58,7 +59,29 @@ class GrammarTest {
 
     @Test
     void first() {
-        Grammar cfg = new Grammar("E");
+        Grammar cfg = new Grammar("S");
+        cfg.addNonTerminals("A", "B");
+        cfg.addTerminals("a", "b", "c", EPSILON);
+        cfg.addProductions(
+                new Production("S", "A", "a"),
+                new Production("S", "a"),
+                new Production("A", "c"),
+                new Production("A", "b", "B"),
+                new Production("B", "c", "B"),
+                new Production("B", EPSILON)
+        );
+        FirstMap actual = cfg.first();
+        FirstMap expected = new FirstMap();
+        expected.put("a", new First("a"));
+        expected.put("b", new First("b"));
+        expected.put("c", new First("c"));
+        expected.put(EPSILON, new First(EPSILON));
+        expected.put("S", new First("a", "b", "c"));
+        expected.put("A", new First("c", "b"));
+        expected.put("B", new First("c", EPSILON));
+        assertEquals(expected, actual);
+
+        cfg = new Grammar("E");
         cfg.addNonTerminals("E'", "T", "T'", "F");
         cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
         cfg.addProductions(
@@ -68,11 +91,11 @@ class GrammarTest {
                 new Production("T", "F", "T'"),
                 new Production("T'", "*", "F", "T'"),
                 new Production("T'", EPSILON),
-                new Production("F", "(", "id", ")"),
+                new Production("F", "(", "E", ")"),
                 new Production("F", "id")
         );
-        FirstMap actual = cfg.first();
-        FirstMap expected = new FirstMap();
+        actual = cfg.first();
+        expected = new FirstMap();
         expected.put("(", new First("("));
         expected.put(")", new First(")"));
         expected.put("*", new First("*"));
@@ -90,13 +113,41 @@ class GrammarTest {
     @Test
     void follow() {
         FollowMap expected = new FollowMap();
-        expected.put("E", new Follow(")", "#"));
-        expected.put("E'", new Follow(")", "#"));
-        expected.put("F", new Follow("+", "*", ")", "#"));
-        expected.put("T", new Follow("+", ")", "#"));
-        expected.put("T'", new Follow("+", ")", "#"));
+        expected.put("S", new Follow(TERMINATOR));
+        expected.put("A", new Follow("a"));
+        expected.put("B", new Follow("a"));
 
-        Grammar cfg = new Grammar("E");
+        Grammar cfg = new Grammar("S");
+        cfg.addNonTerminals("A", "B");
+        cfg.addTerminals("a", "b", "c", EPSILON);
+        cfg.addProductions(
+                new Production("S", "A", "a"),
+                new Production("S", "a"),
+                new Production("A", "c"),
+                new Production("A", "b", "B"),
+                new Production("B", "c", "B"),
+                new Production("B", EPSILON)
+        );
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("a", new First("a"));
+        firstMap.put("b", new First("b"));
+        firstMap.put("c", new First("c"));
+        firstMap.put(EPSILON, new First(EPSILON));
+        firstMap.put("S", new First("a", "b", "c"));
+        firstMap.put("A", new First("c", "b"));
+        firstMap.put("B", new First("c", EPSILON));
+        FollowMap actual = cfg.follow(firstMap);
+
+        assertEquals(expected, actual);
+
+        expected = new FollowMap();
+        expected.put("E", new Follow(")", TERMINATOR));
+        expected.put("E'", new Follow(")", TERMINATOR));
+        expected.put("F", new Follow("+", "*", ")", TERMINATOR));
+        expected.put("T", new Follow("+", ")", TERMINATOR));
+        expected.put("T'", new Follow("+", ")", TERMINATOR));
+
+        cfg = new Grammar("E");
         cfg.addNonTerminals("E'", "T", "T'", "F");
         cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
         cfg.addProductions(
@@ -106,10 +157,10 @@ class GrammarTest {
                 new Production("T", "F", "T'"),
                 new Production("T'", "*", "F", "T'"),
                 new Production("T'", EPSILON),
-                new Production("F", "(", "id", ")"),
+                new Production("F", "(", "E", ")"),
                 new Production("F", "id")
         );
-        FirstMap firstMap = new FirstMap();
+        firstMap = new FirstMap();
         firstMap.put("(", new First("("));
         firstMap.put(")", new First(")"));
         firstMap.put("*", new First("*"));
@@ -121,7 +172,7 @@ class GrammarTest {
         firstMap.put("T'", new First("*", EPSILON));
         firstMap.put("id", new First("id"));
         firstMap.put(EPSILON, new First(EPSILON));
-        FollowMap actual = cfg.follow(firstMap);
+        actual = cfg.follow(firstMap);
 
         assertEquals(expected, actual);
     }

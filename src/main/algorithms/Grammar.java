@@ -129,7 +129,7 @@ class Grammar {
     FollowMap follow(FirstMap firstMap) {
         FollowMap followMap = new FollowMap();
         nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
-        followMap.put(start, new Follow("#"));
+        followMap.put(start, new Follow(TERMINATOR));
         FollowMap previous = followMap.deepClone();
 
         boolean newSymbolsAreBeingAdded = true;
@@ -148,11 +148,10 @@ class Grammar {
                     First firstOfSubsequence = firstMap.first(subsequence);
                     followOfXi.addAll(firstOfSubsequence);
                     followOfXi.remove(EPSILON);
-                    followMap.put(xi, followOfXi);
                     if (i == n - 1 || firstOfSubsequence.contains(EPSILON)) {
                         followOfXi.addAll(followMap.get(lhs));
-                        followMap.put(xi, followOfXi);
                     }
+                    followMap.put(xi, followOfXi);
                 }
             }
             newSymbolsAreBeingAdded = !followMap.equals(previous);
@@ -228,6 +227,22 @@ class Production implements Comparable<Production> {
         Production other = (Production) o;
         return lhs.equals(other.lhs) && rhs.equals(other.rhs);
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(lhs + " ::= ");
+        for (int i = 0; i < rhs.size(); i++) {
+            String symbol = rhs.get(i);
+            if (i == rhs.size() - 1) {
+                sb.append(symbol);
+            } else {
+                sb.append(symbol + " ");
+            }
+        }
+        return sb.toString();
+    }
 }
 
 class First extends TreeSet<String> {
@@ -281,14 +296,14 @@ class FirstMap extends TreeMap<String, First> {
     First first(List<String> sequence) {
         First F = new First();
         if (sequence.size() != 0) {
-            String x1 = sequence.get(0);
-            F.addAll(this.get(x1));
+            String firstSymbol = sequence.get(0);
+            F.addAll(this.get(firstSymbol));
             int i = 1;
             int n = sequence.size();
             while (F.contains(EPSILON) && i < n) {
                 F.remove(EPSILON);
-                String xi = sequence.get(i);
-                F.addAll(this.get(xi));
+                String symbol = sequence.get(i);
+                F.addAll(this.get(symbol));
                 i++;
             }
         }
