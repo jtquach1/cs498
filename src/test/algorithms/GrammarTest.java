@@ -86,4 +86,43 @@ class GrammarTest {
         expected.put(EPSILON, new First(EPSILON));
         assertEquals(expected, actual);
     }
+
+    @Test
+    void follow() {
+        FollowMap expected = new FollowMap();
+        expected.put("E", new Follow(")", "#"));
+        expected.put("E'", new Follow(")", "#"));
+        expected.put("F", new Follow("+", "*", ")", "#"));
+        expected.put("T", new Follow("+", ")", "#"));
+        expected.put("T'", new Follow("+", ")", "#"));
+
+        Grammar cfg = new Grammar("E");
+        cfg.addNonTerminals("E'", "T", "T'", "F");
+        cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
+        cfg.addProductions(
+                new Production("E", "T", "E'"),
+                new Production("E'", "+", "T", "E'"),
+                new Production("E'", EPSILON),
+                new Production("T", "F", "T'"),
+                new Production("T'", "*", "F", "T'"),
+                new Production("T'", EPSILON),
+                new Production("F", "(", "id", ")"),
+                new Production("F", "id")
+        );
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("E'", new First("+", EPSILON));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("T'", new First("*", EPSILON));
+        firstMap.put("id", new First("id"));
+        firstMap.put(EPSILON, new First(EPSILON));
+        FollowMap actual = cfg.follow(firstMap);
+
+        assertEquals(expected, actual);
+    }
 }

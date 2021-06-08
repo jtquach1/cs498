@@ -9,6 +9,7 @@ import static algorithms.Grammar.EPSILON;
 
 class Grammar {
     static final String EPSILON = Character.toString('\u025B');
+    static final String TERMINATOR = "#";
 
     Set<String> nonTerminals;
     Set<String> terminals;
@@ -123,6 +124,41 @@ class Grammar {
         }
 
         return map;
+    }
+
+    FollowMap follow(FirstMap firstMap) {
+        FollowMap followMap = new FollowMap();
+        nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
+        followMap.put(start, new Follow("#"));
+        FollowMap previous = followMap.deepClone();
+
+        boolean newSymbolsAreBeingAdded = true;
+        while (newSymbolsAreBeingAdded) {
+            for (Production p : productions) {
+                String lhs = p.getLhs();
+                List<String> rhs = p.getRhs();
+                int n = rhs.size();
+                for (int i = 0; i < n; i++) {
+                    String xi = rhs.get(i);
+                    if (!nonTerminals.contains(xi)) {
+                        continue;
+                    }
+                    Follow followOfXi = followMap.get(xi);
+                    List<String> subsequence = rhs.subList(i + 1, n);
+                    First firstOfSubsequence = firstMap.first(subsequence);
+                    followOfXi.addAll(firstOfSubsequence);
+                    followOfXi.remove(EPSILON);
+                    followMap.put(xi, followOfXi);
+                    if (i == n - 1 || firstOfSubsequence.contains(EPSILON)) {
+                        followOfXi.addAll(followMap.get(lhs));
+                        followMap.put(xi, followOfXi);
+                    }
+                }
+            }
+            newSymbolsAreBeingAdded = !followMap.equals(previous);
+            previous = followMap.deepClone();
+        }
+        return followMap;
     }
 
     public Set<String> getTerminals() {
@@ -242,17 +278,19 @@ class FirstMap extends TreeMap<String, First> {
         this.put(lhs, set);
     }
 
-    First first(ArrayList<String> sequence) {
-        String x1 = sequence.get(0);
+    First first(List<String> sequence) {
         First F = new First();
-        F.addAll(this.get(x1));
-        int i = 1;
-        int n = sequence.size();
-        while (F.contains(EPSILON) && i < n) {
-            F.remove(EPSILON);
-            String xi = sequence.get(i);
-            F.addAll(this.get(xi));
-            i++;
+        if (sequence.size() != 0) {
+            String x1 = sequence.get(0);
+            F.addAll(this.get(x1));
+            int i = 1;
+            int n = sequence.size();
+            while (F.contains(EPSILON) && i < n) {
+                F.remove(EPSILON);
+                String xi = sequence.get(i);
+                F.addAll(this.get(xi));
+                i++;
+            }
         }
         return F;
     }
@@ -260,6 +298,10 @@ class FirstMap extends TreeMap<String, First> {
 }
 
 class Follow extends TreeSet<String> {
+    public Follow(String... symbols) {
+        super();
+        this.addAll(Arrays.asList(symbols));
+    }
 }
 
 class FollowMap extends TreeMap<String, Follow> {
@@ -276,5 +318,10 @@ class FollowMap extends TreeMap<String, Follow> {
             mapClone.put(symbol, clone);
         }
         return mapClone;
+    }
+
+    void initializeFollowSetOfNonTerminal(String symbol) {
+        Follow set = new Follow();
+        this.put(symbol, set);
     }
 }
