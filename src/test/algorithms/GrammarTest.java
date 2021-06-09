@@ -59,6 +59,7 @@ class GrammarTest {
 
     @Test
     void first() {
+        // From sample exam 1
         Grammar cfg = new Grammar("S");
         cfg.addNonTerminals("A", "B");
         cfg.addTerminals("a", "b", "c", EPSILON);
@@ -81,6 +82,7 @@ class GrammarTest {
         expected.put("B", new First("c", EPSILON));
         assertEquals(expected, actual);
 
+        // From lecture slides
         cfg = new Grammar("E");
         cfg.addNonTerminals("E'", "T", "T'", "F");
         cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
@@ -112,6 +114,7 @@ class GrammarTest {
 
     @Test
     void follow() {
+        // From sample exam 1
         FollowMap expected = new FollowMap();
         expected.put("S", new Follow(TERMINATOR));
         expected.put("A", new Follow("a"));
@@ -140,6 +143,7 @@ class GrammarTest {
 
         assertEquals(expected, actual);
 
+        // From lecture slides
         expected = new FollowMap();
         expected.put("E", new Follow(")", TERMINATOR));
         expected.put("E'", new Follow(")", TERMINATOR));

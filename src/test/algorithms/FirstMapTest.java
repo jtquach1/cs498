@@ -47,9 +47,9 @@ class FirstMapTest {
     @Test
     void initializeFirstSetOfNonTerminal() {
         FirstMap expected = new FirstMap();
-        expected.put("(", new First());
+        expected.put("E", new First());
         FirstMap actual = new FirstMap();
-        actual.initializeFirstSetOfNonTerminal("(");
+        actual.initializeFirstSetOfNonTerminal("E");
         assertEquals(expected, actual);
     }
 
