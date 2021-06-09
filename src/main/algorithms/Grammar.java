@@ -129,7 +129,7 @@ class Grammar {
     FollowMap follow(FirstMap firstMap) {
         FollowMap followMap = new FollowMap();
         nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
-        followMap.put(start, new Follow(TERMINATOR));
+        followMap.get(start).add(TERMINATOR);
         FollowMap previous = followMap.deepClone();
 
         boolean newSymbolsAreBeingAdded = true;
@@ -139,19 +139,18 @@ class Grammar {
                 List<String> rhs = p.getRhs();
                 int n = rhs.size();
                 for (int i = 0; i < n; i++) {
-                    String xi = rhs.get(i);
-                    if (!nonTerminals.contains(xi)) {
+                    String symbol = rhs.get(i);
+                    if (!nonTerminals.contains(symbol)) {
                         continue;
                     }
-                    Follow followOfXi = followMap.get(xi);
+                    Follow followOfSymbol = followMap.get(symbol);
                     List<String> subsequence = rhs.subList(i + 1, n);
                     First firstOfSubsequence = firstMap.first(subsequence);
-                    followOfXi.addAll(firstOfSubsequence);
-                    followOfXi.remove(EPSILON);
+                    followOfSymbol.addAll(firstOfSubsequence);
+                    followOfSymbol.remove(EPSILON);
                     if (i == n - 1 || firstOfSubsequence.contains(EPSILON)) {
-                        followOfXi.addAll(followMap.get(lhs));
+                        followOfSymbol.addAll(followMap.get(lhs));
                     }
-                    followMap.put(xi, followOfXi);
                 }
             }
             newSymbolsAreBeingAdded = !followMap.equals(previous);
@@ -184,11 +183,6 @@ class Grammar {
 class Production implements Comparable<Production> {
     private final String lhs;
     private final ArrayList<String> rhs;
-
-    Production(String lhs, ArrayList<String> rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-    }
 
     Production(String lhs, String... rhs) {
         this.lhs = lhs;
@@ -283,18 +277,17 @@ class FirstMap extends TreeMap<String, First> {
         String lhs = p.getLhs();
         First set = this.get(lhs);
         set.add(EPSILON);
-        this.put(lhs, set);
     }
 
     void addFirstSetOfSequenceToFirstSetOfSymbol(Production p) {
         String lhs = p.getLhs();
         First set = this.get(lhs);
         set.addAll(this.first(p.getRhs()));
-        this.put(lhs, set);
     }
 
     First first(List<String> sequence) {
         First F = new First();
+        // An empty sequence has no characters
         if (sequence.size() != 0) {
             String firstSymbol = sequence.get(0);
             F.addAll(this.get(firstSymbol));

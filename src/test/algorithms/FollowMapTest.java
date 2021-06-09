@@ -11,7 +11,6 @@ class FollowMapTest {
     @Test
     void deepClone() {
         FollowMap expected = new FollowMap();
-        expected = new FollowMap();
         expected.put("E", new Follow(")", TERMINATOR));
         expected.put("E'", new Follow(")", TERMINATOR));
         expected.put("F", new Follow("+", "*", ")", TERMINATOR));
