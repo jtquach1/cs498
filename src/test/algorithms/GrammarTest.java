@@ -178,4 +178,47 @@ class GrammarTest {
 
         assertEquals(expected, actual);
     }
+
+    @Test
+    void generateLL1ParseTable() {
+        // From sample exam 1
+        LL1ParseTable expected = new LL1ParseTable(new TreeSet<>(Arrays.asList("a", "b", "c", EPSILON)));
+        expected.set("S", "a", 1);
+        expected.set("S", "b", 0);
+        expected.set("S", "c", 0);
+        expected.set("A", "b", 3);
+        expected.set("A", "c", 2);
+        expected.set("B", "a", 5);
+        expected.set("B", "c", 4);
+
+        Grammar cfg = new Grammar("S");
+        cfg.addNonTerminals("A", "B");
+        cfg.addTerminals("a", "b", "c", EPSILON);
+        cfg.addProductions(
+                new Production("S", "A", "a"),
+                new Production("S", "a"),
+                new Production("A", "c"),
+                new Production("A", "b", "B"),
+                new Production("B", "c", "B"),
+                new Production("B", EPSILON)
+        );
+
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("a", new First("a"));
+        firstMap.put("b", new First("b"));
+        firstMap.put("c", new First("c"));
+        firstMap.put(EPSILON, new First(EPSILON));
+        firstMap.put("S", new First("a", "b", "c"));
+        firstMap.put("A", new First("c", "b"));
+        firstMap.put("B", new First("c", EPSILON));
+
+        FollowMap followMap = new FollowMap();
+        followMap.put("S", new Follow(TERMINATOR));
+        followMap.put("A", new Follow("a"));
+        followMap.put("B", new Follow("a"));
+
+        LL1ParseTable actual = cfg.generateLL1ParseTable(firstMap, followMap);
+
+        assertEquals(expected, actual);
+    }
 }

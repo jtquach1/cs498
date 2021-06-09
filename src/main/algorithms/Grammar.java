@@ -165,12 +165,9 @@ class Grammar {
     }
 
     LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
-        LL1ParseTable table = new LL1ParseTable();
+        LL1ParseTable table = new LL1ParseTable(terminals);
         for (String nonTerminal : nonTerminals) {
-            List<Production> subset = productions
-                    .stream()
-                    .filter(p -> p.getLhs().equals(nonTerminal))
-                    .collect(Collectors.toList());
+            List<Production> subset = getSubsetOfProductions(nonTerminal);
             for (Production p : subset) {
                 int productionIndex = productions.indexOf(p);
                 First firstOfRhs = firstMap.first(p.getRhs());
@@ -190,6 +187,14 @@ class Grammar {
             }
         }
         return table;
+    }
+
+    @NotNull
+    private List<Production> getSubsetOfProductions(String nonTerminal) {
+        return productions
+                .stream()
+                .filter(p -> p.getLhs().equals(nonTerminal))
+                .collect(Collectors.toList());
     }
 
     public Set<String> getTerminals() {
