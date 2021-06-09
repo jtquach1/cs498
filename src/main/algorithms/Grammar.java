@@ -165,20 +165,22 @@ class Grammar {
     }
 
     LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
-        LL1ParseTable table = new LL1ParseTable(terminals);
+        LL1ParseTable table = new LL1ParseTable();
+
         for (String nonTerminal : nonTerminals) {
             List<Production> subset = getSubsetOfProductions(nonTerminal);
+
             for (Production p : subset) {
                 int productionIndex = productions.indexOf(p);
                 First firstOfRhs = firstMap.first(p.getRhs());
-                First withoutEpsilon = firstOfRhs.deepClone();
-                withoutEpsilon.remove(EPSILON);
 
-                for (String firstTerminal : withoutEpsilon) {
-                    table.set(nonTerminal, firstTerminal, productionIndex);
-
+                for (String firstTerminal : firstOfRhs) {
+                    if (!firstTerminal.equals(EPSILON)) {
+                        table.set(nonTerminal, firstTerminal, productionIndex);
+                    }
                     if (firstOfRhs.contains(EPSILON)) {
                         Follow followOfNonTerminal = followMap.get(nonTerminal);
+
                         for (String followTerminal : followOfNonTerminal) {
                             table.set(nonTerminal, followTerminal, productionIndex);
                         }
@@ -259,7 +261,6 @@ class Production implements Comparable<Production> {
         Production other = (Production) o;
         return lhs.equals(other.lhs) && rhs.equals(other.rhs);
     }
-
 
     @Override
     public String toString() {

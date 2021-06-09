@@ -182,7 +182,7 @@ class GrammarTest {
     @Test
     void generateLL1ParseTable() {
         // From sample exam 1
-        LL1ParseTable expected = new LL1ParseTable(new TreeSet<>(Arrays.asList("a", "b", "c", EPSILON)));
+        LL1ParseTable expected = new LL1ParseTable();
         expected.set("S", "a", 1);
         expected.set("S", "b", 0);
         expected.set("S", "c", 0);
@@ -218,6 +218,59 @@ class GrammarTest {
         followMap.put("B", new Follow("a"));
 
         LL1ParseTable actual = cfg.generateLL1ParseTable(firstMap, followMap);
+
+        assertEquals(expected, actual);
+
+        // From lecture slides
+        expected = new LL1ParseTable();
+        expected.set("E", "(", 0);
+        expected.set("E", "id", 0);
+        expected.set("E'", "+", 1);
+        expected.set("E'", ")", 2);
+        expected.set("E'", TERMINATOR, 2);
+        expected.set("T", "(", 3);
+        expected.set("T", "id", 3);
+        expected.set("T'", "+", 5);
+        expected.set("T'", "*", 4);
+        expected.set("T'", ")", 5);
+        expected.set("T'", TERMINATOR, 5);
+        expected.set("F", "(", 6);
+        expected.set("F", "id", 7);
+
+        cfg = new Grammar("E");
+        cfg.addNonTerminals("E'", "T", "T'", "F");
+        cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
+        cfg.addProductions(
+                new Production("E", "T", "E'"),
+                new Production("E'", "+", "T", "E'"),
+                new Production("E'", EPSILON),
+                new Production("T", "F", "T'"),
+                new Production("T'", "*", "F", "T'"),
+                new Production("T'", EPSILON),
+                new Production("F", "(", "E", ")"),
+                new Production("F", "id")
+        );
+        firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("E'", new First("+", EPSILON));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("T'", new First("*", EPSILON));
+        firstMap.put("id", new First("id"));
+        firstMap.put(EPSILON, new First(EPSILON));
+
+        followMap = new FollowMap();
+        followMap.put("E", new Follow(")", TERMINATOR));
+        followMap.put("E'", new Follow(")", TERMINATOR));
+        followMap.put("F", new Follow("+", "*", ")", TERMINATOR));
+        followMap.put("T", new Follow("+", ")", TERMINATOR));
+        followMap.put("T'", new Follow("+", ")", TERMINATOR));
+
+        actual = cfg.generateLL1ParseTable(firstMap, followMap);
 
         assertEquals(expected, actual);
     }
