@@ -14,25 +14,30 @@ class Grammar {
     Set<String> nonTerminals;
     Set<String> terminals;
     String start;
-    Set<Production> productions;
+    List<Production> productions;
 
     Grammar(String start) {
         nonTerminals = new TreeSet<>();
         terminals = new TreeSet<>();
         this.start = start;
-        productions = new TreeSet<>();
+        productions = new ArrayList<>();
         nonTerminals.add(start);
     }
 
     public static void main(String[] args) {
         String inputFile = args[0]; // supply file or do redirection?
         List<List<String[]>> parsedInput = getParsedInput(inputFile);
-        Grammar grammar = initializeGrammar(parsedInput);
-        populateGrammarWithProductions(parsedInput, grammar);
-        populateGrammarWithNonTerminals(grammar);
+        Grammar cfg = initializeGrammar(parsedInput);
+        populateGrammarWithProductions(parsedInput, cfg);
+        populateGrammarWithNonTerminals(cfg);
 
-        FirstMap firstMap = grammar.first();
+        FirstMap firstMap = cfg.first();
+        FollowMap followMap = cfg.follow(firstMap);
+        LL1ParseTable ll1ParseTable = cfg.generateLL1ParseTable(firstMap, followMap);
+
         System.out.println(firstMap);
+        System.out.println(followMap);
+        System.out.println(ll1ParseTable);
     }
 
     @NotNull
@@ -78,7 +83,7 @@ class Grammar {
         terminals.addAll(Arrays.asList(symbols));
     }
 
-    public Set<Production> getProductions() {
+    public List<Production> getProductions() {
         return productions;
     }
 
@@ -157,6 +162,34 @@ class Grammar {
             previous = followMap.deepClone();
         }
         return followMap;
+    }
+
+    LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
+        LL1ParseTable table = new LL1ParseTable();
+        for (String nonTerminal : nonTerminals) {
+            List<Production> subset = productions
+                    .stream()
+                    .filter(p -> p.getLhs().equals(nonTerminal))
+                    .collect(Collectors.toList());
+            for (Production p : subset) {
+                int productionIndex = productions.indexOf(p);
+                First firstOfRhs = firstMap.first(p.getRhs());
+                First withoutEpsilon = firstOfRhs.deepClone();
+                withoutEpsilon.remove(EPSILON);
+
+                for (String firstTerminal : withoutEpsilon) {
+                    table.set(nonTerminal, firstTerminal, productionIndex);
+
+                    if (firstOfRhs.contains(EPSILON)) {
+                        Follow followOfNonTerminal = followMap.get(nonTerminal);
+                        for (String followTerminal : followOfNonTerminal) {
+                            table.set(nonTerminal, followTerminal, productionIndex);
+                        }
+                    }
+                }
+            }
+        }
+        return table;
     }
 
     public Set<String> getTerminals() {
@@ -243,6 +276,12 @@ class First extends TreeSet<String> {
     public First(String... symbols) {
         super();
         this.addAll(Arrays.asList(symbols));
+    }
+
+    First deepClone() {
+        First clone = new First();
+        clone.addAll(this);
+        return clone;
     }
 }
 

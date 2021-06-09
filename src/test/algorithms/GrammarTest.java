@@ -2,9 +2,7 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
@@ -43,8 +41,8 @@ class GrammarTest {
                 new Production("F", "(", "E", ")"),
                 new Production("F", "id")
         );
-        Set<Production> actual = cfg.getProductions();
-        Set<Production> expected = new TreeSet<>(Arrays.asList(
+        List<Production> actual = cfg.getProductions();
+        List<Production> expected = new ArrayList<>(Arrays.asList(
                 new Production("E", "T", "E'"),
                 new Production("E'", "+", "T", "E'"),
                 new Production("E'", EPSILON),
