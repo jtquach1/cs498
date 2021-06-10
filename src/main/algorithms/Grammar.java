@@ -204,8 +204,25 @@ class Grammar {
 
     Grammar removeLeftRecursion() {
         Grammar cfg = this.deepClone();
+        TreeMap<String, Integer> enumerations = new TreeMap<>();
+        arbitrarilyEnumerateNonTerminals(enumerations);
+
+        for (int i = 0; i < nonTerminals.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                List<Production> leftMostIsNonTerminal = new ArrayList<>();
+                ;;;
+            }
+        }
 
         return cfg;
+    }
+
+    private void arbitrarilyEnumerateNonTerminals(TreeMap<String, Integer> enumerations) {
+        int i = 0;
+        for (String nonTerminal : nonTerminals) {
+            enumerations.put(nonTerminal, i);
+            i++;
+        }
     }
 
     Grammar deepClone() {
