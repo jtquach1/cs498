@@ -6,8 +6,7 @@ import java.util.*;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
 
@@ -274,6 +273,47 @@ class GrammarTest {
         actual = cfg.generateLL1ParseTable(firstMap, followMap);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void parseSentence() {
+        LL1ParseTable table = new LL1ParseTable();
+        table.set("E", "(", 0);
+        table.set("E", "id", 0);
+        table.set("E'", "+", 1);
+        table.set("E'", ")", 2);
+        table.set("E'", TERMINATOR, 2);
+        table.set("T", "(", 3);
+        table.set("T", "id", 3);
+        table.set("T'", "+", 5);
+        table.set("T'", "*", 4);
+        table.set("T'", ")", 5);
+        table.set("T'", TERMINATOR, 5);
+        table.set("F", "(", 6);
+        table.set("F", "id", 7);
+
+        Grammar cfg = new Grammar("E");
+        cfg.addNonTerminals("E'", "T", "T'", "F");
+        cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
+        cfg.addProductions(
+                new Production("E", "T", "E'"),
+                new Production("E'", "+", "T", "E'"),
+                new Production("E'", EPSILON),
+                new Production("T", "F", "T'"),
+                new Production("T'", "*", "F", "T'"),
+                new Production("T'", EPSILON),
+                new Production("F", "(", "E", ")"),
+                new Production("F", "id")
+        );
+        String w = "id + id * id " + TERMINATOR;
+
+        boolean sentenceIsParseable = true;
+        try {
+            cfg.parseSentence(table, w);
+        } catch (Exception e) {
+            sentenceIsParseable = false;
+        }
+        assertTrue(sentenceIsParseable);
     }
 
     @Test

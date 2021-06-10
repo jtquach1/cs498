@@ -24,7 +24,7 @@ class Grammar {
         nonTerminals.add(start);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String inputFile = args[0]; // supply file or do redirection?
         List<List<String[]>> parsedInput = getParsedInput(inputFile);
         Grammar cfg = initializeGrammar(parsedInput);
@@ -39,7 +39,10 @@ class Grammar {
 //        System.out.println(followMap);
 //        System.out.println(ll1ParseTable);
 
-        System.out.println(cfg.removeLeftRecursion());
+//        System.out.println(cfg.removeLeftRecursion());
+
+        String w = "id + id * id";
+        cfg.parseSentence(ll1ParseTable, w);
 
     }
 
@@ -202,6 +205,46 @@ class Grammar {
                 .collect(Collectors.toList());
     }
 
+    void parseSentence(LL1ParseTable table, String w) throws Exception {
+        // We will get an ArrayIndexOutOfBounds exception otherwise.
+        if (!w.endsWith(TERMINATOR)) {
+            throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
+        }
+        List<String> sentence = Arrays.asList(w.strip().split(" "));
+        Stack<String> stack = new Stack<>();
+        stack.push(TERMINATOR);
+        stack.push(start);
+
+        String symbol = sentence.get(0);
+        int i = 1;
+
+        while (true) {
+            String top = stack.pop();
+            if (top.equals(symbol) && symbol.equals(TERMINATOR)) {
+                break;
+            } else if (terminals.contains(top)) {
+                if (top.equals(symbol)) {
+                    symbol = sentence.get(i++);
+                } else if (top.equals(EPSILON)) {
+                    /* Replace the previous non-terminal on the stack with nothing.
+                    EPSILON should not be a symbol in the sentence; it's only used for parsing. */
+                } else {
+                    throw new Exception("A " + symbol + " found where a " + top + " was expected");
+                }
+            } else if (nonTerminals.contains(top)) {
+                Integer index = table.get(top, symbol);
+                if (index != null) {
+                    Production rule = productions.get(index);
+                    List<String> reverse = new ArrayList<>(rule.getRhs());
+                    Collections.reverse(reverse);
+                    reverse.forEach(stack::push);
+                } else {
+                    throw new Exception("No rule to follow");
+                }
+            }
+        }
+    }
+
     Grammar removeLeftRecursion() {
         Grammar cfg = this.deepClone();
         TreeMap<String, Integer> enumerations = new TreeMap<>();
@@ -210,7 +253,6 @@ class Grammar {
         for (int i = 0; i < nonTerminals.size(); i++) {
             for (int j = 0; j < i; j++) {
                 List<Production> leftMostIsNonTerminal = new ArrayList<>();
-                ;;;
             }
         }
 
