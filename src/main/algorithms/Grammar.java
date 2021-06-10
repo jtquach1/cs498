@@ -35,9 +35,12 @@ class Grammar {
         FollowMap followMap = cfg.follow(firstMap);
         LL1ParseTable ll1ParseTable = cfg.generateLL1ParseTable(firstMap, followMap);
 
-        System.out.println(firstMap);
-        System.out.println(followMap);
-        System.out.println(ll1ParseTable);
+//        System.out.println(firstMap);
+//        System.out.println(followMap);
+//        System.out.println(ll1ParseTable);
+
+        System.out.println(cfg.removeLeftRecursion());
+
     }
 
     @NotNull
@@ -197,6 +200,20 @@ class Grammar {
                 .stream()
                 .filter(p -> p.getLhs().equals(nonTerminal))
                 .collect(Collectors.toList());
+    }
+
+    Grammar removeLeftRecursion() {
+        Grammar cfg = this.deepClone();
+
+        return cfg;
+    }
+
+    Grammar deepClone() {
+        Grammar clone = new Grammar(start);
+        clone.nonTerminals.addAll(nonTerminals);
+        clone.terminals.addAll(terminals);
+        clone.productions.addAll(productions);
+        return clone;
     }
 
     public Set<String> getTerminals() {

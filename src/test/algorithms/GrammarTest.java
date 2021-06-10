@@ -7,6 +7,7 @@ import java.util.*;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 class GrammarTest {
 
@@ -273,5 +274,80 @@ class GrammarTest {
         actual = cfg.generateLL1ParseTable(firstMap, followMap);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void removeLeftRecursion() {
+        // From lecture slides 1
+        Grammar expected = new Grammar("Y");
+        expected.addNonTerminals("'Y");
+        expected.addTerminals("a", "b", EPSILON);
+        expected.addProductions(
+                new Production("Y", "b", "Y'"),
+                new Production("Y'", "a", "Y'"),
+                new Production("Y'", EPSILON)
+        );
+
+        Grammar cfg = new Grammar("Y");
+        cfg.addTerminals("a", "b");
+        cfg.addProductions(
+                new Production("Y", "Y", "a"),
+                new Production("Y", "b")
+        );
+        Grammar actual = cfg.removeLeftRecursion();
+
+        assertEquals(cfg, actual);
+
+        // From lecture slides 2
+        /*
+        Grammar expected = new Grammar("E");
+        expected.addNonTerminals("E'", "T", "T'", "F");
+        expected.addTerminals("+", EPSILON, "*", "(", ")", "id");
+        expected.addProductions(
+                new Production("E", "T", "E'"),
+                new Production("E'", "+", "T", "E'"),
+                new Production("E'", EPSILON),
+                new Production("T", "F", "T'"),
+                new Production("T'", "*", "F", "T'"),
+                new Production("T'", EPSILON),
+                new Production("F", "(", "E", ")"),
+                new Production("F", "id")
+        );
+
+        Grammar cfg = new Grammar("E");
+        cfg.addNonTerminals("E'", "T", "T'", "F");
+        cfg.addTerminals("+", EPSILON, "*", "(", ")", "id");
+        cfg.addProductions(
+                new Production("E", "E", "+", "T"),
+                new Production("E", "T"),
+                new Production("T", "T", "*", "F"),
+                new Production("T'", "F"),
+                new Production("F", "(", "E", ")"),
+                new Production("F", "id")
+        );
+        Grammar actual = cfg.removeLeftRecursion();
+
+        assertEquals(expected, actual);
+        */
+    }
+
+    @Test
+    void deepClone() {
+        Grammar expected = new Grammar("E");
+        expected.addNonTerminals("E'", "T", "T'", "F");
+        expected.addTerminals("+", EPSILON, "*", "(", ")", "id");
+        expected.addProductions(
+                new Production("E", "T", "E'"),
+                new Production("E'", "+", "T", "E'"),
+                new Production("E'", EPSILON),
+                new Production("T", "F", "T'"),
+                new Production("T'", "*", "F", "T'"),
+                new Production("T'", EPSILON),
+                new Production("F", "(", "E", ")"),
+                new Production("F", "id")
+        );
+        Grammar actual = expected.deepClone();
+        assertEquals(expected, actual);
+        assertNotSame(expected, actual);
     }
 }
