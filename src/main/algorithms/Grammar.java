@@ -151,7 +151,7 @@ class Grammar {
                 int n = rhs.size();
                 for (int i = 0; i < n; i++) {
                     String symbol = rhs.get(i);
-                    if (!nonTerminals.contains(symbol)) {
+                    if (!isNonTerminal(symbol)) {
                         continue;
                     }
                     Follow followOfSymbol = followMap.get(symbol);
@@ -168,6 +168,10 @@ class Grammar {
             previous = followMap.deepClone();
         }
         return followMap;
+    }
+
+    private boolean isNonTerminal(String top) {
+        return nonTerminals.contains(top);
     }
 
     LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
@@ -206,15 +210,8 @@ class Grammar {
     }
 
     void parseSentence(LL1ParseTable table, String w) throws Exception {
-        // We will get an ArrayIndexOutOfBounds exception otherwise.
-        if (!w.endsWith(TERMINATOR)) {
-            throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
-        }
-        List<String> sentence = Arrays.asList(w.strip().split(" "));
-        Stack<String> stack = new Stack<>();
-        stack.push(TERMINATOR);
-        stack.push(start);
-
+        List<String> sentence = this.handleSentence(w);
+        Stack<String> stack = this.initializeStack();
         String symbol = sentence.get(0);
         int i = 1;
 
@@ -222,7 +219,7 @@ class Grammar {
             String top = stack.pop();
             if (top.equals(symbol) && symbol.equals(TERMINATOR)) {
                 break;
-            } else if (terminals.contains(top)) {
+            } else if (isTerminal(top)) {
                 if (top.equals(symbol)) {
                     symbol = sentence.get(i++);
                 } else if (top.equals(EPSILON)) {
@@ -231,18 +228,46 @@ class Grammar {
                 } else {
                     throw new Exception("A " + symbol + " found where a " + top + " was expected");
                 }
-            } else if (nonTerminals.contains(top)) {
+            } else if (isNonTerminal(top)) {
                 Integer index = table.get(top, symbol);
                 if (index != null) {
-                    Production rule = productions.get(index);
-                    List<String> reverse = new ArrayList<>(rule.getRhs());
-                    Collections.reverse(reverse);
-                    reverse.forEach(stack::push);
+                    this.applyRuleAndReplaceTop(stack, index);
                 } else {
                     throw new Exception("No rule to follow");
                 }
+            } else {
+                throw new Exception("Illegal symbol " + top);
             }
         }
+    }
+
+    private boolean isTerminal(String top) {
+        return terminals.contains(top);
+    }
+
+    private void applyRuleAndReplaceTop(Stack<String> stack, Integer index) {
+        Production rule = productions.get(index);
+        List<String> reverse = new ArrayList<>(rule.getRhs());
+        Collections.reverse(reverse);
+        reverse.forEach(stack::push);
+    }
+
+    @NotNull
+    private List<String> handleSentence(String w) throws Exception {
+        // We will get an ArrayIndexOutOfBounds exception otherwise.
+        if (!w.endsWith(TERMINATOR)) {
+            throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
+        }
+        List<String> sentence = Arrays.asList(w.strip().split(" "));
+        return sentence;
+    }
+
+    @NotNull
+    private Stack<String> initializeStack() {
+        Stack<String> stack = new Stack<>();
+        stack.push(TERMINATOR);
+        stack.push(start);
+        return stack;
     }
 
     Grammar removeLeftRecursion() {
@@ -352,6 +377,9 @@ class Production implements Comparable<Production> {
         }
         return sb.toString();
     }
+}
+
+class Productions extends ArrayList<Production> {
 }
 
 class First extends TreeSet<String> {
