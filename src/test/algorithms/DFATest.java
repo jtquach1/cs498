@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static algorithms.FSA.EPSILON;
 import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,18 +23,18 @@ class DFATest {
         Set<Move> moves = new TreeSet<>();
         Utility.addMoves(moves,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, FSA.EPSILON, 5),
+                Utility.makeMove(1, EPSILON, 5),
                 Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, FSA.EPSILON, 5),
-                Utility.makeMove(4, FSA.EPSILON, 0),
-                Utility.makeMove(4, FSA.EPSILON, 2),
-                Utility.makeMove(5, FSA.EPSILON, 8),
+                Utility.makeMove(3, EPSILON, 5),
+                Utility.makeMove(4, EPSILON, 0),
+                Utility.makeMove(4, EPSILON, 2),
+                Utility.makeMove(5, EPSILON, 8),
                 Utility.makeMove(6, 'a', 7),
-                Utility.makeMove(7, FSA.EPSILON, 6),
-                Utility.makeMove(7, FSA.EPSILON, 9),
-                Utility.makeMove(8, FSA.EPSILON, 6),
-                Utility.makeMove(8, FSA.EPSILON, 9),
-                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(7, EPSILON, 6),
+                Utility.makeMove(7, EPSILON, 9),
+                Utility.makeMove(8, EPSILON, 6),
+                Utility.makeMove(8, EPSILON, 9),
+                Utility.makeMove(9, EPSILON, 10),
                 Utility.makeMove(10, 'b', 11));
 
         Set<State> states = new TreeSet<>();
@@ -51,18 +52,18 @@ class DFATest {
         Set<Move> moves = new TreeSet<>();
         Utility.addMoves(moves,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, FSA.EPSILON, 5),
+                Utility.makeMove(1, EPSILON, 5),
                 Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, FSA.EPSILON, 5),
-                Utility.makeMove(4, FSA.EPSILON, 0),
-                Utility.makeMove(4, FSA.EPSILON, 2),
-                Utility.makeMove(5, FSA.EPSILON, 8),
+                Utility.makeMove(3, EPSILON, 5),
+                Utility.makeMove(4, EPSILON, 0),
+                Utility.makeMove(4, EPSILON, 2),
+                Utility.makeMove(5, EPSILON, 8),
                 Utility.makeMove(6, 'a', 7),
-                Utility.makeMove(7, FSA.EPSILON, 6),
-                Utility.makeMove(7, FSA.EPSILON, 9),
-                Utility.makeMove(8, FSA.EPSILON, 6),
-                Utility.makeMove(8, FSA.EPSILON, 9),
-                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(7, EPSILON, 6),
+                Utility.makeMove(7, EPSILON, 9),
+                Utility.makeMove(8, EPSILON, 6),
+                Utility.makeMove(8, EPSILON, 9),
+                Utility.makeMove(9, EPSILON, 10),
                 Utility.makeMove(10, 'b', 11));
 
         Set<State> states = new TreeSet<>();
@@ -85,7 +86,7 @@ class DFATest {
         Utility.addFinalStates(nfa, 3);
         Utility.addMoves(nfa,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, FSA.EPSILON, 2),
+                Utility.makeMove(1, EPSILON, 2),
                 Utility.makeMove(2, 'b', 3)
         );
 
@@ -116,10 +117,10 @@ class DFATest {
         Utility.addFinalStates(nfa, 3);
         Utility.addMoves(nfa,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, FSA.EPSILON, 0),
-                Utility.makeMove(1, FSA.EPSILON, 3),
-                Utility.makeMove(2, FSA.EPSILON, 0),
-                Utility.makeMove(2, FSA.EPSILON, 3)
+                Utility.makeMove(1, EPSILON, 0),
+                Utility.makeMove(1, EPSILON, 3),
+                Utility.makeMove(2, EPSILON, 0),
+                Utility.makeMove(2, EPSILON, 3)
         );
 
         DFA expected = makeDFA(0);
@@ -142,9 +143,9 @@ class DFATest {
         Utility.addStates(nfa, 0, 1, 2, 3, 4);
         Utility.addFinalStates(nfa, 2, 4);
         Utility.addMoves(nfa,
-                Utility.makeMove(0, FSA.EPSILON, 1),
+                Utility.makeMove(0, EPSILON, 1),
                 Utility.makeMove(1, 'a', 2),
-                Utility.makeMove(0, FSA.EPSILON, 3),
+                Utility.makeMove(0, EPSILON, 3),
                 Utility.makeMove(3, 'b', 4)
         );
 
@@ -199,18 +200,18 @@ class DFATest {
         Utility.addFinalStates(nfa, 11);
         Utility.addMoves(nfa,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, FSA.EPSILON, 5),
+                Utility.makeMove(1, EPSILON, 5),
                 Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, FSA.EPSILON, 5),
-                Utility.makeMove(4, FSA.EPSILON, 0),
-                Utility.makeMove(4, FSA.EPSILON, 2),
-                Utility.makeMove(5, FSA.EPSILON, 8),
+                Utility.makeMove(3, EPSILON, 5),
+                Utility.makeMove(4, EPSILON, 0),
+                Utility.makeMove(4, EPSILON, 2),
+                Utility.makeMove(5, EPSILON, 8),
                 Utility.makeMove(6, 'a', 7),
-                Utility.makeMove(7, FSA.EPSILON, 6),
-                Utility.makeMove(7, FSA.EPSILON, 9),
-                Utility.makeMove(8, FSA.EPSILON, 6),
-                Utility.makeMove(8, FSA.EPSILON, 9),
-                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(7, EPSILON, 6),
+                Utility.makeMove(7, EPSILON, 9),
+                Utility.makeMove(8, EPSILON, 6),
+                Utility.makeMove(8, EPSILON, 9),
+                Utility.makeMove(9, EPSILON, 10),
                 Utility.makeMove(10, 'b', 11)
         );
 
@@ -245,18 +246,18 @@ class DFATest {
         Utility.addFinalStates(nfa, 11);
         Utility.addMoves(nfa,
                 Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, FSA.EPSILON, 8),
+                Utility.makeMove(1, EPSILON, 8),
                 Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(3, FSA.EPSILON, 7),
+                Utility.makeMove(3, EPSILON, 7),
                 Utility.makeMove(4, 'b', 5),
-                Utility.makeMove(5, FSA.EPSILON, 7),
-                Utility.makeMove(6, FSA.EPSILON, 2),
-                Utility.makeMove(6, FSA.EPSILON, 4),
-                Utility.makeMove(7, FSA.EPSILON, 6),
-                Utility.makeMove(7, FSA.EPSILON, 9),
-                Utility.makeMove(8, FSA.EPSILON, 6),
-                Utility.makeMove(8, FSA.EPSILON, 9),
-                Utility.makeMove(9, FSA.EPSILON, 10),
+                Utility.makeMove(5, EPSILON, 7),
+                Utility.makeMove(6, EPSILON, 2),
+                Utility.makeMove(6, EPSILON, 4),
+                Utility.makeMove(7, EPSILON, 6),
+                Utility.makeMove(7, EPSILON, 9),
+                Utility.makeMove(8, EPSILON, 6),
+                Utility.makeMove(8, EPSILON, 9),
+                Utility.makeMove(9, EPSILON, 10),
                 Utility.makeMove(10, 'b', 11)
         );
 
@@ -292,37 +293,37 @@ class DFATest {
         Utility.addFinalStates(nfa, 25);
         Utility.addMoves(nfa,
                 Utility.makeMove(0, '$', 1),
-                Utility.makeMove(1, FSA.EPSILON, 13),
+                Utility.makeMove(1, EPSILON, 13),
                 Utility.makeMove(2, '_', 3),
-                Utility.makeMove(3, FSA.EPSILON, 11),
+                Utility.makeMove(3, EPSILON, 11),
                 Utility.makeMove(4, 's', 5),
-                Utility.makeMove(5, FSA.EPSILON, 9),
+                Utility.makeMove(5, EPSILON, 9),
                 Utility.makeMove(6, 'S', 7),
-                Utility.makeMove(7, FSA.EPSILON, 9),
-                Utility.makeMove(8, FSA.EPSILON, 4),
-                Utility.makeMove(8, FSA.EPSILON, 6),
-                Utility.makeMove(9, FSA.EPSILON, 11),
-                Utility.makeMove(10, FSA.EPSILON, 2),
-                Utility.makeMove(10, FSA.EPSILON, 8),
-                Utility.makeMove(11, FSA.EPSILON, 13),
-                Utility.makeMove(12, FSA.EPSILON, 0),
-                Utility.makeMove(12, FSA.EPSILON, 10),
-                Utility.makeMove(13, FSA.EPSILON, 24),
+                Utility.makeMove(7, EPSILON, 9),
+                Utility.makeMove(8, EPSILON, 4),
+                Utility.makeMove(8, EPSILON, 6),
+                Utility.makeMove(9, EPSILON, 11),
+                Utility.makeMove(10, EPSILON, 2),
+                Utility.makeMove(10, EPSILON, 8),
+                Utility.makeMove(11, EPSILON, 13),
+                Utility.makeMove(12, EPSILON, 0),
+                Utility.makeMove(12, EPSILON, 10),
+                Utility.makeMove(13, EPSILON, 24),
                 Utility.makeMove(14, 's', 15),
-                Utility.makeMove(15, FSA.EPSILON, 23),
+                Utility.makeMove(15, EPSILON, 23),
                 Utility.makeMove(16, 'S', 17),
-                Utility.makeMove(17, FSA.EPSILON, 21),
+                Utility.makeMove(17, EPSILON, 21),
                 Utility.makeMove(18, 'd', 19),
-                Utility.makeMove(19, FSA.EPSILON, 21),
-                Utility.makeMove(20, FSA.EPSILON, 16),
-                Utility.makeMove(20, FSA.EPSILON, 18),
-                Utility.makeMove(21, FSA.EPSILON, 23),
-                Utility.makeMove(22, FSA.EPSILON, 14),
-                Utility.makeMove(22, FSA.EPSILON, 20),
-                Utility.makeMove(23, FSA.EPSILON, 22),
-                Utility.makeMove(23, FSA.EPSILON, 25),
-                Utility.makeMove(24, FSA.EPSILON, 22),
-                Utility.makeMove(24, FSA.EPSILON, 25)
+                Utility.makeMove(19, EPSILON, 21),
+                Utility.makeMove(20, EPSILON, 16),
+                Utility.makeMove(20, EPSILON, 18),
+                Utility.makeMove(21, EPSILON, 23),
+                Utility.makeMove(22, EPSILON, 14),
+                Utility.makeMove(22, EPSILON, 20),
+                Utility.makeMove(23, EPSILON, 22),
+                Utility.makeMove(23, EPSILON, 25),
+                Utility.makeMove(24, EPSILON, 22),
+                Utility.makeMove(24, EPSILON, 25)
         );
 
         DFA expected = makeDFA(0, 8);
@@ -387,7 +388,7 @@ class DFATest {
         Utility.addStates(nfa, 0, 1);
         Utility.addFinalStates(nfa, 1);
         Utility.addMoves(nfa,
-                Utility.makeMove(0, FSA.EPSILON, 1)
+                Utility.makeMove(0, EPSILON, 1)
         );
 
         DFA expected = makeDFA(0);

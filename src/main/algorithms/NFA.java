@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static algorithms.Grammar.EPSILON;
+import static algorithms.Grammar.GREEK_EPSILON;
+
 class NFA extends FSA {
     NFA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
         Set<Move> moves) {
@@ -189,6 +192,7 @@ class NFA extends FSA {
 
 class Regex {
     static String infixToPostfix(String infix) {
+        infix = infix.replaceAll(GREEK_EPSILON, EPSILON);
         infix = Regex.markWithConcatenation(infix);
         return infixToPostfix(infix.toCharArray());
     }

@@ -9,6 +9,7 @@ import static algorithms.Grammar.EPSILON;
 
 class Grammar {
     static final String EPSILON = Character.toString('\u025B');
+    static final String GREEK_EPSILON = Character.toString('\u03B5');
     static final String TERMINATOR = "#";
 
     Set<String> nonTerminals;
@@ -26,6 +27,14 @@ class Grammar {
 
     public static void main(String[] args) throws Exception {
         String inputFile = args[0]; // supply file or do redirection?
+        inputFile = "E ::= T E'\n" +
+                "E' ::= + T E'\n" +
+                "E' ::= ε\n" +
+                "T ::= F T'\n" +
+                "T' ::= ε\n" +
+                "F ::= ( E )\n" +
+                "F ::= id\n";
+
         List<List<String[]>> parsedInput = getParsedInput(inputFile);
         Grammar cfg = initializeGrammar(parsedInput);
         populateGrammarWithProductions(parsedInput, cfg);
@@ -35,30 +44,26 @@ class Grammar {
         FollowMap followMap = cfg.follow(firstMap);
         LL1ParseTable ll1ParseTable = cfg.generateLL1ParseTable(firstMap, followMap);
 
-//        System.out.println(firstMap);
-//        System.out.println(followMap);
-//        System.out.println(ll1ParseTable);
-
-//        System.out.println(cfg.removeLeftRecursion());
-
+        // Later: specify the grammar as stdin, sentence as CLI
+        // OR have both be files- one for sentence, one for grammar
         String w = "id + id * id";
-        cfg.parseSentence(ll1ParseTable, w);
+        LL1ParseOutput output = cfg.parseSentence(ll1ParseTable, w);
+
+        System.out.println(firstMap);
+        System.out.println(followMap);
+        System.out.println(ll1ParseTable);
+        System.out.println(output);
+
+        // System.out.println(cfg.removeLeftRecursion());
 
     }
 
     @NotNull
     private static List<List<String[]>> getParsedInput(String grammar) {
-        String g = "E ::= T E'\n" +
-                "E' ::= + T E'\n" +
-                "E' ::= ε\n" +
-                "T ::= F T'\n" +
-                "T' ::= ε\n" +
-                "F ::= ( E )\n" +
-                "F ::= id\n";
-
+        grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
         List<List<String[]>> parsedInput =
                 Arrays
-                        .stream(g.split("\r?\n|\r"))
+                        .stream(grammar.split("\r?\n|\r"))
                         .map(prod -> Arrays
                                 .stream(prod.split("::="))
                                 .map(side -> side.trim().split(" "))
@@ -267,7 +272,8 @@ class Grammar {
     private Queue<String> handleSentence(String w) throws Exception {
         // We will get an ArrayIndexOutOfBounds exception otherwise.
         if (!w.endsWith(TERMINATOR)) {
-            throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
+//            throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
+            w += " " + TERMINATOR;
         }
         List<String> sentence = Arrays.asList(w.strip().split(" "));
         Queue<String> result = new Queue<>();
@@ -360,7 +366,8 @@ class Production implements Comparable<Production> {
     }
 
     boolean beginsWithEpsilon() {
-        return rhs.get(0).equals(EPSILON);
+        String firstSymbol = rhs.get(0);
+        return firstSymbol.equals(EPSILON);
     }
 
     @Override
