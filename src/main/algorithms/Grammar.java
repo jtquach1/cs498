@@ -170,8 +170,8 @@ class Grammar {
         return followMap;
     }
 
-    private boolean isNonTerminal(String top) {
-        return nonTerminals.contains(top);
+    private boolean isNonTerminal(String symbol) {
+        return nonTerminals.contains(symbol);
     }
 
     LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
@@ -209,19 +209,20 @@ class Grammar {
                 .collect(Collectors.toList());
     }
 
-    void parseSentence(LL1ParseTable table, String w) throws Exception {
-        List<String> sentence = this.handleSentence(w);
+    LL1ParseOutput parseSentence(LL1ParseTable table, String delimitedBySpaces) throws Exception {
+        Queue<String> sentence = this.handleSentence(delimitedBySpaces);
         Stack<String> stack = this.initializeStack();
-        String symbol = sentence.get(0);
-        int i = 1;
+        String symbol = sentence.dequeue();
+        LL1ParseOutput output = this.initializeOutput(sentence, stack, symbol);
 
         while (true) {
             String top = stack.pop();
+            Integer index = null;
             if (top.equals(symbol) && symbol.equals(TERMINATOR)) {
                 break;
             } else if (isTerminal(top)) {
                 if (top.equals(symbol)) {
-                    symbol = sentence.get(i++);
+                    symbol = sentence.dequeue();
                 } else if (top.equals(EPSILON)) {
                     /* Replace the previous non-terminal on the stack with nothing.
                     EPSILON should not be a symbol in the sentence; it's only used for parsing. */
@@ -229,7 +230,7 @@ class Grammar {
                     throw new Exception("A " + symbol + " found where a " + top + " was expected");
                 }
             } else if (isNonTerminal(top)) {
-                Integer index = table.get(top, symbol);
+                index = table.get(top, symbol);
                 if (index != null) {
                     this.applyRuleAndReplaceTop(stack, index);
                 } else {
@@ -238,11 +239,21 @@ class Grammar {
             } else {
                 throw new Exception("Illegal symbol " + top);
             }
+            output.add(new LL1ParseOutputEntry(stack, sentence, index, symbol));
         }
+        return output;
     }
 
-    private boolean isTerminal(String top) {
-        return terminals.contains(top);
+    @NotNull
+    private LL1ParseOutput initializeOutput(Queue<String> sentence, Stack<String> stack,
+                                            String symbol) {
+        LL1ParseOutput output = new LL1ParseOutput();
+        output.add(new LL1ParseOutputEntry(stack, sentence, null, symbol));
+        return output;
+    }
+
+    private boolean isTerminal(String symbol) {
+        return terminals.contains(symbol);
     }
 
     private void applyRuleAndReplaceTop(Stack<String> stack, Integer index) {
@@ -253,13 +264,15 @@ class Grammar {
     }
 
     @NotNull
-    private List<String> handleSentence(String w) throws Exception {
+    private Queue<String> handleSentence(String w) throws Exception {
         // We will get an ArrayIndexOutOfBounds exception otherwise.
         if (!w.endsWith(TERMINATOR)) {
             throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
         }
         List<String> sentence = Arrays.asList(w.strip().split(" "));
-        return sentence;
+        Queue<String> result = new Queue<>();
+        result.addAll(sentence);
+        return result;
     }
 
     @NotNull

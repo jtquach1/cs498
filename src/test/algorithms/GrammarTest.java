@@ -6,7 +6,9 @@ import java.util.*;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
-import static org.junit.jupiter.api.Assertions.*;
+import static algorithms.Utility.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 class GrammarTest {
 
@@ -276,7 +278,91 @@ class GrammarTest {
     }
 
     @Test
-    void parseSentence() {
+    void parseSentence() throws Exception {
+        LL1ParseOutput expected = new LL1ParseOutput();
+        expected.addAll(Arrays.asList(
+                makeEntry(
+                        makeStack(TERMINATOR, "E"),
+                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T"),
+                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                        0),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "F"),
+                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                        3),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "id"),
+                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                        7),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'"),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", EPSILON),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        5),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'"),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T", "+"),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        1),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T"),
+                        makeQueue("id", "*", "id", TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "F"),
+                        makeQueue("id", "*", "id", TERMINATOR),
+                        3),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "id"),
+                        makeQueue("id", "*", "id", TERMINATOR),
+                        7),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'"),
+                        makeQueue("*", "id", TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "F", "*"),
+                        makeQueue("*", "id", TERMINATOR),
+                        4),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "F"),
+                        makeQueue("id", TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'", "id"),
+                        makeQueue("id", TERMINATOR),
+                        7),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", "T'"),
+                        makeQueue(TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'", EPSILON),
+                        makeQueue(TERMINATOR),
+                        5),
+                makeEntry(
+                        makeStack(TERMINATOR, "E'"),
+                        makeQueue(TERMINATOR),
+                        null),
+                makeEntry(
+                        makeStack(TERMINATOR, EPSILON),
+                        makeQueue(TERMINATOR),
+                        2),
+                makeEntry(
+                        makeStack(TERMINATOR),
+                        makeQueue(TERMINATOR),
+                        null)
+        ));
+
         LL1ParseTable table = new LL1ParseTable();
         table.set("E", "(", 0);
         table.set("E", "id", 0);
@@ -306,14 +392,9 @@ class GrammarTest {
                 new Production("F", "id")
         );
         String w = "id + id * id " + TERMINATOR;
+        LL1ParseOutput actual = cfg.parseSentence(table, w);
 
-        boolean sentenceIsParseable = true;
-        try {
-            cfg.parseSentence(table, w);
-        } catch (Exception e) {
-            sentenceIsParseable = false;
-        }
-        assertTrue(sentenceIsParseable);
+        assertEquals(expected, actual);
     }
 
     @Test

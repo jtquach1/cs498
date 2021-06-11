@@ -93,4 +93,21 @@ class Utility {
         }
         return states;
     }
+
+    static LL1ParseOutputEntry makeEntry(Stack<String> stack, Queue<String> input, Integer output) {
+        return new LL1ParseOutputEntry(stack, input, output);
+    }
+
+    static Stack<String> makeStack(String... symbols) {
+        Stack<String> stack = new Stack<>();
+        stack.addAll(Arrays.asList(symbols));
+        return stack;
+    }
+
+    static Queue<String> makeQueue(String... terminals) {
+        Queue<String> queue = new Queue<>();
+        queue.addAll(Arrays.asList(terminals));
+        return queue;
+    }
+
 }
