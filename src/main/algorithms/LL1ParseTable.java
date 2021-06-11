@@ -54,11 +54,11 @@ class LL1ParseOutputEntry {
         this.output = output;
     }
 
+    // For unit tests
     LL1ParseOutputEntry(Stack<String> stack, Queue<String> input, Integer output) {
         this.stack = new Stack<>();
         this.stack.addAll(stack);
 
-        // Lecture slides show the cursor as part of the input
         this.input = new Queue<>();
         this.input.addAll(input);
 

@@ -279,6 +279,8 @@ class GrammarTest {
 
     @Test
     void parseSentence() throws Exception {
+        /* In contrast to the table from the lecture slides, this test checks for entries
+        where EPSILON is on the stack */
         LL1ParseOutput expected = new LL1ParseOutput();
         expected.addAll(Arrays.asList(
                 makeEntry(
