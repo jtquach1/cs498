@@ -21,24 +21,24 @@ class DFATest {
     void epsilonClosureForOneState() {
         int id = 0;
         Set<Move> moves = new TreeSet<>();
-        Utility.addMoves(moves,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, EPSILON, 5),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, EPSILON, 5),
-                Utility.makeMove(4, EPSILON, 0),
-                Utility.makeMove(4, EPSILON, 2),
-                Utility.makeMove(5, EPSILON, 8),
-                Utility.makeMove(6, 'a', 7),
-                Utility.makeMove(7, EPSILON, 6),
-                Utility.makeMove(7, EPSILON, 9),
-                Utility.makeMove(8, EPSILON, 6),
-                Utility.makeMove(8, EPSILON, 9),
-                Utility.makeMove(9, EPSILON, 10),
-                Utility.makeMove(10, 'b', 11));
+        addMoves(moves,
+                makeMove(0, 'a', 1),
+                makeMove(1, EPSILON, 5),
+                makeMove(2, 'b', 3),
+                makeMove(3, EPSILON, 5),
+                makeMove(4, EPSILON, 0),
+                makeMove(4, EPSILON, 2),
+                makeMove(5, EPSILON, 8),
+                makeMove(6, 'a', 7),
+                makeMove(7, EPSILON, 6),
+                makeMove(7, EPSILON, 9),
+                makeMove(8, EPSILON, 6),
+                makeMove(8, EPSILON, 9),
+                makeMove(9, EPSILON, 10),
+                makeMove(10, 'b', 11));
 
         Set<State> states = new TreeSet<>();
-        Utility.addStates(states, 1, 5, 6, 8, 9, 10);
+        addStates(states, 1, 5, 6, 8, 9, 10);
         DFAState expected = new DFAState(id);
         expected.addAll(states);
 
@@ -50,29 +50,29 @@ class DFATest {
     void epsilonClosureForSetOfStates() {
         int id = 0;
         Set<Move> moves = new TreeSet<>();
-        Utility.addMoves(moves,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, EPSILON, 5),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, EPSILON, 5),
-                Utility.makeMove(4, EPSILON, 0),
-                Utility.makeMove(4, EPSILON, 2),
-                Utility.makeMove(5, EPSILON, 8),
-                Utility.makeMove(6, 'a', 7),
-                Utility.makeMove(7, EPSILON, 6),
-                Utility.makeMove(7, EPSILON, 9),
-                Utility.makeMove(8, EPSILON, 6),
-                Utility.makeMove(8, EPSILON, 9),
-                Utility.makeMove(9, EPSILON, 10),
-                Utility.makeMove(10, 'b', 11));
+        addMoves(moves,
+                makeMove(0, 'a', 1),
+                makeMove(1, EPSILON, 5),
+                makeMove(2, 'b', 3),
+                makeMove(3, EPSILON, 5),
+                makeMove(4, EPSILON, 0),
+                makeMove(4, EPSILON, 2),
+                makeMove(5, EPSILON, 8),
+                makeMove(6, 'a', 7),
+                makeMove(7, EPSILON, 6),
+                makeMove(7, EPSILON, 9),
+                makeMove(8, EPSILON, 6),
+                makeMove(8, EPSILON, 9),
+                makeMove(9, EPSILON, 10),
+                makeMove(10, 'b', 11));
 
         Set<State> states = new TreeSet<>();
-        Utility.addStates(states, 0, 2, 4, 6, 7, 9, 10);
+        addStates(states, 0, 2, 4, 6, 7, 9, 10);
         DFAState expected = new DFAState(id);
         expected.addAll(states);
 
         states.clear();
-        Utility.addStates(states, 4, 7);
+        addStates(states, 4, 7);
         DFAState actual = DFA.epsilonClosure(states, moves, id);
 
         assertEquals(expected, actual);
@@ -81,28 +81,28 @@ class DFATest {
     @Test
     void NFAToDFAConcatenate() {
         NFA nfa = makeNFA(0);
-        Utility.addSymbols(nfa, 'a', 'b');
-        Utility.addStates(nfa, 0, 1, 2, 3);
-        Utility.addFinalStates(nfa, 3);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, EPSILON, 2),
-                Utility.makeMove(2, 'b', 3)
+        addSymbols(nfa, 'a', 'b');
+        addStates(nfa, 0, 1, 2, 3);
+        addFinalStates(nfa, 3);
+        addMoves(nfa,
+                makeMove(0, 'a', 1),
+                makeMove(1, EPSILON, 2),
+                makeMove(2, 'b', 3)
         );
 
         DFA expected = makeDFA(0, 3);
-        Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2, 3);
-        Utility.addFinalStates(expected, 2);
-        Utility.addMoves(expected,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 3),
-                Utility.makeMove(1, 'b', 2),
-                Utility.makeMove(1, 'a', 3),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 3)
+        addSymbols(expected, 'a', 'b');
+        addStates(expected, 0, 1, 2, 3);
+        addFinalStates(expected, 2);
+        addMoves(expected,
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 3),
+                makeMove(1, 'b', 2),
+                makeMove(1, 'a', 3),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 3),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 3)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -112,24 +112,24 @@ class DFATest {
     @Test
     void NFAToDFAKleeneStar() {
         NFA nfa = makeNFA(2);
-        Utility.addSymbols(nfa, 'a');
-        Utility.addStates(nfa, 0, 1, 2, 3);
-        Utility.addFinalStates(nfa, 3);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, EPSILON, 0),
-                Utility.makeMove(1, EPSILON, 3),
-                Utility.makeMove(2, EPSILON, 0),
-                Utility.makeMove(2, EPSILON, 3)
+        addSymbols(nfa, 'a');
+        addStates(nfa, 0, 1, 2, 3);
+        addFinalStates(nfa, 3);
+        addMoves(nfa,
+                makeMove(0, 'a', 1),
+                makeMove(1, EPSILON, 0),
+                makeMove(1, EPSILON, 3),
+                makeMove(2, EPSILON, 0),
+                makeMove(2, EPSILON, 3)
         );
 
         DFA expected = makeDFA(0);
-        Utility.addSymbols(expected, 'a');
-        Utility.addStates(expected, 0, 1);
-        Utility.addFinalStates(expected, 0, 1);
-        Utility.addMoves(expected,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, 'a', 1)
+        addSymbols(expected, 'a');
+        addStates(expected, 0, 1);
+        addFinalStates(expected, 0, 1);
+        addMoves(expected,
+                makeMove(0, 'a', 1),
+                makeMove(1, 'a', 1)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -139,29 +139,29 @@ class DFATest {
     @Test
     void NFAToDFAAlternate() {
         NFA nfa = makeNFA(0);
-        Utility.addSymbols(nfa, 'a', 'b');
-        Utility.addStates(nfa, 0, 1, 2, 3, 4);
-        Utility.addFinalStates(nfa, 2, 4);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, EPSILON, 1),
-                Utility.makeMove(1, 'a', 2),
-                Utility.makeMove(0, EPSILON, 3),
-                Utility.makeMove(3, 'b', 4)
+        addSymbols(nfa, 'a', 'b');
+        addStates(nfa, 0, 1, 2, 3, 4);
+        addFinalStates(nfa, 2, 4);
+        addMoves(nfa,
+                makeMove(0, EPSILON, 1),
+                makeMove(1, 'a', 2),
+                makeMove(0, EPSILON, 3),
+                makeMove(3, 'b', 4)
         );
 
         DFA expected = makeDFA(0, 3);
-        Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2, 3);
-        Utility.addFinalStates(expected, 1, 2);
-        Utility.addMoves(expected,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 2),
-                Utility.makeMove(1, 'a', 3),
-                Utility.makeMove(1, 'b', 3),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 3)
+        addSymbols(expected, 'a', 'b');
+        addStates(expected, 0, 1, 2, 3);
+        addFinalStates(expected, 1, 2);
+        addMoves(expected,
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 2),
+                makeMove(1, 'a', 3),
+                makeMove(1, 'b', 3),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 3),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 3)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -171,21 +171,21 @@ class DFATest {
     @Test
     void NFAToDFANoEpsilon() {
         NFA nfa = makeNFA(0);
-        Utility.addSymbols(nfa, 'a');
-        Utility.addStates(nfa, 0, 1);
-        Utility.addFinalStates(nfa, 1);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, 'a', 0),
-                Utility.makeMove(0, 'a', 1)
+        addSymbols(nfa, 'a');
+        addStates(nfa, 0, 1);
+        addFinalStates(nfa, 1);
+        addMoves(nfa,
+                makeMove(0, 'a', 0),
+                makeMove(0, 'a', 1)
         );
 
         DFA expected = makeDFA(0);
-        Utility.addSymbols(expected, 'a');
-        Utility.addStates(expected, 0, 1);
-        Utility.addFinalStates(expected, 1);
-        Utility.addMoves(expected,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, 'a', 1)
+        addSymbols(expected, 'a');
+        addStates(expected, 0, 1);
+        addFinalStates(expected, 1);
+        addMoves(expected,
+                makeMove(0, 'a', 1),
+                makeMove(1, 'a', 1)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -195,43 +195,43 @@ class DFATest {
     @Test
     void NFAToDFABasic() {
         NFA nfa = makeNFA(4);
-        Utility.addSymbols(nfa, 'a', 'b');
-        Utility.addStates(nfa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-        Utility.addFinalStates(nfa, 11);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, EPSILON, 5),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, EPSILON, 5),
-                Utility.makeMove(4, EPSILON, 0),
-                Utility.makeMove(4, EPSILON, 2),
-                Utility.makeMove(5, EPSILON, 8),
-                Utility.makeMove(6, 'a', 7),
-                Utility.makeMove(7, EPSILON, 6),
-                Utility.makeMove(7, EPSILON, 9),
-                Utility.makeMove(8, EPSILON, 6),
-                Utility.makeMove(8, EPSILON, 9),
-                Utility.makeMove(9, EPSILON, 10),
-                Utility.makeMove(10, 'b', 11)
+        addSymbols(nfa, 'a', 'b');
+        addStates(nfa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        addFinalStates(nfa, 11);
+        addMoves(nfa,
+                makeMove(0, 'a', 1),
+                makeMove(1, EPSILON, 5),
+                makeMove(2, 'b', 3),
+                makeMove(3, EPSILON, 5),
+                makeMove(4, EPSILON, 0),
+                makeMove(4, EPSILON, 2),
+                makeMove(5, EPSILON, 8),
+                makeMove(6, 'a', 7),
+                makeMove(7, EPSILON, 6),
+                makeMove(7, EPSILON, 9),
+                makeMove(8, EPSILON, 6),
+                makeMove(8, EPSILON, 9),
+                makeMove(9, EPSILON, 10),
+                makeMove(10, 'b', 11)
         );
 
         DFA expected = makeDFA(0, 5);
-        Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2, 3, 4, 5);
-        Utility.addFinalStates(expected, 4);
-        Utility.addMoves(expected,
-                Utility.makeMove(1, 'a', 3),
-                Utility.makeMove(1, 'b', 4),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 4),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 4),
-                Utility.makeMove(4, 'a', 5),
-                Utility.makeMove(5, 'b', 5),
-                Utility.makeMove(4, 'b', 5),
-                Utility.makeMove(5, 'a', 5),
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 2)
+        addSymbols(expected, 'a', 'b');
+        addStates(expected, 0, 1, 2, 3, 4, 5);
+        addFinalStates(expected, 4);
+        addMoves(expected,
+                makeMove(1, 'a', 3),
+                makeMove(1, 'b', 4),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 4),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 4),
+                makeMove(4, 'a', 5),
+                makeMove(5, 'b', 5),
+                makeMove(4, 'b', 5),
+                makeMove(5, 'a', 5),
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 2)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -241,41 +241,41 @@ class DFATest {
     @Test
     void NFAToDFABasic2() {
         NFA nfa = makeNFA(0);
-        Utility.addSymbols(nfa, 'a', 'b');
-        Utility.addStates(nfa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-        Utility.addFinalStates(nfa, 11);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, EPSILON, 8),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(3, EPSILON, 7),
-                Utility.makeMove(4, 'b', 5),
-                Utility.makeMove(5, EPSILON, 7),
-                Utility.makeMove(6, EPSILON, 2),
-                Utility.makeMove(6, EPSILON, 4),
-                Utility.makeMove(7, EPSILON, 6),
-                Utility.makeMove(7, EPSILON, 9),
-                Utility.makeMove(8, EPSILON, 6),
-                Utility.makeMove(8, EPSILON, 9),
-                Utility.makeMove(9, EPSILON, 10),
-                Utility.makeMove(10, 'b', 11)
+        addSymbols(nfa, 'a', 'b');
+        addStates(nfa, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        addFinalStates(nfa, 11);
+        addMoves(nfa,
+                makeMove(0, 'a', 1),
+                makeMove(1, EPSILON, 8),
+                makeMove(2, 'a', 3),
+                makeMove(3, EPSILON, 7),
+                makeMove(4, 'b', 5),
+                makeMove(5, EPSILON, 7),
+                makeMove(6, EPSILON, 2),
+                makeMove(6, EPSILON, 4),
+                makeMove(7, EPSILON, 6),
+                makeMove(7, EPSILON, 9),
+                makeMove(8, EPSILON, 6),
+                makeMove(8, EPSILON, 9),
+                makeMove(9, EPSILON, 10),
+                makeMove(10, 'b', 11)
         );
 
         DFA expected = makeDFA(0, 4);
-        Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2, 3, 4);
-        Utility.addFinalStates(expected, 3);
-        Utility.addMoves(expected,
-                Utility.makeMove(2, 'a', 2),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, 'b', 3),
-                Utility.makeMove(3, 'a', 2),
-                Utility.makeMove(4, 'b', 4),
-                Utility.makeMove(4, 'a', 4),
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, 'a', 2),
-                Utility.makeMove(1, 'b', 3),
-                Utility.makeMove(0, 'b', 4)
+        addSymbols(expected, 'a', 'b');
+        addStates(expected, 0, 1, 2, 3, 4);
+        addFinalStates(expected, 3);
+        addMoves(expected,
+                makeMove(2, 'a', 2),
+                makeMove(2, 'b', 3),
+                makeMove(3, 'b', 3),
+                makeMove(3, 'a', 2),
+                makeMove(4, 'b', 4),
+                makeMove(4, 'a', 4),
+                makeMove(0, 'a', 1),
+                makeMove(1, 'a', 2),
+                makeMove(1, 'b', 3),
+                makeMove(0, 'b', 4)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -285,97 +285,97 @@ class DFATest {
     @Test
     void NFAToDFAIdentifiers() {
         NFA nfa = makeNFA(12);
-        Utility.addSymbols(nfa, '$', 'S', '_', 'd', 's');
-        Utility.addStates(nfa,
+        addSymbols(nfa, '$', 'S', '_', 'd', 's');
+        addStates(nfa,
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
                 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
         );
-        Utility.addFinalStates(nfa, 25);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, '$', 1),
-                Utility.makeMove(1, EPSILON, 13),
-                Utility.makeMove(2, '_', 3),
-                Utility.makeMove(3, EPSILON, 11),
-                Utility.makeMove(4, 's', 5),
-                Utility.makeMove(5, EPSILON, 9),
-                Utility.makeMove(6, 'S', 7),
-                Utility.makeMove(7, EPSILON, 9),
-                Utility.makeMove(8, EPSILON, 4),
-                Utility.makeMove(8, EPSILON, 6),
-                Utility.makeMove(9, EPSILON, 11),
-                Utility.makeMove(10, EPSILON, 2),
-                Utility.makeMove(10, EPSILON, 8),
-                Utility.makeMove(11, EPSILON, 13),
-                Utility.makeMove(12, EPSILON, 0),
-                Utility.makeMove(12, EPSILON, 10),
-                Utility.makeMove(13, EPSILON, 24),
-                Utility.makeMove(14, 's', 15),
-                Utility.makeMove(15, EPSILON, 23),
-                Utility.makeMove(16, 'S', 17),
-                Utility.makeMove(17, EPSILON, 21),
-                Utility.makeMove(18, 'd', 19),
-                Utility.makeMove(19, EPSILON, 21),
-                Utility.makeMove(20, EPSILON, 16),
-                Utility.makeMove(20, EPSILON, 18),
-                Utility.makeMove(21, EPSILON, 23),
-                Utility.makeMove(22, EPSILON, 14),
-                Utility.makeMove(22, EPSILON, 20),
-                Utility.makeMove(23, EPSILON, 22),
-                Utility.makeMove(23, EPSILON, 25),
-                Utility.makeMove(24, EPSILON, 22),
-                Utility.makeMove(24, EPSILON, 25)
+        addFinalStates(nfa, 25);
+        addMoves(nfa,
+                makeMove(0, '$', 1),
+                makeMove(1, EPSILON, 13),
+                makeMove(2, '_', 3),
+                makeMove(3, EPSILON, 11),
+                makeMove(4, 's', 5),
+                makeMove(5, EPSILON, 9),
+                makeMove(6, 'S', 7),
+                makeMove(7, EPSILON, 9),
+                makeMove(8, EPSILON, 4),
+                makeMove(8, EPSILON, 6),
+                makeMove(9, EPSILON, 11),
+                makeMove(10, EPSILON, 2),
+                makeMove(10, EPSILON, 8),
+                makeMove(11, EPSILON, 13),
+                makeMove(12, EPSILON, 0),
+                makeMove(12, EPSILON, 10),
+                makeMove(13, EPSILON, 24),
+                makeMove(14, 's', 15),
+                makeMove(15, EPSILON, 23),
+                makeMove(16, 'S', 17),
+                makeMove(17, EPSILON, 21),
+                makeMove(18, 'd', 19),
+                makeMove(19, EPSILON, 21),
+                makeMove(20, EPSILON, 16),
+                makeMove(20, EPSILON, 18),
+                makeMove(21, EPSILON, 23),
+                makeMove(22, EPSILON, 14),
+                makeMove(22, EPSILON, 20),
+                makeMove(23, EPSILON, 22),
+                makeMove(23, EPSILON, 25),
+                makeMove(24, EPSILON, 22),
+                makeMove(24, EPSILON, 25)
         );
 
         DFA expected = makeDFA(0, 8);
-        Utility.addSymbols(expected, '$', 'S', '_', 'd', 's');
-        Utility.addStates(expected, 0, 1, 2, 3, 4, 5, 6, 7, 8);
-        Utility.addFinalStates(expected, 1, 2, 3, 4, 5, 6, 7);
-        Utility.addMoves(expected,
-                Utility.makeMove(1, 'd', 6),
-                Utility.makeMove(2, 'd', 6),
-                Utility.makeMove(0, 'd', 8),
-                Utility.makeMove(4, 'd', 6),
-                Utility.makeMove(1, '$', 8),
-                Utility.makeMove(3, 'd', 6),
-                Utility.makeMove(2, '$', 8),
-                Utility.makeMove(6, 'd', 6),
-                Utility.makeMove(3, '$', 8),
-                Utility.makeMove(5, 'd', 6),
-                Utility.makeMove(4, '$', 8),
-                Utility.makeMove(6, '$', 8),
-                Utility.makeMove(7, 'd', 6),
-                Utility.makeMove(5, '$', 8),
-                Utility.makeMove(8, '$', 8),
-                Utility.makeMove(8, 'd', 8),
-                Utility.makeMove(7, '$', 8),
-                Utility.makeMove(0, 's', 4),
-                Utility.makeMove(1, 's', 7),
-                Utility.makeMove(2, 's', 7),
-                Utility.makeMove(4, 's', 7),
-                Utility.makeMove(3, 's', 7),
-                Utility.makeMove(6, 's', 7),
-                Utility.makeMove(5, 's', 7),
-                Utility.makeMove(7, 's', 7),
-                Utility.makeMove(8, 's', 8),
-                Utility.makeMove(0, '_', 3),
-                Utility.makeMove(1, '_', 8),
-                Utility.makeMove(2, '_', 8),
-                Utility.makeMove(3, '_', 8),
-                Utility.makeMove(5, '_', 8),
-                Utility.makeMove(4, '_', 8),
-                Utility.makeMove(0, 'S', 2),
-                Utility.makeMove(7, '_', 8),
-                Utility.makeMove(6, '_', 8),
-                Utility.makeMove(8, '_', 8),
-                Utility.makeMove(1, 'S', 5),
-                Utility.makeMove(2, 'S', 5),
-                Utility.makeMove(3, 'S', 5),
-                Utility.makeMove(4, 'S', 5),
-                Utility.makeMove(6, 'S', 5),
-                Utility.makeMove(5, 'S', 5),
-                Utility.makeMove(7, 'S', 5),
-                Utility.makeMove(0, '$', 1),
-                Utility.makeMove(8, 'S', 8)
+        addSymbols(expected, '$', 'S', '_', 'd', 's');
+        addStates(expected, 0, 1, 2, 3, 4, 5, 6, 7, 8);
+        addFinalStates(expected, 1, 2, 3, 4, 5, 6, 7);
+        addMoves(expected,
+                makeMove(1, 'd', 6),
+                makeMove(2, 'd', 6),
+                makeMove(0, 'd', 8),
+                makeMove(4, 'd', 6),
+                makeMove(1, '$', 8),
+                makeMove(3, 'd', 6),
+                makeMove(2, '$', 8),
+                makeMove(6, 'd', 6),
+                makeMove(3, '$', 8),
+                makeMove(5, 'd', 6),
+                makeMove(4, '$', 8),
+                makeMove(6, '$', 8),
+                makeMove(7, 'd', 6),
+                makeMove(5, '$', 8),
+                makeMove(8, '$', 8),
+                makeMove(8, 'd', 8),
+                makeMove(7, '$', 8),
+                makeMove(0, 's', 4),
+                makeMove(1, 's', 7),
+                makeMove(2, 's', 7),
+                makeMove(4, 's', 7),
+                makeMove(3, 's', 7),
+                makeMove(6, 's', 7),
+                makeMove(5, 's', 7),
+                makeMove(7, 's', 7),
+                makeMove(8, 's', 8),
+                makeMove(0, '_', 3),
+                makeMove(1, '_', 8),
+                makeMove(2, '_', 8),
+                makeMove(3, '_', 8),
+                makeMove(5, '_', 8),
+                makeMove(4, '_', 8),
+                makeMove(0, 'S', 2),
+                makeMove(7, '_', 8),
+                makeMove(6, '_', 8),
+                makeMove(8, '_', 8),
+                makeMove(1, 'S', 5),
+                makeMove(2, 'S', 5),
+                makeMove(3, 'S', 5),
+                makeMove(4, 'S', 5),
+                makeMove(6, 'S', 5),
+                makeMove(5, 'S', 5),
+                makeMove(7, 'S', 5),
+                makeMove(0, '$', 1),
+                makeMove(8, 'S', 8)
         );
 
         DFA actual = DFA.NFAtoDFA(nfa);
@@ -385,15 +385,15 @@ class DFATest {
     @Test
     void NFAtoDFAEmpty() {
         NFA nfa = makeNFA(0);
-        Utility.addStates(nfa, 0, 1);
-        Utility.addFinalStates(nfa, 1);
-        Utility.addMoves(nfa,
-                Utility.makeMove(0, EPSILON, 1)
+        addStates(nfa, 0, 1);
+        addFinalStates(nfa, 1);
+        addMoves(nfa,
+                makeMove(0, EPSILON, 1)
         );
 
         DFA expected = makeDFA(0);
-        Utility.addStates(expected, 0);
-        Utility.addFinalStates(expected, 0);
+        addStates(expected, 0);
+        addFinalStates(expected, 0);
 
         DFA actual = DFA.NFAtoDFA(nfa);
         assertEquals(expected, actual);
@@ -402,30 +402,30 @@ class DFATest {
     @Test
     void getPartition() {
         Partition expected = new Partition();
-        Utility.addPSets(expected,
-                Utility.makePSet(0),
-                Utility.makePSet(1, 2, 3),
-                Utility.makePSet(4),
-                Utility.makePSet(5)
+        addPSets(expected,
+                makePSet(0),
+                makePSet(1, 2, 3),
+                makePSet(4),
+                makePSet(5)
         );
 
         DFA dfa = makeDFA(0, 5);
-        Utility.addSymbols(dfa, 'a', 'b');
-        Utility.addStates(dfa, 0, 1, 2, 3, 4, 5);
-        Utility.addFinalStates(dfa, 4);
-        Utility.addMoves(dfa,
-                Utility.makeMove(1, 'a', 3),
-                Utility.makeMove(1, 'b', 4),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 4),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 4),
-                Utility.makeMove(4, 'a', 5),
-                Utility.makeMove(5, 'b', 5),
-                Utility.makeMove(4, 'b', 5),
-                Utility.makeMove(5, 'a', 5),
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 2)
+        addSymbols(dfa, 'a', 'b');
+        addStates(dfa, 0, 1, 2, 3, 4, 5);
+        addFinalStates(dfa, 4);
+        addMoves(dfa,
+                makeMove(1, 'a', 3),
+                makeMove(1, 'b', 4),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 4),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 4),
+                makeMove(4, 'a', 5),
+                makeMove(5, 'b', 5),
+                makeMove(4, 'b', 5),
+                makeMove(5, 'a', 5),
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 2)
         );
         Partition actual = dfa.getPartition();
 
@@ -435,38 +435,38 @@ class DFATest {
     @Test
     void DFAtoMinDFABasic() {
         DFA dfa = makeDFA(0, 5);
-        Utility.addSymbols(dfa, 'a', 'b');
-        Utility.addStates(dfa, 0, 1, 2, 3, 4, 5);
-        Utility.addFinalStates(dfa, 4);
-        Utility.addMoves(dfa,
-                Utility.makeMove(1, 'a', 3),
-                Utility.makeMove(1, 'b', 4),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 4),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 4),
-                Utility.makeMove(4, 'a', 5),
-                Utility.makeMove(5, 'b', 5),
-                Utility.makeMove(4, 'b', 5),
-                Utility.makeMove(5, 'a', 5),
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 2)
+        addSymbols(dfa, 'a', 'b');
+        addStates(dfa, 0, 1, 2, 3, 4, 5);
+        addFinalStates(dfa, 4);
+        addMoves(dfa,
+                makeMove(1, 'a', 3),
+                makeMove(1, 'b', 4),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 4),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 4),
+                makeMove(4, 'a', 5),
+                makeMove(5, 'b', 5),
+                makeMove(4, 'b', 5),
+                makeMove(5, 'a', 5),
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 2)
         );
         DFA actual = DFA.DFAtoMinDFA(dfa);
 
         DFA expected = makeDFA(0, 3);
-        Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2, 3);
-        Utility.addFinalStates(expected, 2);
-        Utility.addMoves(expected,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 1),
-                Utility.makeMove(1, 'a', 1),
-                Utility.makeMove(1, 'b', 2),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 3)
+        addSymbols(expected, 'a', 'b');
+        addStates(expected, 0, 1, 2, 3);
+        addFinalStates(expected, 2);
+        addMoves(expected,
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 1),
+                makeMove(1, 'a', 1),
+                makeMove(1, 'b', 2),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 3),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 3)
         );
 
         assertEquals(expected, actual);
@@ -475,36 +475,36 @@ class DFATest {
     @Test
     void DFAtoMinDFABasic2() {
         DFA dfa = makeDFA(0, 4);
-        Utility.addSymbols(dfa, 'a', 'b');
-        Utility.addStates(dfa, 0, 1, 2, 3, 4);
-        Utility.addFinalStates(dfa, 3);
-        Utility.addMoves(dfa,
-                Utility.makeMove(2, 'a', 2),
-                Utility.makeMove(2, 'b', 3),
-                Utility.makeMove(3, 'b', 3),
-                Utility.makeMove(3, 'a', 2),
-                Utility.makeMove(4, 'b', 4),
-                Utility.makeMove(4, 'a', 4),
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, 'a', 2),
-                Utility.makeMove(1, 'b', 3),
-                Utility.makeMove(0, 'b', 4)
+        addSymbols(dfa, 'a', 'b');
+        addStates(dfa, 0, 1, 2, 3, 4);
+        addFinalStates(dfa, 3);
+        addMoves(dfa,
+                makeMove(2, 'a', 2),
+                makeMove(2, 'b', 3),
+                makeMove(3, 'b', 3),
+                makeMove(3, 'a', 2),
+                makeMove(4, 'b', 4),
+                makeMove(4, 'a', 4),
+                makeMove(0, 'a', 1),
+                makeMove(1, 'a', 2),
+                makeMove(1, 'b', 3),
+                makeMove(0, 'b', 4)
         );
         DFA actual = DFA.DFAtoMinDFA(dfa);
 
         DFA expected = makeDFA(0, 3);
-        Utility.addSymbols(expected, 'a', 'b');
-        Utility.addStates(expected, 0, 1, 2, 3);
-        Utility.addFinalStates(expected, 2);
-        Utility.addMoves(expected,
-                Utility.makeMove(3, 'b', 3),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(1, 'a', 1),
-                Utility.makeMove(0, 'b', 3),
-                Utility.makeMove(1, 'b', 2),
-                Utility.makeMove(2, 'a', 1),
-                Utility.makeMove(2, 'b', 2)
+        addSymbols(expected, 'a', 'b');
+        addStates(expected, 0, 1, 2, 3);
+        addFinalStates(expected, 2);
+        addMoves(expected,
+                makeMove(3, 'b', 3),
+                makeMove(3, 'a', 3),
+                makeMove(0, 'a', 1),
+                makeMove(1, 'a', 1),
+                makeMove(0, 'b', 3),
+                makeMove(1, 'b', 2),
+                makeMove(2, 'a', 1),
+                makeMove(2, 'b', 2)
         );
 
         assertEquals(expected, actual);
@@ -513,78 +513,78 @@ class DFATest {
     @Test
     void DFAtoMinDFAIdentifiers() {
         DFA dfa = makeDFA(0, 8);
-        Utility.addSymbols(dfa, '$', 'S', '_', 'd', 's');
-        Utility.addStates(dfa, 0, 1, 2, 3, 4, 5, 6, 7, 8);
-        Utility.addFinalStates(dfa, 1, 2, 3, 4, 5, 6, 7);
-        Utility.addMoves(dfa,
-                Utility.makeMove(1, 'd', 6),
-                Utility.makeMove(2, 'd', 6),
-                Utility.makeMove(0, 'd', 8),
-                Utility.makeMove(4, 'd', 6),
-                Utility.makeMove(1, '$', 8),
-                Utility.makeMove(3, 'd', 6),
-                Utility.makeMove(2, '$', 8),
-                Utility.makeMove(6, 'd', 6),
-                Utility.makeMove(3, '$', 8),
-                Utility.makeMove(5, 'd', 6),
-                Utility.makeMove(4, '$', 8),
-                Utility.makeMove(6, '$', 8),
-                Utility.makeMove(7, 'd', 6),
-                Utility.makeMove(5, '$', 8),
-                Utility.makeMove(8, '$', 8),
-                Utility.makeMove(8, 'd', 8),
-                Utility.makeMove(7, '$', 8),
-                Utility.makeMove(0, 's', 4),
-                Utility.makeMove(1, 's', 7),
-                Utility.makeMove(2, 's', 7),
-                Utility.makeMove(4, 's', 7),
-                Utility.makeMove(3, 's', 7),
-                Utility.makeMove(6, 's', 7),
-                Utility.makeMove(5, 's', 7),
-                Utility.makeMove(7, 's', 7),
-                Utility.makeMove(8, 's', 8),
-                Utility.makeMove(0, '_', 3),
-                Utility.makeMove(1, '_', 8),
-                Utility.makeMove(2, '_', 8),
-                Utility.makeMove(3, '_', 8),
-                Utility.makeMove(5, '_', 8),
-                Utility.makeMove(4, '_', 8),
-                Utility.makeMove(0, 'S', 2),
-                Utility.makeMove(7, '_', 8),
-                Utility.makeMove(6, '_', 8),
-                Utility.makeMove(8, '_', 8),
-                Utility.makeMove(1, 'S', 5),
-                Utility.makeMove(2, 'S', 5),
-                Utility.makeMove(3, 'S', 5),
-                Utility.makeMove(4, 'S', 5),
-                Utility.makeMove(6, 'S', 5),
-                Utility.makeMove(5, 'S', 5),
-                Utility.makeMove(7, 'S', 5),
-                Utility.makeMove(0, '$', 1),
-                Utility.makeMove(8, 'S', 8)
+        addSymbols(dfa, '$', 'S', '_', 'd', 's');
+        addStates(dfa, 0, 1, 2, 3, 4, 5, 6, 7, 8);
+        addFinalStates(dfa, 1, 2, 3, 4, 5, 6, 7);
+        addMoves(dfa,
+                makeMove(1, 'd', 6),
+                makeMove(2, 'd', 6),
+                makeMove(0, 'd', 8),
+                makeMove(4, 'd', 6),
+                makeMove(1, '$', 8),
+                makeMove(3, 'd', 6),
+                makeMove(2, '$', 8),
+                makeMove(6, 'd', 6),
+                makeMove(3, '$', 8),
+                makeMove(5, 'd', 6),
+                makeMove(4, '$', 8),
+                makeMove(6, '$', 8),
+                makeMove(7, 'd', 6),
+                makeMove(5, '$', 8),
+                makeMove(8, '$', 8),
+                makeMove(8, 'd', 8),
+                makeMove(7, '$', 8),
+                makeMove(0, 's', 4),
+                makeMove(1, 's', 7),
+                makeMove(2, 's', 7),
+                makeMove(4, 's', 7),
+                makeMove(3, 's', 7),
+                makeMove(6, 's', 7),
+                makeMove(5, 's', 7),
+                makeMove(7, 's', 7),
+                makeMove(8, 's', 8),
+                makeMove(0, '_', 3),
+                makeMove(1, '_', 8),
+                makeMove(2, '_', 8),
+                makeMove(3, '_', 8),
+                makeMove(5, '_', 8),
+                makeMove(4, '_', 8),
+                makeMove(0, 'S', 2),
+                makeMove(7, '_', 8),
+                makeMove(6, '_', 8),
+                makeMove(8, '_', 8),
+                makeMove(1, 'S', 5),
+                makeMove(2, 'S', 5),
+                makeMove(3, 'S', 5),
+                makeMove(4, 'S', 5),
+                makeMove(6, 'S', 5),
+                makeMove(5, 'S', 5),
+                makeMove(7, 'S', 5),
+                makeMove(0, '$', 1),
+                makeMove(8, 'S', 8)
         );
         DFA actual = DFA.DFAtoMinDFA(dfa);
 
         DFA expected = makeDFA(0, 2);
-        Utility.addSymbols(expected, '$', 'S', '_', 'd', 's');
-        Utility.addStates(expected, 0, 1, 2);
-        Utility.addFinalStates(expected, 1);
-        Utility.addMoves(expected,
-                Utility.makeMove(1, '_', 2),
-                Utility.makeMove(2, '_', 2),
-                Utility.makeMove(0, 'S', 1),
-                Utility.makeMove(0, 's', 1),
-                Utility.makeMove(1, 'S', 1),
-                Utility.makeMove(1, 's', 1),
-                Utility.makeMove(2, 'S', 2),
-                Utility.makeMove(2, 's', 2),
-                Utility.makeMove(0, '$', 1),
-                Utility.makeMove(0, 'd', 2),
-                Utility.makeMove(1, 'd', 1),
-                Utility.makeMove(1, '$', 2),
-                Utility.makeMove(2, '$', 2),
-                Utility.makeMove(2, 'd', 2),
-                Utility.makeMove(0, '_', 1)
+        addSymbols(expected, '$', 'S', '_', 'd', 's');
+        addStates(expected, 0, 1, 2);
+        addFinalStates(expected, 1);
+        addMoves(expected,
+                makeMove(1, '_', 2),
+                makeMove(2, '_', 2),
+                makeMove(0, 'S', 1),
+                makeMove(0, 's', 1),
+                makeMove(1, 'S', 1),
+                makeMove(1, 's', 1),
+                makeMove(2, 'S', 2),
+                makeMove(2, 's', 2),
+                makeMove(0, '$', 1),
+                makeMove(0, 'd', 2),
+                makeMove(1, 'd', 1),
+                makeMove(1, '$', 2),
+                makeMove(2, '$', 2),
+                makeMove(2, 'd', 2),
+                makeMove(0, '_', 1)
         );
 
         assertEquals(expected, actual);
@@ -598,50 +598,50 @@ class DFATest {
         DFA actual = DFA.DFAtoMinDFA(dfa);
 
         DFA expected = makeDFA(0, 3);
-        Utility.addSymbols(expected, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
-        Utility.addStates(expected, 0, 1, 2, 3);
-        Utility.addFinalStates(expected, 1, 2);
-        Utility.addMoves(expected,
-                Utility.makeMove(0, '9', 2),
-                Utility.makeMove(0, '7', 2),
-                Utility.makeMove(1, '9', 3),
-                Utility.makeMove(2, '9', 2),
-                Utility.makeMove(0, '5', 2),
-                Utility.makeMove(1, '7', 3),
-                Utility.makeMove(2, '7', 2),
-                Utility.makeMove(3, '9', 3),
-                Utility.makeMove(0, '3', 2),
-                Utility.makeMove(1, '5', 3),
-                Utility.makeMove(2, '5', 2),
-                Utility.makeMove(3, '7', 3),
-                Utility.makeMove(0, '1', 2),
-                Utility.makeMove(1, '3', 3),
-                Utility.makeMove(2, '3', 2),
-                Utility.makeMove(3, '5', 3),
-                Utility.makeMove(2, '1', 2),
-                Utility.makeMove(3, '3', 3),
-                Utility.makeMove(1, '1', 3),
-                Utility.makeMove(3, '1', 3),
-                Utility.makeMove(0, '8', 2),
-                Utility.makeMove(0, '6', 2),
-                Utility.makeMove(1, '8', 3),
-                Utility.makeMove(2, '8', 2),
-                Utility.makeMove(3, '8', 3),
-                Utility.makeMove(0, '4', 2),
-                Utility.makeMove(1, '6', 3),
-                Utility.makeMove(2, '6', 2),
-                Utility.makeMove(3, '6', 3),
-                Utility.makeMove(0, '2', 2),
-                Utility.makeMove(1, '4', 3),
-                Utility.makeMove(2, '4', 2),
-                Utility.makeMove(0, '0', 1),
-                Utility.makeMove(3, '4', 3),
-                Utility.makeMove(1, '2', 3),
-                Utility.makeMove(2, '2', 2),
-                Utility.makeMove(3, '2', 3),
-                Utility.makeMove(1, '0', 3),
-                Utility.makeMove(2, '0', 2),
-                Utility.makeMove(3, '0', 3)
+        addSymbols(expected, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        addStates(expected, 0, 1, 2, 3);
+        addFinalStates(expected, 1, 2);
+        addMoves(expected,
+                makeMove(0, '9', 2),
+                makeMove(0, '7', 2),
+                makeMove(1, '9', 3),
+                makeMove(2, '9', 2),
+                makeMove(0, '5', 2),
+                makeMove(1, '7', 3),
+                makeMove(2, '7', 2),
+                makeMove(3, '9', 3),
+                makeMove(0, '3', 2),
+                makeMove(1, '5', 3),
+                makeMove(2, '5', 2),
+                makeMove(3, '7', 3),
+                makeMove(0, '1', 2),
+                makeMove(1, '3', 3),
+                makeMove(2, '3', 2),
+                makeMove(3, '5', 3),
+                makeMove(2, '1', 2),
+                makeMove(3, '3', 3),
+                makeMove(1, '1', 3),
+                makeMove(3, '1', 3),
+                makeMove(0, '8', 2),
+                makeMove(0, '6', 2),
+                makeMove(1, '8', 3),
+                makeMove(2, '8', 2),
+                makeMove(3, '8', 3),
+                makeMove(0, '4', 2),
+                makeMove(1, '6', 3),
+                makeMove(2, '6', 2),
+                makeMove(3, '6', 3),
+                makeMove(0, '2', 2),
+                makeMove(1, '4', 3),
+                makeMove(2, '4', 2),
+                makeMove(0, '0', 1),
+                makeMove(3, '4', 3),
+                makeMove(1, '2', 3),
+                makeMove(2, '2', 2),
+                makeMove(3, '2', 3),
+                makeMove(1, '0', 3),
+                makeMove(2, '0', 2),
+                makeMove(3, '0', 3)
         );
 
         assertEquals(expected, actual);
@@ -650,12 +650,12 @@ class DFATest {
     @Test
     void DFAtoMinDFAEmpty() {
         DFA dfa = makeDFA(0);
-        Utility.addStates(dfa, 0);
-        Utility.addFinalStates(dfa, 0);
+        addStates(dfa, 0);
+        addFinalStates(dfa, 0);
 
         DFA expected = makeDFA(0);
-        Utility.addStates(expected, 0);
-        Utility.addFinalStates(expected, 0);
+        addStates(expected, 0);
+        addFinalStates(expected, 0);
 
         DFA actual = DFA.DFAtoMinDFA(dfa);
         assertEquals(dfa, actual);
@@ -692,31 +692,31 @@ class DFATest {
                 "\tENTRY -> 0;\n" +
                 "}\n";
 
-        DFA dfa = Utility.makeDFA(
+        DFA dfa = makeDFA(
                 makeState(0, makeStates(0, 2, 4)),
                 new State(5));
-        Utility.addSymbols(dfa, 'a', 'b');
-        Utility.addStates(dfa,
+        addSymbols(dfa, 'a', 'b');
+        addStates(dfa,
                 makeState(0, makeStates(0, 2, 4)),
                 makeState(1, makeStates(1, 5, 6, 8, 9, 10)),
                 makeState(2, makeStates(3, 5, 6, 8, 9, 10)),
                 makeState(3, makeStates(6, 7, 9, 10)),
                 makeState(4, makeStates(11)));
-        Utility.addStates(dfa, 5);
-        Utility.addFinalStates(dfa, 4);
-        Utility.addMoves(dfa,
-                Utility.makeMove(0, 'a', 1),
-                Utility.makeMove(0, 'b', 2),
-                Utility.makeMove(1, 'a', 3),
-                Utility.makeMove(1, 'b', 4),
-                Utility.makeMove(2, 'a', 3),
-                Utility.makeMove(2, 'b', 4),
-                Utility.makeMove(3, 'a', 3),
-                Utility.makeMove(3, 'b', 4),
-                Utility.makeMove(4, 'a', 5),
-                Utility.makeMove(4, 'b', 5),
-                Utility.makeMove(5, 'a', 5),
-                Utility.makeMove(5, 'b', 5));
+        addStates(dfa, 5);
+        addFinalStates(dfa, 4);
+        addMoves(dfa,
+                makeMove(0, 'a', 1),
+                makeMove(0, 'b', 2),
+                makeMove(1, 'a', 3),
+                makeMove(1, 'b', 4),
+                makeMove(2, 'a', 3),
+                makeMove(2, 'b', 4),
+                makeMove(3, 'a', 3),
+                makeMove(3, 'b', 4),
+                makeMove(4, 'a', 5),
+                makeMove(4, 'b', 5),
+                makeMove(5, 'a', 5),
+                makeMove(5, 'b', 5));
         String actual = dfa.toString();
 
         assertEquals(expected, actual);

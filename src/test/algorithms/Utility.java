@@ -49,11 +49,6 @@ class Utility {
         return new Move(new State(fromId), consumed, new State(toId));
     }
 
-    static FSA makeFSA(Integer start) {
-        return new FSA(new State(start));
-    }
-
-
     static DFA makeDFA(Integer start) {
         return new DFA(new State(start), null);
     }

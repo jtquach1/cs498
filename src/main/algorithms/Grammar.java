@@ -269,10 +269,10 @@ class Grammar {
     }
 
     @NotNull
-    private Queue<String> handleSentence(String w) throws Exception {
-        // We will get an ArrayIndexOutOfBounds exception otherwise.
+    private Queue<String> handleSentence(String w) {
+        /* If the sentence doesn't end with the terminator, we will get an
+        ArrayIndexOutOfBounds exception otherwise when doing LL1 parsing. */
         if (!w.endsWith(TERMINATOR)) {
-//            throw new Exception("Sentence `" + w + "` does not end with " + TERMINATOR);
             w += " " + TERMINATOR;
         }
         List<String> sentence = Arrays.asList(w.strip().split(" "));
