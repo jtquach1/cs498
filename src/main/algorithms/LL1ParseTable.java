@@ -8,11 +8,18 @@ class LL1ParseTable extends TreeMap<String, LL1ParseTableEntry> {
 
     void set(String nonTerminal, String terminal, int productionIndex) {
         LL1ParseTableEntry entry = this.get(nonTerminal);
+        Indices indices;
         if (entry == null) {
             entry = new LL1ParseTableEntry();
             this.put(nonTerminal, entry);
         }
-        entry.put(terminal, productionIndex);
+        indices = entry.get(terminal);
+        if (indices == null) {
+            indices = new Indices();
+        }
+
+        indices.add(productionIndex);
+        entry.put(terminal, indices);
     }
 
     Integer get(String nonTerminal, String symbol) {
@@ -20,15 +27,26 @@ class LL1ParseTable extends TreeMap<String, LL1ParseTableEntry> {
         if (entry == null) {
             return null;
         }
-        Integer productionIndex = entry.get(symbol);
-        if (symbol == null) {
+
+        Indices indices = entry.get(symbol);
+        if (symbol == null || indices == null) {
             return null;
         }
+
+        // In case of conflicts, we just want to return one value
+        Integer productionIndex = indices.get(0);
         return productionIndex;
     }
 }
 
-class LL1ParseTableEntry extends TreeMap<String, Integer> {
+class LL1ParseTableEntry extends TreeMap<String, Indices> {
+    /* We use a list of integers to see whether the parsed grammar was LL1.
+     If the list contains more than one index, then the grammar is ambiguous
+     and must have left recursion removed. */
+}
+
+class Indices extends ArrayList<Integer> {
+
 }
 
 class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {

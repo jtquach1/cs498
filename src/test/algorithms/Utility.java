@@ -1,8 +1,6 @@
 package algorithms;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 class Utility {
     static void addSymbols(FSA fsa, Character... symbols) {
@@ -81,7 +79,7 @@ class Utility {
         return new State(stateId, states);
     }
 
-    static Set<State> makeStates(Integer ...stateIds) {
+    static Set<State> makeStates(Integer... stateIds) {
         Set<State> states = new TreeSet<>();
         for (int stateId : stateIds) {
             states.add(new State(stateId));
@@ -105,4 +103,15 @@ class Utility {
         return queue;
     }
 
+    static Set<String> makeNonTerminals(String... symbols) {
+        return new TreeSet<>(Arrays.asList(symbols));
+    }
+
+    static Set<String> makeTerminals(String... symbols) {
+        return new TreeSet<>(Arrays.asList(symbols));
+    }
+
+    static List<Production> makeProductions(Production... productions) {
+        return new ArrayList<>(Arrays.asList(productions));
+    }
 }

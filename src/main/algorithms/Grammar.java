@@ -17,109 +17,21 @@ class Grammar {
     String start;
     List<Production> productions;
 
-    Grammar(String start) {
-        nonTerminals = new TreeSet<>();
-        terminals = new TreeSet<>();
+    FirstMap firstMap;
+    FollowMap followMap;
+    LL1ParseTable ll1ParseTable;
+
+    Grammar(Set<String> nonTerminals, Set<String> terminals, String start,
+            List<Production> productions) {
+        this.nonTerminals = nonTerminals;
+        this.terminals = terminals;
         this.start = start;
-        productions = new ArrayList<>();
+        this.productions = productions;
         nonTerminals.add(start);
-    }
 
-    public static void main(String[] args) throws Exception {
-        String inputFile = args[0]; // supply file or do redirection?
-        inputFile = "E ::= T E'\n" +
-                "E' ::= + T E'\n" +
-                "E' ::= ε\n" +
-                "T ::= F T'\n" +
-                "T' ::= ε\n" +
-                "F ::= ( E )\n" +
-                "F ::= id\n";
-
-        List<List<String[]>> parsedInput = getParsedInput(inputFile);
-        Grammar cfg = initializeGrammar(parsedInput);
-        populateGrammarWithProductions(parsedInput, cfg);
-        populateGrammarWithNonTerminals(cfg);
-
-        FirstMap firstMap = cfg.first();
-        FollowMap followMap = cfg.follow(firstMap);
-        LL1ParseTable ll1ParseTable = cfg.generateLL1ParseTable(firstMap, followMap);
-
-        // Later: specify the grammar as stdin, sentence as CLI
-        // OR have both be files- one for sentence, one for grammar
-        String w = "id + id * id";
-        LL1ParseOutput output = cfg.parseSentence(ll1ParseTable, w);
-
-        System.out.println(firstMap);
-        System.out.println(followMap);
-        System.out.println(ll1ParseTable);
-        System.out.println(output);
-
-        // System.out.println(cfg.removeLeftRecursion());
-
-    }
-
-    @NotNull
-    private static List<List<String[]>> getParsedInput(String grammar) {
-        grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
-        List<List<String[]>> parsedInput =
-                Arrays
-                        .stream(grammar.split("\r?\n|\r"))
-                        .map(prod -> Arrays
-                                .stream(prod.split("::="))
-                                .map(side -> side.trim().split(" "))
-                                .collect(Collectors.toList()))
-                        .collect(Collectors.toList());
-        return parsedInput;
-    }
-
-    @NotNull
-    private static Grammar initializeGrammar(List<List<String[]>> parsedInput) {
-        String start = parsedInput.get(0).get(0)[0];
-        return new Grammar(start);
-    }
-
-    private static void populateGrammarWithNonTerminals(Grammar cfg) {
-        Set<String> nonTerminals = cfg.getNonTerminals();
-        for (Production p : cfg.getProductions()) {
-            List<String> rhs = p.getRhs();
-            List<String> terminals = rhs
-                    .stream()
-                    .filter(symbol -> !nonTerminals.contains(symbol))
-                    .collect(Collectors.toList());
-            terminals.forEach(cfg::addTerminals);
-        }
-    }
-
-    void addTerminals(String... symbols) {
-        terminals.addAll(Arrays.asList(symbols));
-    }
-
-    public List<Production> getProductions() {
-        return productions;
-    }
-
-    public Set<String> getNonTerminals() {
-        return nonTerminals;
-    }
-
-    private static void populateGrammarWithProductions(List<List<String[]>> parsedInput,
-                                                       Grammar cfg) {
-        for (List<String[]> prod : parsedInput) {
-            String lhs = prod.get(0)[0];
-            String[] rhs = prod.get(1);
-
-            cfg.addNonTerminals(lhs);
-            Production p = new Production(lhs, rhs);
-            cfg.addProductions(p);
-        }
-    }
-
-    void addNonTerminals(String... symbols) {
-        nonTerminals.addAll(Arrays.asList(symbols));
-    }
-
-    void addProductions(Production... productions) {
-        this.productions.addAll(Arrays.asList(productions));
+        firstMap = first();
+        followMap = follow();
+        ll1ParseTable = generateLL1ParseTable();
     }
 
     FirstMap first() {
@@ -142,7 +54,7 @@ class Grammar {
         return map;
     }
 
-    FollowMap follow(FirstMap firstMap) {
+    FollowMap follow() {
         FollowMap followMap = new FollowMap();
         nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
         followMap.get(start).add(TERMINATOR);
@@ -179,7 +91,7 @@ class Grammar {
         return nonTerminals.contains(symbol);
     }
 
-    LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
+    LL1ParseTable generateLL1ParseTable() {
         LL1ParseTable table = new LL1ParseTable();
 
         for (String nonTerminal : nonTerminals) {
@@ -214,7 +126,80 @@ class Grammar {
                 .collect(Collectors.toList());
     }
 
-    LL1ParseOutput parseSentence(LL1ParseTable table, String delimitedBySpaces) throws Exception {
+    public static void main(String[] args) throws Exception {
+        String inputFile = args[0]; // supply file or do redirection?
+//        inputFile = "E ::= T E'\n" +
+//                "E' ::= + T E'\n" +
+//                "E' ::= ε\n" +
+//                "T ::= F T'\n" +
+//                "T' ::= ε\n" +
+//                "F ::= ( E )\n" +
+//                "F ::= id\n";
+
+        inputFile = "E ::= E + T\n" +
+                "E ::= T\n" +
+                "T ::= T * F\n" +
+                "T ::= F\n" +
+                "F ::= ( E )\n" +
+                "F ::= id\n";
+
+        List<List<String[]>> parsedInput = getParsedInput(inputFile);
+        Grammar grammar = initializeGrammar(parsedInput);
+
+        // Later: specify the grammar as stdin, sentence as CLI
+        // OR have both be files- one for sentence, one for grammar
+        String w = "id + id * id";
+        if (!grammar.isLL1()) {
+            Grammar converted = grammar.removeLeftRecursion();
+        } else {
+            LL1ParseOutput output = grammar.parseSentence(w);
+//            System.out.println(output);
+        }
+
+        System.out.println("foo");
+
+    }
+
+    @NotNull
+    private static List<List<String[]>> getParsedInput(String grammar) {
+        grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
+        return Arrays
+                .stream(grammar.split("\r?\n|\r"))
+                .map(production -> Arrays
+                        .stream(production.split("::="))
+                        .map(side -> side.trim().split(" "))
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
+    }
+
+    @NotNull
+    private static Grammar initializeGrammar(List<List<String[]>> parsedInput) {
+        Set<String> nonTerminals = new TreeSet<>();
+        Set<String> terminals = new TreeSet<>();
+        String start = parsedInput.get(0).get(0)[0];
+        List<Production> productions = new ArrayList<>();
+
+        for (List<String[]> prod : parsedInput) {
+            String lhs = prod.get(0)[0];
+            nonTerminals.add(lhs);
+
+            String[] rhs = prod.get(1);
+            Production p = new Production(lhs, rhs);
+            productions.add(p);
+        }
+
+        for (Production p : productions) {
+            for (String symbol : p.getRhs()) {
+                if (!nonTerminals.contains(symbol)) {
+                    terminals.add(symbol);
+                }
+            }
+        }
+
+        return new Grammar(nonTerminals, terminals, start, productions);
+    }
+
+    LL1ParseOutput parseSentence(String delimitedBySpaces) throws Exception {
         Queue<String> sentence = this.handleSentence(delimitedBySpaces);
         Stack<String> stack = this.initializeStack();
         String symbol = sentence.dequeue();
@@ -235,7 +220,7 @@ class Grammar {
                     throw new Exception("A " + symbol + " found where a " + top + " was expected");
                 }
             } else if (isNonTerminal(top)) {
-                index = table.get(top, symbol);
+                index = ll1ParseTable.get(top, symbol);
                 if (index != null) {
                     this.applyRuleAndReplaceTop(stack, index);
                 } else {
@@ -289,6 +274,20 @@ class Grammar {
         return stack;
     }
 
+    boolean isLL1() {
+        Set<String> nonTerminals = ll1ParseTable.keySet();
+        for (String nonTerminal : nonTerminals) {
+            LL1ParseTableEntry entry = ll1ParseTable.get(nonTerminal);
+            Collection<Indices> values = entry.values();
+            for (Indices indices : values) {
+                if (indices.size() > 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     Grammar removeLeftRecursion() {
         Grammar cfg = this.deepClone();
         TreeMap<String, Integer> enumerations = new TreeMap<>();
@@ -312,15 +311,10 @@ class Grammar {
     }
 
     Grammar deepClone() {
-        Grammar clone = new Grammar(start);
-        clone.nonTerminals.addAll(nonTerminals);
-        clone.terminals.addAll(terminals);
-        clone.productions.addAll(productions);
-        return clone;
-    }
-
-    public Set<String> getTerminals() {
-        return terminals;
+        Set<String> nonTerminals = new TreeSet<>(this.nonTerminals);
+        Set<String> terminals = new TreeSet<>(this.terminals);
+        List<Production> productions = new ArrayList<>(this.productions);
+        return new Grammar(nonTerminals, terminals, start, productions);
     }
 
     @Override
@@ -399,19 +393,10 @@ class Production implements Comparable<Production> {
     }
 }
 
-class Productions extends ArrayList<Production> {
-}
-
 class First extends TreeSet<String> {
     public First(String... symbols) {
         super();
         this.addAll(Arrays.asList(symbols));
-    }
-
-    First deepClone() {
-        First clone = new First();
-        clone.addAll(this);
-        return clone;
     }
 }
 
