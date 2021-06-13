@@ -12,12 +12,6 @@ class First extends TreeSet<String> {
         super();
         this.addAll(Arrays.asList(symbols));
     }
-
-    First deepClone() {
-        First clone = new First();
-        clone.addAll(this);
-        return clone;
-    }
 }
 
 class FirstMap extends TreeMap<String, First> {

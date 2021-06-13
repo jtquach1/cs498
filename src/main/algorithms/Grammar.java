@@ -43,8 +43,8 @@ class Grammar {
                 "F ::= ( E )\n" +
                 "F ::= id\n";
 
-        List<List<String[]>> parsedInput = getParsedInput(inputFile);
-        Grammar grammar = initializeGrammar(parsedInput);
+        List<Production> productions = getProductionsFromFile(inputFile);
+        Grammar grammar = initializeGrammar(productions);
 
         FirstMap firstMap = grammar.first();
         FollowMap followMap = grammar.follow(firstMap);
@@ -62,35 +62,33 @@ class Grammar {
     }
 
     @NotNull
-    private static List<List<String[]>> getParsedInput(String grammar) {
+    private static List<Production> getProductionsFromFile(String grammar) {
         grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
-        return Arrays
-                .stream(grammar.split("\r?\n|\r"))
-                .map(production -> Arrays
-                        .stream(production.split("::="))
-                        .map(side -> side.trim().split(" "))
-                        .collect(Collectors.toList()))
-                .collect(Collectors.toList());
+        String[] lines = grammar.split("\r?\n|\r");
+        List<Production> productions = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] sides = line.split("::=");
+            String lhs = sides[0].trim();
+            String[] rhs = sides[1].trim().split(" ");
+            productions.add(new Production(lhs, rhs));
+        }
+
+        return productions;
     }
 
     @NotNull
-    private static Grammar initializeGrammar(List<List<String[]>> parsedInput) {
+    private static Grammar initializeGrammar(List<Production> productions) {
         Set<String> nonTerminals = new TreeSet<>();
         Set<String> terminals = new TreeSet<>();
-        String start = parsedInput.get(0).get(0)[0];
-        List<Production> productions = new ArrayList<>();
+        String start = productions.get(0).getLhs();
 
-        for (List<String[]> prod : parsedInput) {
-            String lhs = prod.get(0)[0];
+        for (Production production : productions) {
+            String lhs = production.getLhs();
             nonTerminals.add(lhs);
 
-            String[] rhs = prod.get(1);
-            Production p = new Production(lhs, rhs);
-            productions.add(p);
-        }
-
-        for (Production p : productions) {
-            for (String symbol : p.getRhs()) {
+            List<String> rhs = production.getRhs();
+            for (String symbol : rhs) {
                 if (!nonTerminals.contains(symbol)) {
                     terminals.add(symbol);
                 }
