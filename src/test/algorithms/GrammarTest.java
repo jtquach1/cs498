@@ -19,15 +19,14 @@ class GrammarTest {
         Set<String> nonTerminals = makeNonTerminals("A", "B");
         Set<String> terminals = makeTerminals("a", "b", "c", EPSILON);
         List<Production> productions = makeProductions(
-                new Production("S", "A", "a"),
-                new Production("S", "a"),
-                new Production("A", "c"),
-                new Production("A", "b", "B"),
-                new Production("B", "c", "B"),
-                new Production("B", EPSILON)
+                "S ::= A a",
+                "S ::= a",
+                "A ::= c",
+                "A ::= b B",
+                "B ::= c B",
+                "B ::= " + EPSILON
         );
         Grammar cfg = new Grammar(nonTerminals, terminals, "S", productions);
-
         FirstMap actual = cfg.first();
         FirstMap expected = new FirstMap();
         expected.put("a", new First("a"));
@@ -39,21 +38,20 @@ class GrammarTest {
         expected.put("B", new First("c", EPSILON));
         assertEquals(expected, actual);
 
-        // From lecture slides
+        // From lecture slides, LL(1) grammar
         nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
         productions = makeProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= T E'",
+                "E' ::= + T E'",
+                "E' ::= " + EPSILON,
+                "T ::= F T'",
+                "T' ::= * F T'",
+                "T' ::= " + EPSILON,
+                "F ::= ( E )",
+                "F ::= id"
         );
         cfg = new Grammar(nonTerminals, terminals, "E", productions);
-
         actual = cfg.first();
         expected = new FirstMap();
         expected.put("(", new First("("));
@@ -68,6 +66,31 @@ class GrammarTest {
         expected.put("id", new First("id"));
         expected.put(EPSILON, new First(EPSILON));
         assertEquals(expected, actual);
+
+        // From lecture slides, non LL(1) grammar
+        nonTerminals = makeNonTerminals("T", "F");
+        terminals = makeTerminals("+", "*", "(", ")", "id");
+        productions = makeProductions(
+                "E ::= E + T",
+                "E ::= T",
+                "T ::= T * F",
+                "T ::= F",
+                "F ::= ( E )",
+                "F ::= id"
+        );
+        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        actual = cfg.first();
+
+        expected = new FirstMap();
+        expected.put("(", new First("("));
+        expected.put(")", new First(")"));
+        expected.put("*", new First("*"));
+        expected.put("+", new First("+"));
+        expected.put("E", new First("(", "id"));
+        expected.put("F", new First("(", "id"));
+        expected.put("T", new First("(", "id"));
+        expected.put("id", new First("id"));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -81,19 +104,28 @@ class GrammarTest {
         Set<String> nonTerminals = makeNonTerminals("A", "B");
         Set<String> terminals = makeTerminals("a", "b", "c", EPSILON);
         List<Production> productions = makeProductions(
-                new Production("S", "A", "a"),
-                new Production("S", "a"),
-                new Production("A", "c"),
-                new Production("A", "b", "B"),
-                new Production("B", "c", "B"),
-                new Production("B", EPSILON)
+                "S ::= A a",
+                "S ::= a",
+                "A ::= c",
+                "A ::= b B",
+                "B ::= c B",
+                "B ::= " + EPSILON
         );
         Grammar cfg = new Grammar(nonTerminals, terminals, "S", productions);
-        FollowMap actual = cfg.follow();
 
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("a", new First("a"));
+        firstMap.put("b", new First("b"));
+        firstMap.put("c", new First("c"));
+        firstMap.put(EPSILON, new First(EPSILON));
+        firstMap.put("S", new First("a", "b", "c"));
+        firstMap.put("A", new First("c", "b"));
+        firstMap.put("B", new First("c", EPSILON));
+
+        FollowMap actual = cfg.follow(firstMap);
         assertEquals(expected, actual);
 
-        // From lecture slides
+        // From lecture slides, LL(1) grammar
         expected = new FollowMap();
         expected.put("E", new Follow(")", TERMINATOR));
         expected.put("E'", new Follow(")", TERMINATOR));
@@ -104,18 +136,62 @@ class GrammarTest {
         nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
         productions = makeProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= T E'",
+                "E' ::= + T E'",
+                "E' ::= " + EPSILON,
+                "T ::= F T'",
+                "T' ::= * F T'",
+                "T' ::= " + EPSILON,
+                "F ::= ( E )",
+                "F ::= id"
         );
         cfg = new Grammar(nonTerminals, terminals, "E", productions);
-        actual = cfg.follow();
 
+        firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("E'", new First("+", EPSILON));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("T'", new First("*", EPSILON));
+        firstMap.put("id", new First("id"));
+        firstMap.put(EPSILON, new First(EPSILON));
+
+        actual = cfg.follow(firstMap);
+        assertEquals(expected, actual);
+
+        // From lecture slides, non LL(1) grammar
+        expected = new FollowMap();
+        expected.put("E", new Follow("+", ")", TERMINATOR));
+        expected.put("F", new Follow("+", "*", ")", TERMINATOR));
+        expected.put("T", new Follow("+", "*", ")", TERMINATOR));
+
+        nonTerminals = makeNonTerminals("T", "F");
+        terminals = makeTerminals("+", "*", "(", ")", "id");
+        productions = makeProductions(
+                "E ::= E + T",
+                "E ::= T",
+                "T ::= T * F",
+                "T ::= F",
+                "F ::= ( E )",
+                "F ::= id"
+        );
+        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+
+        firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("id", new First("id"));
+
+        actual = cfg.follow(firstMap);
         assertEquals(expected, actual);
     }
 
@@ -134,18 +210,33 @@ class GrammarTest {
         Set<String> nonTerminals = makeNonTerminals("A", "B");
         Set<String> terminals = makeTerminals("a", "b", "c", EPSILON);
         List<Production> productions = makeProductions(
-                new Production("S", "A", "a"),
-                new Production("S", "a"),
-                new Production("A", "c"),
-                new Production("A", "b", "B"),
-                new Production("B", "c", "B"),
-                new Production("B", EPSILON)
+                "S ::= A a",
+                "S ::= a",
+                "A ::= c",
+                "A ::= b B",
+                "B ::= c B",
+                "B ::= " + EPSILON
         );
         Grammar cfg = new Grammar(nonTerminals, terminals, "S", productions);
-        LL1ParseTable actual = cfg.generateLL1ParseTable();
+
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("a", new First("a"));
+        firstMap.put("b", new First("b"));
+        firstMap.put("c", new First("c"));
+        firstMap.put(EPSILON, new First(EPSILON));
+        firstMap.put("S", new First("a", "b", "c"));
+        firstMap.put("A", new First("c", "b"));
+        firstMap.put("B", new First("c", EPSILON));
+
+        FollowMap followMap = new FollowMap();
+        followMap.put("S", new Follow(TERMINATOR));
+        followMap.put("A", new Follow("a"));
+        followMap.put("B", new Follow("a"));
+
+        LL1ParseTable actual = cfg.generateLL1ParseTable(firstMap, followMap);
         assertEquals(expected, actual);
 
-        // From lecture slides
+        // From lecture slides, LL(1) grammar
         expected = new LL1ParseTable();
         expected.set("E", "(", 0);
         expected.set("E", "id", 0);
@@ -164,17 +255,83 @@ class GrammarTest {
         nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
         productions = makeProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= T E'",
+                "E' ::= + T E'",
+                "E' ::= " + EPSILON,
+                "T ::= F T'",
+                "T' ::= * F T'",
+                "T' ::= " + EPSILON,
+                "F ::= ( E )",
+                "F ::= id"
         );
         cfg = new Grammar(nonTerminals, terminals, "E", productions);
-        actual = cfg.generateLL1ParseTable();
+
+        firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("E'", new First("+", EPSILON));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("T'", new First("*", EPSILON));
+        firstMap.put("id", new First("id"));
+        firstMap.put(EPSILON, new First(EPSILON));
+
+        followMap = new FollowMap();
+        followMap.put("E", new Follow(")", TERMINATOR));
+        followMap.put("E'", new Follow(")", TERMINATOR));
+        followMap.put("F", new Follow("+", "*", ")", TERMINATOR));
+        followMap.put("T", new Follow("+", ")", TERMINATOR));
+        followMap.put("T'", new Follow("+", ")", TERMINATOR));
+
+        actual = cfg.generateLL1ParseTable(firstMap, followMap);
+
+        assertEquals(expected, actual);
+
+        // From lecture slides, non LL(1) grammar
+        expected = new LL1ParseTable();
+        expected.set("E", "(", 0);
+        expected.set("E", "(", 1);
+        expected.set("E", "id", 0);
+        expected.set("E", "id", 1);
+        expected.set("T", "(", 2);
+        expected.set("T", "(", 3);
+        expected.set("T", "id", 2);
+        expected.set("T", "id", 3);
+        expected.set("F", "(", 4);
+        expected.set("F", "id", 5);
+
+        nonTerminals = makeNonTerminals("T", "F");
+        terminals = makeTerminals("+", "*", "(", ")", "id");
+        productions = makeProductions(
+                "E ::= E + T",
+                "E ::= T",
+                "T ::= T * F",
+                "T ::= F",
+                "F ::= ( E )",
+                "F ::= id"
+        );
+        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+
+        firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("id", new First("id"));
+
+        followMap = new FollowMap();
+        followMap.put("E", new Follow("+", ")", TERMINATOR));
+        followMap.put("F", new Follow("+", "*", ")", TERMINATOR));
+        followMap.put("T", new Follow("+", "*", ")", TERMINATOR));
+
+        actual = cfg.generateLL1ParseTable(firstMap, followMap);
+
         assertEquals(expected, actual);
     }
 
@@ -266,22 +423,37 @@ class GrammarTest {
                         null)
         ));
 
+        LL1ParseTable table = new LL1ParseTable();
+        table.set("E", "(", 0);
+        table.set("E", "id", 0);
+        table.set("E'", "+", 1);
+        table.set("E'", ")", 2);
+        table.set("E'", TERMINATOR, 2);
+        table.set("T", "(", 3);
+        table.set("T", "id", 3);
+        table.set("T'", "+", 5);
+        table.set("T'", "*", 4);
+        table.set("T'", ")", 5);
+        table.set("T'", TERMINATOR, 5);
+        table.set("F", "(", 6);
+        table.set("F", "id", 7);
+
         Set<String> nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         Set<String> terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
         List<Production> productions = makeProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= T E'",
+                "E' ::= + T E'",
+                "E' ::= " + EPSILON,
+                "T ::= F T'",
+                "T' ::= * F T'",
+                "T' ::= " + EPSILON,
+                "F ::= ( E )",
+                "F ::= id"
         );
         Grammar cfg = new Grammar(nonTerminals, terminals, "E", productions);
-        String w = "id + id * id " + TERMINATOR;
-        LL1ParseOutput actual = cfg.parseSentence(w);
 
+        String w = "id + id * id " + TERMINATOR;
+        LL1ParseOutput actual = cfg.parseSentence(table, w);
         assertEquals(expected, actual);
     }
 
@@ -291,31 +463,58 @@ class GrammarTest {
         Set<String> nonTerminals = makeNonTerminals("T", "F");
         Set<String> terminals = makeTerminals("+", "*", "(", ")", "id");
         List<Production> productions = makeProductions(
-                new Production("E", "E", "+", "T"),
-                new Production("E", "T"),
-                new Production("T", "T", "*", "F"),
-                new Production("T", "F"),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= E + T",
+                "E ::= T",
+                "T ::= T * F",
+                "T ::= F",
+                "F ::= ( E )",
+                "F ::= id"
         );
         Grammar cfg = new Grammar(nonTerminals, terminals, "E", productions);
-        assertFalse(cfg.isLL1());
+        LL1ParseTable table = new LL1ParseTable();
+        table.set("E", "(", 0);
+        table.set("E", "(", 1);
+        table.set("E", "id", 0);
+        table.set("E", "id", 1);
+        table.set("T", "(", 2);
+        table.set("T", "(", 3);
+        table.set("T", "id", 2);
+        table.set("T", "id", 3);
+        table.set("F", "(", 4);
+        table.set("F", "id", 5);
+
+        assertFalse(cfg.isLL1(table));
 
         // Equivalent LL(1) grammar
         nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
         productions = makeProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= T E'",
+                "E' ::= + T E'",
+                "E' ::= " + EPSILON,
+                "T ::= F T'",
+                "T' ::= * F T'",
+                "T' ::= " + EPSILON,
+                "F ::= ( E )",
+                "F ::= id"
         );
         cfg = new Grammar(nonTerminals, terminals, "E", productions);
-        assertTrue(cfg.isLL1());
+        table = new LL1ParseTable();
+        table.set("E", "(", 0);
+        table.set("E", "id", 0);
+        table.set("E'", "+", 1);
+        table.set("E'", ")", 2);
+        table.set("E'", TERMINATOR, 2);
+        table.set("T", "(", 3);
+        table.set("T", "id", 3);
+        table.set("T'", "+", 5);
+        table.set("T'", "*", 4);
+        table.set("T'", ")", 5);
+        table.set("T'", TERMINATOR, 5);
+        table.set("F", "(", 6);
+        table.set("F", "id", 7);
+
+        assertTrue(cfg.isLL1(table));
     }
 
     @Test
@@ -326,9 +525,9 @@ class GrammarTest {
                 makeTerminals("a", "b", EPSILON),
                 "Y",
                 makeProductions(
-                        new Production("Y", "b", "Y'"),
-                        new Production("Y'", "a", "Y'"),
-                        new Production("Y'", EPSILON)
+                        "Y  ::= b Y'",
+                        "Y' ::= a Y'",
+                        "Y' ::= " + EPSILON
                 )
         );
         Grammar cfg = new Grammar(
@@ -336,13 +535,12 @@ class GrammarTest {
                 makeTerminals("a", "b"),
                 "Y",
                 makeProductions(
-                        new Production("Y", "Y", "a"),
-                        new Production("Y", "b")
+                        "Y ::= Y a",
+                        "Y ::= b"
                 )
         );
         Grammar actual = cfg.removeLeftRecursion();
-
-        assertEquals(cfg, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -350,14 +548,14 @@ class GrammarTest {
         Set<String> nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         Set<String> terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
         List<Production> productions = makeProductions(
-                new Production("E", "T", "E'"),
-                new Production("E'", "+", "T", "E'"),
-                new Production("E'", EPSILON),
-                new Production("T", "F", "T'"),
-                new Production("T'", "*", "F", "T'"),
-                new Production("T'", EPSILON),
-                new Production("F", "(", "E", ")"),
-                new Production("F", "id")
+                "E ::= T E'",
+                "E' ::= + T E'",
+                "E' ::= " + EPSILON,
+                "T ::= F T'",
+                "T' ::= * F T'",
+                "T' ::= " + EPSILON,
+                "F ::= ( E )",
+                "F ::= id"
         );
         Grammar expected = new Grammar(nonTerminals, terminals, "E", productions);
         Grammar actual = expected.deepClone();

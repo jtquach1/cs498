@@ -111,7 +111,17 @@ class Utility {
         return new TreeSet<>(Arrays.asList(symbols));
     }
 
-    static List<Production> makeProductions(Production... productions) {
-        return new ArrayList<>(Arrays.asList(productions));
+    static List<Production> makeProductions(String... productionStrings) {
+        List<Production> productions = new ArrayList<>();
+
+        for (String prod : productionStrings) {
+            String[] sides = prod.split("::=");
+            String lhs = sides[0].trim();
+            String[] rhs = sides[1].trim().split(" ");
+            Production production = new Production(lhs, rhs);
+            productions.add(production);
+        }
+
+        return productions;
     }
 }

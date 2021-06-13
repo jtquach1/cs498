@@ -34,19 +34,17 @@ class LL1ParseTable extends TreeMap<String, LL1ParseTableEntry> {
         }
 
         // In case of conflicts, we just want to return one value
-        Integer productionIndex = indices.get(0);
-        return productionIndex;
+        return indices.get(0);
     }
 }
 
 class LL1ParseTableEntry extends TreeMap<String, Indices> {
-    /* We use a list of integers to see whether the parsed grammar was LL1.
-     If the list contains more than one index, then the grammar is ambiguous
-     and must have left recursion removed. */
 }
 
 class Indices extends ArrayList<Integer> {
-
+    /* We use a list of integers to see whether a parsed grammar was LL1.
+     If the list contains more than one index, then the grammar is ambiguous
+     and must have left recursion removed. */
 }
 
 class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {
