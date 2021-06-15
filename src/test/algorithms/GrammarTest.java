@@ -3,8 +3,6 @@ package algorithms;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
@@ -16,9 +14,9 @@ class GrammarTest {
     @Test
     void first() {
         // From sample exam 1
-        Set<String> nonTerminals = makeNonTerminals("A", "B");
-        Set<String> terminals = makeTerminals("a", "b", "c", EPSILON);
-        List<Production> productions = makeProductions(
+        Symbols nonTerminals = makeNonTerminals("A", "B");
+        Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
+        Productions productions = makeProductions(
                 "S ::= A a",
                 "S ::= a",
                 "A ::= c",
@@ -101,9 +99,9 @@ class GrammarTest {
         expected.put("A", new Follow("a"));
         expected.put("B", new Follow("a"));
 
-        Set<String> nonTerminals = makeNonTerminals("A", "B");
-        Set<String> terminals = makeTerminals("a", "b", "c", EPSILON);
-        List<Production> productions = makeProductions(
+        Symbols nonTerminals = makeNonTerminals("A", "B");
+        Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
+        Productions productions = makeProductions(
                 "S ::= A a",
                 "S ::= a",
                 "A ::= c",
@@ -207,9 +205,9 @@ class GrammarTest {
         expected.set("B", "a", 5);
         expected.set("B", "c", 4);
 
-        Set<String> nonTerminals = makeNonTerminals("A", "B");
-        Set<String> terminals = makeTerminals("a", "b", "c", EPSILON);
-        List<Production> productions = makeProductions(
+        Symbols nonTerminals = makeNonTerminals("A", "B");
+        Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
+        Productions productions = makeProductions(
                 "S ::= A a",
                 "S ::= a",
                 "A ::= c",
@@ -438,9 +436,9 @@ class GrammarTest {
         table.set("F", "(", 6);
         table.set("F", "id", 7);
 
-        Set<String> nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        Set<String> terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        List<Production> productions = makeProductions(
+        Symbols nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
+        Symbols terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
+        Productions productions = makeProductions(
                 "E ::= T E'",
                 "E' ::= + T E'",
                 "E' ::= " + EPSILON,
@@ -460,9 +458,9 @@ class GrammarTest {
     @Test
     void isLL1() {
         // Non LL(1) grammar with direct left recursion
-        Set<String> nonTerminals = makeNonTerminals("T", "F");
-        Set<String> terminals = makeTerminals("+", "*", "(", ")", "id");
-        List<Production> productions = makeProductions(
+        Symbols nonTerminals = makeNonTerminals("T", "F");
+        Symbols terminals = makeTerminals("+", "*", "(", ")", "id");
+        Productions productions = makeProductions(
                 "E ::= E + T",
                 "E ::= T",
                 "T ::= T * F",
@@ -550,9 +548,9 @@ class GrammarTest {
 
     @Test
     void deepClone() {
-        Set<String> nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        Set<String> terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        List<Production> productions = makeProductions(
+        Symbols nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
+        Symbols terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
+        Productions productions = makeProductions(
                 "E ::= T E'",
                 "E' ::= + T E'",
                 "E' ::= " + EPSILON,

@@ -103,16 +103,16 @@ class Utility {
         return queue;
     }
 
-    static Set<String> makeNonTerminals(String... symbols) {
-        return new TreeSet<>(Arrays.asList(symbols));
+    static Symbols makeNonTerminals(String... symbols) {
+        return new Symbols(symbols);
     }
 
-    static Set<String> makeTerminals(String... symbols) {
-        return new TreeSet<>(Arrays.asList(symbols));
+    static Symbols makeTerminals(String... symbols) {
+        return new Symbols(symbols);
     }
 
-    static List<Production> makeProductions(String... productionStrings) {
-        List<Production> productions = new ArrayList<>();
+    static Productions makeProductions(String... productionStrings) {
+        Productions productions = new Productions();
 
         for (String prod : productionStrings) {
             String[] sides = prod.split("::=");

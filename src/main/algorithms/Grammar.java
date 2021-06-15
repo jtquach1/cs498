@@ -13,13 +13,12 @@ class Grammar {
     static final String GREEK_EPSILON = Character.toString('\u03B5');
     static final String TERMINATOR = "#";
 
-    private final Set<String> nonTerminals;
-    private final Set<String> terminals;
+    private final Symbols nonTerminals;
+    private final Symbols terminals;
     private final String start;
-    private final List<Production> productions;
+    private final Productions productions;
 
-    Grammar(Set<String> nonTerminals, Set<String> terminals, String start,
-            List<Production> productions) {
+    Grammar(Symbols nonTerminals, Symbols terminals, String start, Productions productions) {
         this.nonTerminals = nonTerminals;
         this.terminals = terminals;
         this.start = start;
@@ -44,7 +43,7 @@ class Grammar {
                 "F ::= ( E )\n" +
                 "F ::= id\n";
 
-        List<Production> productions = getProductionsFromFile(inputFile);
+        Productions productions = getProductionsFromFile(inputFile);
         Grammar grammar = initializeGrammar(productions);
 
         FirstMap firstMap = grammar.first();
@@ -65,10 +64,10 @@ class Grammar {
     }
 
     @NotNull
-    private static List<Production> getProductionsFromFile(String grammar) {
+    private static Productions getProductionsFromFile(String grammar) {
         grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
         String[] lines = grammar.split("\r?\n|\r");
-        List<Production> productions = new ArrayList<>();
+        Productions productions = new Productions();
 
         for (String line : lines) {
             String[] sides = line.split("::=");
@@ -81,9 +80,9 @@ class Grammar {
     }
 
     @NotNull
-    private static Grammar initializeGrammar(List<Production> productions) {
-        Set<String> nonTerminals = new TreeSet<>();
-        Set<String> terminals = new TreeSet<>();
+    private static Grammar initializeGrammar(Productions productions) {
+        Symbols nonTerminals = new Symbols();
+        Symbols terminals = new Symbols();
         String start = productions.get(0).getLhs();
 
         for (Production production : productions) {
@@ -162,7 +161,7 @@ class Grammar {
         LL1ParseTable table = new LL1ParseTable();
 
         for (String nonTerminal : nonTerminals) {
-            List<Production> subset = getSubsetOfProductions(nonTerminal);
+            Productions subset = getSubsetOfProductions(nonTerminal);
 
             for (Production p : subset) {
                 int productionIndex = productions.indexOf(p);
@@ -186,11 +185,11 @@ class Grammar {
     }
 
     @NotNull
-    private List<Production> getSubsetOfProductions(String nonTerminal) {
+    private Productions getSubsetOfProductions(String nonTerminal) {
         return productions
                 .stream()
                 .filter(p -> p.getLhs().equals(nonTerminal))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(Productions::new));
     }
 
     LL1ParseOutput parseSentence(LL1ParseTable table, String delimitedBySpaces) throws Exception {
@@ -311,8 +310,8 @@ class Grammar {
     }
 
     private void eliminateDirectLeftRecursion(Enumerations enums, int i) {
-        List<Production> alphaForms = getAlphaForms(isLeftRecursiveAlphaForm(enums, i));
-        List<Production> betaForms = getBetaForms(isNonLeftRecursiveBetaForm(enums, i));
+        Productions alphaForms = getAlphaForms(isLeftRecursiveAlphaForm(enums, i));
+        Productions betaForms = getBetaForms(isNonLeftRecursiveBetaForm(enums, i));
 
         for (Production alphaForm : alphaForms) {
             List<String> rhs = alphaForm.getRhs();
@@ -354,8 +353,8 @@ class Grammar {
     }
 
     private void eliminateIndirectLeftRecursion(Enumerations enums, int i, int j) {
-        List<Production> alphaForms = getAlphaForms(isAlphaForm(enums, i, j));
-        List<Production> betaForms = getBetaForms(isBetaForm(enums, j));
+        Productions alphaForms = getAlphaForms(isAlphaForm(enums, i, j));
+        Productions betaForms = getBetaForms(isBetaForm(enums, j));
 
         for (Production alphaForm : alphaForms) {
             List<String> rhs = alphaForm.getRhs();
@@ -373,19 +372,19 @@ class Grammar {
     }
 
     @NotNull
-    private List<Production> getBetaForms(Predicate<Production> isBetaForm) {
+    private Productions getBetaForms(Predicate<Production> isBetaForm) {
         return productions
                 .stream()
                 .filter(isBetaForm)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(Productions::new));
     }
 
     @NotNull
-    private List<Production> getAlphaForms(Predicate<Production> isAlphaForm) {
+    private Productions getAlphaForms(Predicate<Production> isAlphaForm) {
         return productions
                 .stream()
                 .filter(isAlphaForm)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(Productions::new));
     }
 
     @NotNull
@@ -438,9 +437,9 @@ class Grammar {
     }
 
     Grammar deepClone() {
-        Set<String> nonTerminals = new TreeSet<>(this.nonTerminals);
-        Set<String> terminals = new TreeSet<>(this.terminals);
-        List<Production> productions = new ArrayList<>(this.productions);
+        Symbols nonTerminals = new Symbols(this.nonTerminals);
+        Symbols terminals = new Symbols(this.terminals);
+        Productions productions = new Productions(this.productions);
         return new Grammar(nonTerminals, terminals, start, productions);
     }
 
@@ -521,4 +520,32 @@ class Production implements Comparable<Production> {
 }
 
 class Enumerations extends ArrayList<String> {
+}
+
+
+class Symbols extends TreeSet<String> {
+    public Symbols() {
+        super();
+    }
+
+    public Symbols(Symbols symbols) {
+        super();
+        addAll(symbols);
+    }
+
+    public Symbols(String[] symbols) {
+        super();
+        addAll(Arrays.asList(symbols));
+    }
+}
+
+class Productions extends ArrayList<Production> {
+    public Productions() {
+        super();
+    }
+
+    public Productions(Productions productions) {
+        super();
+        addAll(productions);
+    }
 }
