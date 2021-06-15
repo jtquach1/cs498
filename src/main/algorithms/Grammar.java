@@ -316,42 +316,71 @@ class Grammar {
         Productions betaForms = getBetaForms(isNonLeftRecursiveBetaForm(enums, i));
 
         for (Production alphaForm : alphaForms) {
+            // Remove Y ::= Y α
+            productions.remove(alphaForm);
+
             List<String> rhs = alphaForm.getRhs();
             List<String> alpha = rhs.subList(1, rhs.size());
             String y = alphaForm.getLhs();
             String yPrime = y + "'";
-            productions.remove(alphaForm);
 
             for (Production betaForm : betaForms) {
                 List<String> beta = betaForm.getRhs();
-                String[] newRhs = getNewRhs(beta, Collections.singleton(yPrime));
-                Production newProduction = new Production(y, newRhs);
-                productions.add(newProduction);
 
-                newRhs = getNewRhs(alpha, Collections.singleton(yPrime));
-                newProduction = new Production(yPrime, newRhs);
-                productions.add(newProduction);
+                boolean removedRecursion = addBetaForm(y, yPrime, beta);
+                removedRecursion |= addAlphaForm(alpha, yPrime);
+                removedRecursion |= addEpsilonForm(yPrime);
 
-                newRhs = new String[]{EPSILON};
-                newProduction = new Production(yPrime, newRhs);
-                productions.add(newProduction);
+                if (removedRecursion) {
+                    nonTerminals.add(yPrime);
+                    terminals.add(EPSILON);
+                }
 
+                // Remove Y ::= β
                 productions.remove(betaForm);
             }
         }
     }
 
+    private boolean addBetaForm(String y, String yPrime, List<String> beta) {
+        // Add Y ::= β Y'
+        String[] newRhs = getNewRhs(beta, Collections.singleton(yPrime));
+        Production newProduction = new Production(y, newRhs);
+        return productions.add(newProduction);
+    }
+
+    private boolean addAlphaForm(List<String> alpha, String yPrime) {
+        // Add Y' ::= α Y'
+        String[] rhs = getNewRhs(alpha, Collections.singleton(yPrime));
+        Production production = new Production(yPrime, rhs);
+        return productions.add(production);
+    }
+
+    private boolean addEpsilonForm(String yPrime) {
+        // Add Y' ::= ε
+        String[] rhs = new String[]{EPSILON};
+        Production production = new Production(yPrime, rhs);
+        return productions.add(production);
+    }
+
     private static Predicate<Production> isNonLeftRecursiveBetaForm(Enumerations enums, int j) {
+        // Does the production have the form `Y ::= β` where β does not contain Y?
         return production -> {
             String expectedY = enums.get(j);
             String actualY = production.getLhs();
-            boolean doesNotContainSelf = !production.getRhs().get(0).equals(actualY);
-            return expectedY.equals(actualY) && doesNotContainSelf;
+            boolean doesNotContainY = !production.getRhs().get(0).equals(actualY);
+            return expectedY.equals(actualY) && doesNotContainY;
         };
     }
 
     private static Predicate<Production> isLeftRecursiveAlphaForm(Enumerations enums, int i) {
-        return isAlphaForm(enums, i, i);
+        // Does the production have the form `Y ::= Y α`?
+        return production -> {
+            String expectedY = enums.get(i);
+            String actualY = production.getLhs();
+            String firstSymbolOfRhs = production.getRhs().get(0);
+            return expectedY.equals(actualY) && expectedY.equals(firstSymbolOfRhs);
+        };
     }
 
     private void eliminateIndirectLeftRecursion(Enumerations enums, int i, int j) {
@@ -359,15 +388,19 @@ class Grammar {
         Productions betaForms = getBetaForms(isBetaForm(enums, j));
 
         for (Production alphaForm : alphaForms) {
+            // Remove Xi ::= Xj α
+            productions.remove(alphaForm);
+
             List<String> rhs = alphaForm.getRhs();
             List<String> alpha = rhs.subList(1, rhs.size());
             String xi = alphaForm.getLhs();
-            productions.remove(alphaForm);
 
             for (Production betaForm : betaForms) {
                 List<String> beta = betaForm.getRhs();
                 String[] newRhs = getNewRhs(beta, alpha);
                 Production betaAlphaForm = new Production(xi, newRhs);
+
+                // Add Xi ::= β α
                 productions.add(betaAlphaForm);
             }
         }
@@ -398,6 +431,7 @@ class Grammar {
     }
 
     private static Predicate<Production> isBetaForm(Enumerations enums, int j) {
+        // Does the production have the form `Xj ::= β` where β can be directly left recursive?
         return production -> {
             String expectedXj = enums.get(j);
             String actualXj = production.getLhs();
@@ -406,6 +440,7 @@ class Grammar {
     }
 
     private static Predicate<Production> isAlphaForm(Enumerations enums, int i, int j) {
+        // Does the production have the form `Xi ::= Xj α`?
         return production -> {
             String expectedXi = enums.get(i);
             String actualXi = production.getLhs();
@@ -416,20 +451,10 @@ class Grammar {
     }
 
     private Enumerations enumerateNonTerminals() {
-        Enumerations enums = new Enumerations();
-
-        List<String> orderedNonTerminals = productions
+        return productions
                 .stream()
                 .map(Production::getLhs)
-                .collect(Collectors.toList());
-
-        for (String nonTerminal : orderedNonTerminals) {
-            if (!enums.contains(nonTerminal)) {
-                enums.add(nonTerminal);
-            }
-        }
-
-        return enums;
+                .collect(Collectors.toCollection(Enumerations::new));
     }
 
     Grammar deepClone() {
@@ -515,7 +540,38 @@ class Production implements Comparable<Production> {
     }
 }
 
-class Enumerations extends ArrayList<String> {
+class ListWithUniques<T> extends ArrayList<T> {
+    /* Similar to a set, where only unique elements are stored but
+    their order of insertion is preserved. */
+
+    public ListWithUniques() {
+        super();
+    }
+
+    public ListWithUniques(@NotNull Collection<? extends T> items) {
+        super(items);
+    }
+
+    @Override
+    public boolean add(T item) {
+        if (!contains(item)) {
+            super.add(item);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends T> items) {
+        boolean hasChanged = false;
+        for (T item : items) {
+            hasChanged |= add(item);
+        }
+        return hasChanged;
+    }
+}
+
+class Enumerations extends ListWithUniques<String> {
 }
 
 class Symbols extends TreeSet<String> {
@@ -528,31 +584,12 @@ class Symbols extends TreeSet<String> {
     }
 }
 
-
-class Productions extends ArrayList<Production> {
+class Productions extends ListWithUniques<Production> {
     public Productions() {
         super();
     }
 
-    public Productions(@NotNull Collection<? extends Production> productions) {
-        super(productions);
-    }
-
-    @Override
-    public boolean add(Production production) {
-        if (!contains(production)) {
-            super.add(production);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends Production> productions) {
-        boolean hasChanged = false;
-        for (Production production : productions) {
-            hasChanged |= add(production);
-        }
-        return hasChanged;
+    public Productions(@NotNull Collection<? extends Production> items) {
+        super(items);
     }
 }

@@ -57,12 +57,15 @@ class FirstMap extends TreeMap<String, First> {
 
     First first(List<String> sequence) {
         First F = new First();
+
         // An empty sequence has no characters
         if (sequence.size() != 0) {
+
             String firstSymbol = sequence.get(0);
             F.addAll(this.get(firstSymbol));
             int i = 1;
             int n = sequence.size();
+
             while (F.contains(EPSILON) && i < n) {
                 F.remove(EPSILON);
                 String symbol = sequence.get(i);
@@ -70,6 +73,7 @@ class FirstMap extends TreeMap<String, First> {
                 i++;
             }
         }
+
         return F;
     }
 }
