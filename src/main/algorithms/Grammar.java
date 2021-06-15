@@ -57,9 +57,11 @@ class Grammar {
 
         if (!grammar.isLL1(ll1ParseTable)) {
             Grammar converted = grammar.removeLeftRecursion();
+            System.out.println(converted);
         } else {
             LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
         }
+
     }
 
     @NotNull
@@ -301,8 +303,8 @@ class Grammar {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < i; j++) {
                 cfg.eliminateIndirectLeftRecursion(enums, i, j);
-                cfg.eliminateDirectLeftRecursion(enums, i);
             }
+            cfg.eliminateDirectLeftRecursion(enums, i);
         }
 
         return cfg;
