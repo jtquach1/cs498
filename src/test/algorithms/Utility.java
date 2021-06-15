@@ -119,7 +119,7 @@ class Utility {
             String lhs = sides[0].trim();
             String[] rhs = sides[1].trim().split(" ");
             Production production = new Production(lhs, rhs);
-            productions.add(production);
+            productions.addUnique(production);
         }
 
         return productions;

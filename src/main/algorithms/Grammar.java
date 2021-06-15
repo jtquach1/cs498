@@ -73,7 +73,8 @@ class Grammar {
             String[] sides = line.split("::=");
             String lhs = sides[0].trim();
             String[] rhs = sides[1].trim().split(" ");
-            productions.add(new Production(lhs, rhs));
+            Production production = new Production(lhs, rhs);
+            productions.addUnique(production);
         }
 
         return productions;
@@ -324,15 +325,15 @@ class Grammar {
                 List<String> beta = betaForm.getRhs();
                 String[] newRhs = getNewRhs(beta, Collections.singleton(yPrime));
                 Production newProduction = new Production(y, newRhs);
-                addProductionIfDoesNotAlreadyExist(newProduction);
+                productions.addUnique(newProduction);
 
                 newRhs = getNewRhs(alpha, Collections.singleton(yPrime));
                 newProduction = new Production(yPrime, newRhs);
-                addProductionIfDoesNotAlreadyExist(newProduction);
+                productions.addUnique(newProduction);
 
                 newRhs = new String[]{EPSILON};
                 newProduction = new Production(yPrime, newRhs);
-                addProductionIfDoesNotAlreadyExist(newProduction);
+                productions.addUnique(newProduction);
 
                 productions.remove(betaForm);
             }
@@ -366,7 +367,7 @@ class Grammar {
                 List<String> beta = betaForm.getRhs();
                 String[] newRhs = getNewRhs(beta, alpha);
                 Production betaAlphaForm = new Production(xi, newRhs);
-                addProductionIfDoesNotAlreadyExist(betaAlphaForm);
+                productions.addUnique(betaAlphaForm);
             }
         }
     }
@@ -393,12 +394,6 @@ class Grammar {
         newRhs.addAll(first);
         newRhs.addAll(second);
         return newRhs.toArray(new String[0]);
-    }
-
-    private void addProductionIfDoesNotAlreadyExist(Production production) {
-        if (!productions.contains(production)) {
-            productions.add(production);
-        }
     }
 
     private static Predicate<Production> isBetaForm(Enumerations enums, int j) {
@@ -546,6 +541,18 @@ class Productions extends ArrayList<Production> {
 
     public Productions(Productions productions) {
         super();
-        addAll(productions);
+        addAllUnique(productions);
+    }
+
+    public void addAllUnique(Productions productions) {
+        for (Production production : productions) {
+            addUnique(production);
+        }
+    }
+
+    public void addUnique(Production production) {
+        if (!contains(production)) {
+            add(production);
+        }
     }
 }
