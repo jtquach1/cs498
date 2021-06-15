@@ -197,13 +197,13 @@ class GrammarTest {
     void generateLL1ParseTable() {
         // From sample exam 1
         LL1ParseTable expected = new LL1ParseTable();
-        expected.set("S", "a", 1);
-        expected.set("S", "b", 0);
-        expected.set("S", "c", 0);
-        expected.set("A", "b", 3);
-        expected.set("A", "c", 2);
-        expected.set("B", "a", 5);
-        expected.set("B", "c", 4);
+        expected.set("S", "a", 5);
+        expected.set("S", "b", 4);
+        expected.set("S", "c", 4);
+        expected.set("A", "b", 0);
+        expected.set("A", "c", 1);
+        expected.set("B", "a", 3);
+        expected.set("B", "c", 2);
 
         Symbols nonTerminals = makeNonTerminals("A", "B");
         Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
@@ -241,14 +241,14 @@ class GrammarTest {
         expected.set("E'", "+", 1);
         expected.set("E'", ")", 2);
         expected.set("E'", TERMINATOR, 2);
-        expected.set("T", "(", 3);
-        expected.set("T", "id", 3);
-        expected.set("T'", "+", 5);
-        expected.set("T'", "*", 4);
-        expected.set("T'", ")", 5);
-        expected.set("T'", TERMINATOR, 5);
-        expected.set("F", "(", 6);
-        expected.set("F", "id", 7);
+        expected.set("T", "(", 5);
+        expected.set("T", "id", 5);
+        expected.set("T'", "+", 7);
+        expected.set("T'", "*", 6);
+        expected.set("T'", ")", 7);
+        expected.set("T'", TERMINATOR, 7);
+        expected.set("F", "(", 3);
+        expected.set("F", "id", 4);
 
         nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
@@ -294,12 +294,12 @@ class GrammarTest {
         expected.set("E", "(", 1);
         expected.set("E", "id", 0);
         expected.set("E", "id", 1);
-        expected.set("T", "(", 2);
-        expected.set("T", "(", 3);
-        expected.set("T", "id", 2);
-        expected.set("T", "id", 3);
-        expected.set("F", "(", 4);
-        expected.set("F", "id", 5);
+        expected.set("T", "(", 4);
+        expected.set("T", "(", 5);
+        expected.set("T", "id", 4);
+        expected.set("T", "id", 5);
+        expected.set("F", "(", 2);
+        expected.set("F", "id", 3);
 
         nonTerminals = makeNonTerminals("T", "F");
         terminals = makeTerminals("+", "*", "(", ")", "id");
@@ -350,11 +350,11 @@ class GrammarTest {
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F"),
                         makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                        3),
+                        5),
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "id"),
                         makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                        7),
+                        4),
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'"),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
@@ -362,7 +362,7 @@ class GrammarTest {
                 makeEntry(
                         makeStack(TERMINATOR, "E'", EPSILON),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
-                        5),
+                        7),
                 makeEntry(
                         makeStack(TERMINATOR, "E'"),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
@@ -378,11 +378,11 @@ class GrammarTest {
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F"),
                         makeQueue("id", "*", "id", TERMINATOR),
-                        3),
+                        5),
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "id"),
                         makeQueue("id", "*", "id", TERMINATOR),
-                        7),
+                        4),
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'"),
                         makeQueue("*", "id", TERMINATOR),
@@ -390,7 +390,7 @@ class GrammarTest {
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F", "*"),
                         makeQueue("*", "id", TERMINATOR),
-                        4),
+                        6),
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F"),
                         makeQueue("id", TERMINATOR),
@@ -398,7 +398,7 @@ class GrammarTest {
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'", "id"),
                         makeQueue("id", TERMINATOR),
-                        7),
+                        4),
                 makeEntry(
                         makeStack(TERMINATOR, "E'", "T'"),
                         makeQueue(TERMINATOR),
@@ -406,7 +406,7 @@ class GrammarTest {
                 makeEntry(
                         makeStack(TERMINATOR, "E'", EPSILON),
                         makeQueue(TERMINATOR),
-                        5),
+                        7),
                 makeEntry(
                         makeStack(TERMINATOR, "E'"),
                         makeQueue(TERMINATOR),
@@ -427,14 +427,14 @@ class GrammarTest {
         table.set("E'", "+", 1);
         table.set("E'", ")", 2);
         table.set("E'", TERMINATOR, 2);
-        table.set("T", "(", 3);
-        table.set("T", "id", 3);
-        table.set("T'", "+", 5);
-        table.set("T'", "*", 4);
-        table.set("T'", ")", 5);
-        table.set("T'", TERMINATOR, 5);
-        table.set("F", "(", 6);
-        table.set("F", "id", 7);
+        table.set("T", "(", 5);
+        table.set("T", "id", 5);
+        table.set("T'", "+", 7);
+        table.set("T'", "*", 6);
+        table.set("T'", ")", 7);
+        table.set("T'", TERMINATOR, 7);
+        table.set("F", "(", 3);
+        table.set("F", "id", 4);
 
         Symbols nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
         Symbols terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");

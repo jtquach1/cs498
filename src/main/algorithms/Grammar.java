@@ -43,8 +43,7 @@ class Grammar {
                 "F ::= ( E )\n" +
                 "F ::= id\n";
 
-        Productions productions = getProductionsFromFile(inputFile);
-        Grammar grammar = initializeGrammar(productions);
+        Grammar grammar = initializeGrammar(inputFile);
 
         FirstMap firstMap = grammar.first();
         FollowMap followMap = grammar.follow(firstMap);
@@ -65,37 +64,30 @@ class Grammar {
     }
 
     @NotNull
-    private static Productions getProductionsFromFile(String grammar) {
+    private static Grammar initializeGrammar(String grammar) {
         grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
         String[] lines = grammar.split("\r?\n|\r");
         Productions productions = new Productions();
+        boolean sawStart = false;
+        String start = null;
+        Symbols nonTerminals = new Symbols();
+        Symbols terminals = new Symbols();
 
         for (String line : lines) {
             String[] sides = line.split("::=");
             String lhs = sides[0].trim();
             String[] rhs = sides[1].trim().split(" ");
-            Production production = new Production(lhs, rhs);
-            productions.add(production);
-        }
 
-        return productions;
-    }
-
-    @NotNull
-    private static Grammar initializeGrammar(Productions productions) {
-        Symbols nonTerminals = new Symbols();
-        Symbols terminals = new Symbols();
-        String start = productions.get(0).getLhs();
-
-        for (Production production : productions) {
-            String lhs = production.getLhs();
+            productions.add(new Production(lhs, rhs));
             nonTerminals.add(lhs);
+            Arrays
+                    .stream(rhs)
+                    .filter(symbol -> !nonTerminals.contains(symbol))
+                    .forEach(terminals::add);
 
-            List<String> rhs = production.getRhs();
-            for (String symbol : rhs) {
-                if (!nonTerminals.contains(symbol)) {
-                    terminals.add(symbol);
-                }
+            if (!sawStart) {
+                start = lhs;
+                sawStart = true;
             }
         }
 
@@ -543,22 +535,31 @@ class Production implements Comparable<Production> {
 class ListWithUniques<T> extends ArrayList<T> {
     /* Similar to a set, where only unique elements are stored but
     their order of insertion is preserved. */
+    private final Comparator<T> comparator;
 
-    public ListWithUniques() {
+    public ListWithUniques(final Comparator<T> comparator) {
         super();
+        this.comparator = comparator;
     }
 
-    public ListWithUniques(@NotNull Collection<? extends T> items) {
+    public ListWithUniques(@NotNull Collection<? extends T> items, Comparator<T> comparator) {
         super(items);
+        this.comparator = comparator;
+    }
+
+    @Override
+    public void add(int index, T item) {
+        if (!contains(item)) {
+            super.add(item);
+            this.sort(this.comparator);
+        }
     }
 
     @Override
     public boolean add(T item) {
-        if (!contains(item)) {
-            super.add(item);
-            return true;
-        }
-        return false;
+        boolean isAdded = super.add(item);
+        this.sort(this.comparator);
+        return isAdded;
     }
 
     @Override
@@ -572,6 +573,9 @@ class ListWithUniques<T> extends ArrayList<T> {
 }
 
 class Enumerations extends ListWithUniques<String> {
+    public Enumerations() {
+        super(String::compareTo);
+    }
 }
 
 class Symbols extends TreeSet<String> {
@@ -586,10 +590,10 @@ class Symbols extends TreeSet<String> {
 
 class Productions extends ListWithUniques<Production> {
     public Productions() {
-        super();
+        super(Production::compareTo);
     }
 
     public Productions(@NotNull Collection<? extends Production> items) {
-        super(items);
+        super(items, Production::compareTo);
     }
 }
