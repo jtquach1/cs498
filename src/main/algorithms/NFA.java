@@ -74,8 +74,7 @@ class NFA extends FSA {
 
     private NFA deepClone() {
         State start = this.getStart();
-        Alphabet alphabet = new Alphabet();
-        alphabet.addAll(this.getAlphabet());
+        Alphabet alphabet = new Alphabet(this.getAlphabet());
         Set<State> states = new TreeSet<>(this.getStates());
         Set<State> finalStates = new TreeSet<>(this.getFinalStates());
         Set<Move> moves = new TreeSet<>(this.getMoves());

@@ -3,10 +3,7 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static algorithms.DFAMove.convertToMoves;
@@ -267,11 +264,9 @@ class DFA extends FSA {
     @NotNull
     private Partition initializePartition() {
         Partition partition = new Partition();
-        PSet finalStates = new PSet();
-        finalStates.addAll(this.getFinalStates());
+        PSet finalStates = new PSet(this.getFinalStates());
 
-        PSet S = new PSet();
-        S.addAll(this.getStates());
+        PSet S = new PSet(this.getStates());
         S.removeAll(finalStates);
 
         partition.add(S);
@@ -407,8 +402,8 @@ class DFAState implements Comparable<DFAState> {
         return new State(id, states);
     }
 
-    void addAll(Set<State> set) {
-        states.addAll(set);
+    void addAll(@NotNull Collection<? extends State> states) {
+        this.states.addAll(states);
     }
 
     boolean isEmpty() {
@@ -492,6 +487,10 @@ class Partition extends TreeSet<PSet> {
 }
 
 class PSet extends TreeSet<State> implements Comparable<PSet> {
+    public PSet(@NotNull Collection<? extends State> states) {
+        super(states);
+    }
+
     PSet getIncludedStates(Set<Move> moves, PSet set, Character consumed) {
         PSet included = new PSet();
         included.addAll(set

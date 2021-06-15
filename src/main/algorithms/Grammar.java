@@ -59,6 +59,7 @@ class Grammar {
             System.out.println(converted);
         } else {
             LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
+            System.out.println(output);
         }
 
     }
@@ -74,7 +75,7 @@ class Grammar {
             String lhs = sides[0].trim();
             String[] rhs = sides[1].trim().split(" ");
             Production production = new Production(lhs, rhs);
-            productions.addUnique(production);
+            productions.add(production);
         }
 
         return productions;
@@ -325,15 +326,15 @@ class Grammar {
                 List<String> beta = betaForm.getRhs();
                 String[] newRhs = getNewRhs(beta, Collections.singleton(yPrime));
                 Production newProduction = new Production(y, newRhs);
-                productions.addUnique(newProduction);
+                productions.add(newProduction);
 
                 newRhs = getNewRhs(alpha, Collections.singleton(yPrime));
                 newProduction = new Production(yPrime, newRhs);
-                productions.addUnique(newProduction);
+                productions.add(newProduction);
 
                 newRhs = new String[]{EPSILON};
                 newProduction = new Production(yPrime, newRhs);
-                productions.addUnique(newProduction);
+                productions.add(newProduction);
 
                 productions.remove(betaForm);
             }
@@ -367,7 +368,7 @@ class Grammar {
                 List<String> beta = betaForm.getRhs();
                 String[] newRhs = getNewRhs(beta, alpha);
                 Production betaAlphaForm = new Production(xi, newRhs);
-                productions.addUnique(betaAlphaForm);
+                productions.add(betaAlphaForm);
             }
         }
     }
@@ -517,42 +518,41 @@ class Production implements Comparable<Production> {
 class Enumerations extends ArrayList<String> {
 }
 
-
 class Symbols extends TreeSet<String> {
     public Symbols() {
         super();
     }
 
-    public Symbols(Symbols symbols) {
-        super();
-        addAll(symbols);
-    }
-
-    public Symbols(String[] symbols) {
-        super();
-        addAll(Arrays.asList(symbols));
+    public Symbols(@NotNull Collection<? extends String> symbols) {
+        super(symbols);
     }
 }
+
 
 class Productions extends ArrayList<Production> {
     public Productions() {
         super();
     }
 
-    public Productions(Productions productions) {
-        super();
-        addAllUnique(productions);
+    public Productions(@NotNull Collection<? extends Production> productions) {
+        super(productions);
     }
 
-    public void addAllUnique(Productions productions) {
-        for (Production production : productions) {
-            addUnique(production);
-        }
-    }
-
-    public void addUnique(Production production) {
+    @Override
+    public boolean add(Production production) {
         if (!contains(production)) {
-            add(production);
+            super.add(production);
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Production> productions) {
+        boolean hasChanged = false;
+        for (Production production : productions) {
+            hasChanged |= add(production);
+        }
+        return hasChanged;
     }
 }

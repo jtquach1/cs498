@@ -104,11 +104,11 @@ class Utility {
     }
 
     static Symbols makeNonTerminals(String... symbols) {
-        return new Symbols(symbols);
+        return new Symbols(Arrays.asList(symbols));
     }
 
     static Symbols makeTerminals(String... symbols) {
-        return new Symbols(symbols);
+        return new Symbols(Arrays.asList(symbols));
     }
 
     static Productions makeProductions(String... productionStrings) {
@@ -119,7 +119,7 @@ class Utility {
             String lhs = sides[0].trim();
             String[] rhs = sides[1].trim().split(" ");
             Production production = new Production(lhs, rhs);
-            productions.addUnique(production);
+            productions.add(production);
         }
 
         return productions;

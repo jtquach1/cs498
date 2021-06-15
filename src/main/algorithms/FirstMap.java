@@ -1,9 +1,8 @@
 package algorithms;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
 
 import static algorithms.Grammar.EPSILON;
 
@@ -11,6 +10,10 @@ class First extends TreeSet<String> {
     public First(String... symbols) {
         super();
         this.addAll(Arrays.asList(symbols));
+    }
+
+    public First(@NotNull Collection<? extends String> sets) {
+        super(sets);
     }
 }
 
@@ -23,8 +26,7 @@ class FirstMap extends TreeMap<String, First> {
         FirstMap mapClone = new FirstMap();
         for (String symbol : this.keySet()) {
             First old = this.get(symbol);
-            First clone = new First();
-            clone.addAll(old);
+            First clone = new First(old);
             mapClone.put(symbol, clone);
         }
         return mapClone;

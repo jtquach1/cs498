@@ -261,6 +261,10 @@ class FSA {
 }
 
 class Alphabet extends TreeSet<Character> {
+    public Alphabet(@NotNull Collection<? extends Character> alphabet) {
+        super(alphabet);
+    }
+
     Alphabet() {
         super();
     }
