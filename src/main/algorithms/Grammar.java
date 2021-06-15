@@ -3,6 +3,7 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
@@ -294,24 +295,148 @@ class Grammar {
 
     Grammar removeLeftRecursion() {
         Grammar cfg = this.deepClone();
-        TreeMap<String, Integer> enumerations = new TreeMap<>();
-        arbitrarilyEnumerateNonTerminals(enumerations);
+        TreeMap<Integer, String> enumerations = enumerateNonTerminals();
+        int n = nonTerminals.size();
 
-        for (int i = 0; i < nonTerminals.size(); i++) {
+        for (int i = 0; i < n; i++) {
             for (int j = 0; j < i; j++) {
-                List<Production> leftMostIsNonTerminal = new ArrayList<>();
+                eliminateIndirectLeftRecursion(cfg, enumerations, i, j);
+                eliminateDirectLeftRecursion(cfg, enumerations, i);
             }
         }
 
         return cfg;
     }
 
-    private void arbitrarilyEnumerateNonTerminals(TreeMap<String, Integer> enumerations) {
-        int i = 0;
-        for (String nonTerminal : nonTerminals) {
-            enumerations.put(nonTerminal, i);
-            i++;
+    private static void eliminateDirectLeftRecursion(Grammar cfg,
+                                                     TreeMap<Integer, String> enumerations, int i) {
+        List<Production> alphaForms = cfg
+                .productions
+                .stream()
+                .filter(isAlphaFormReferringToSelf(enumerations, i))
+                .collect(Collectors.toList());
+        List<Production> betaForms = cfg
+                .productions
+                .stream()
+                .filter(isBetaFormNotReferringToSelf(enumerations, i))
+                .collect(Collectors.toList());
+
+        for (Production alphaForm : alphaForms) {
+            List<String> rhs = alphaForm.getRhs();
+            List<String> alpha = rhs.subList(1, rhs.size());
+            String y = alphaForm.getLhs();
+            String yPrime = y + "'";
+            cfg.productions.remove(alphaForm);
+
+            for (Production betaForm : betaForms) {
+                List<String> beta = betaForm.getRhs();
+                String[] newRhs = getNewRhs(beta, Collections.singleton(yPrime));
+                Production newProduction = new Production(y, newRhs);
+                addProductionIfDoesNotAlreadyExist(cfg, newProduction);
+
+                newRhs = getNewRhs(alpha, Collections.singleton(yPrime));
+                newProduction = new Production(yPrime, newRhs);
+                addProductionIfDoesNotAlreadyExist(cfg, newProduction);
+
+                newRhs = new String[]{EPSILON};
+                newProduction = new Production(yPrime, newRhs);
+                addProductionIfDoesNotAlreadyExist(cfg, newProduction);
+
+                cfg.productions.remove(betaForm);
+            }
         }
+    }
+
+    private static Predicate<Production> isBetaFormNotReferringToSelf(TreeMap<Integer, String> enumerations, int j) {
+        return production -> {
+            String expectedY = enumerations.get(j);
+            String actualY = production.getLhs();
+            boolean doesNotContainSelf = !production.getRhs().get(0).equals(actualY);
+            return expectedY.equals(actualY) && doesNotContainSelf;
+        };
+    }
+
+    private static Predicate<Production> isAlphaFormReferringToSelf(TreeMap<Integer, String> enumerations,
+                                                                    int i) {
+        return isAlphaForm(enumerations, i, i);
+    }
+
+    private static void eliminateIndirectLeftRecursion(Grammar cfg,
+                                                       TreeMap<Integer, String> enumerations, int i,
+                                                       int j) {
+        List<Production> alphaForms = cfg
+                .productions
+                .stream()
+                .filter(isAlphaForm(enumerations, i, j))
+                .collect(Collectors.toList());
+        List<Production> betaForms = cfg
+                .productions
+                .stream()
+                .filter(isBetaForm(enumerations, j))
+                .collect(Collectors.toList());
+
+        for (Production alphaForm : alphaForms) {
+            List<String> rhs = alphaForm.getRhs();
+            List<String> alpha = rhs.subList(1, rhs.size());
+            String xi = alphaForm.getLhs();
+            cfg.productions.remove(alphaForm);
+
+            for (Production betaForm : betaForms) {
+                List<String> beta = betaForm.getRhs();
+                String[] newRhs = getNewRhs(beta, alpha);
+                Production betaAlphaForm = new Production(xi, newRhs);
+                addProductionIfDoesNotAlreadyExist(cfg, betaAlphaForm);
+            }
+        }
+    }
+
+    @NotNull
+    private static String[] getNewRhs(Collection<String> first, Collection<String> second) {
+        List<String> newRhs = new ArrayList<>();
+        newRhs.addAll(first);
+        newRhs.addAll(second);
+        return newRhs.toArray(new String[0]);
+    }
+
+    private static void addProductionIfDoesNotAlreadyExist(Grammar grammar, Production production) {
+        if (!grammar.productions.contains(production)) {
+            grammar.productions.add(production);
+        }
+    }
+
+    private static Predicate<Production> isBetaForm(TreeMap<Integer, String> enumerations, int j) {
+        return production -> {
+            String expectedXj = enumerations.get(j);
+            String actualXj = production.getLhs();
+            return expectedXj.equals(actualXj);
+        };
+    }
+
+    private static Predicate<Production> isAlphaForm(TreeMap<Integer, String> enumerations,
+                                                     int i, int j) {
+        return production -> {
+            String expectedXi = enumerations.get(i);
+            String actualXi = production.getLhs();
+            String expectedXj = enumerations.get(j);
+            String actualXj = production.getRhs().get(0);
+            return expectedXi.equals(actualXi) && expectedXj.equals(actualXj);
+        };
+    }
+
+    private TreeMap<Integer, String> enumerateNonTerminals() {
+        TreeMap<Integer, String> enumerations = new TreeMap<>();
+        int i = 0;
+        List<String> orderedNonTerminals = productions
+                .stream()
+                .map(Production::getLhs)
+                .collect(Collectors.toList());
+        for (String nonTerminal : orderedNonTerminals) {
+            if (!enumerations.containsValue(nonTerminal)) {
+                enumerations.put(i, nonTerminal);
+                i++;
+            }
+        }
+        return enumerations;
     }
 
     Grammar deepClone() {

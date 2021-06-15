@@ -519,24 +519,29 @@ class GrammarTest {
 
     @Test
     void removeLeftRecursion() {
-        // From lecture slides 1
+        // Textbook example
         Grammar expected = new Grammar(
-                makeNonTerminals("Y'"),
-                makeTerminals("a", "b", EPSILON),
-                "Y",
+                makeNonTerminals("A"),
+                makeTerminals("a", "b", "c", "d", EPSILON),
+                "S",
                 makeProductions(
-                        "Y  ::= b Y'",
-                        "Y' ::= a Y'",
-                        "Y' ::= " + EPSILON
+                        "S ::= A a",
+                        "S ::= b",
+                        "A ::= b c A'",
+                        "A ::= d A'",
+                        "A' ::= a c A'",
+                        "A' ::= " + EPSILON
                 )
         );
         Grammar cfg = new Grammar(
-                makeNonTerminals("Y'"),
-                makeTerminals("a", "b"),
-                "Y",
+                makeNonTerminals("A"),
+                makeTerminals("a", "b", "c", "d"),
+                "S",
                 makeProductions(
-                        "Y ::= Y a",
-                        "Y ::= b"
+                        "S ::= A a",
+                        "S ::= b",
+                        "A ::= S c",
+                        "A ::= d"
                 )
         );
         Grammar actual = cfg.removeLeftRecursion();
