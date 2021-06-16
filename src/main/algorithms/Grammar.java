@@ -54,8 +54,8 @@ class Grammar {
         String w = "id + id * id";
 
         if (!grammar.isLL1(ll1ParseTable)) {
-            Grammar converted = grammar.removeLeftRecursion();
-            System.out.println(converted);
+//            Grammar converted = grammar.removeLeftRecursion();
+//            System.out.println(converted);
         } else {
             LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
             System.out.println(output);
@@ -291,7 +291,7 @@ class Grammar {
     Grammar removeLeftRecursion() {
         Grammar cfg = this.deepClone();
         Enumerations enums = enumerateNonTerminals();
-        int n = nonTerminals.size();
+        int n = enums.size();
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < i; j++) {
@@ -443,10 +443,16 @@ class Grammar {
     }
 
     private Enumerations enumerateNonTerminals() {
-        return productions
-                .stream()
-                .map(Production::getLhs)
-                .collect(Collectors.toCollection(Enumerations::new));
+        Enumerations enumerations = new Enumerations();
+        ListWithUniques<String> withoutStart = new ListWithUniques<>(nonTerminals,
+                String::compareTo);
+        withoutStart.remove(start);
+
+        /* If we don't begin with the start symbol, the converted grammar will
+        have completely different productions. */
+        enumerations.add(start);
+        enumerations.addAll(withoutStart);
+        return enumerations;
     }
 
     Grammar deepClone() {
@@ -543,22 +549,23 @@ class ListWithUniques<T> extends ArrayList<T> {
     }
 
     public ListWithUniques(@NotNull Collection<? extends T> items, Comparator<T> comparator) {
-        super(items);
+        super();
         this.comparator = comparator;
+        this.addAll(items);
     }
 
     @Override
     public void add(int index, T item) {
-        if (!contains(item)) {
-            super.add(item);
-            this.sort(this.comparator);
-        }
+        this.add(item);
     }
 
     @Override
     public boolean add(T item) {
-        boolean isAdded = super.add(item);
-        this.sort(this.comparator);
+        boolean isAdded = false;
+        if (!contains(item)) {
+            isAdded = super.add(item);
+            this.sort(this.comparator);
+        }
         return isAdded;
     }
 
@@ -572,10 +579,11 @@ class ListWithUniques<T> extends ArrayList<T> {
     }
 }
 
-class Enumerations extends ListWithUniques<String> {
-    public Enumerations() {
-        super(String::compareTo);
-    }
+class Enumerations extends ArrayList<String> {
+//class Enumerations extends ListWithUniques<String> {
+//    public Enumerations() {
+//        super(String::compareTo);
+//    }
 }
 
 class Symbols extends TreeSet<String> {
