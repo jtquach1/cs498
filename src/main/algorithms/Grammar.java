@@ -54,12 +54,16 @@ class Grammar {
         String w = "id + id * id";
 
         if (!grammar.isLL1(ll1ParseTable)) {
-//            Grammar converted = grammar.removeLeftRecursion();
-//            System.out.println(converted);
-        } else {
-            LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
-            System.out.println(output);
+            grammar = grammar.removeLeftRecursion();
+
+            firstMap = grammar.first();
+            followMap = grammar.follow(firstMap);
+            ll1ParseTable = grammar.generateLL1ParseTable(firstMap, followMap);
+
         }
+
+        LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
+        System.out.println(output);
 
     }
 
@@ -580,10 +584,6 @@ class ListWithUniques<T> extends ArrayList<T> {
 }
 
 class Enumerations extends ArrayList<String> {
-//class Enumerations extends ListWithUniques<String> {
-//    public Enumerations() {
-//        super(String::compareTo);
-//    }
 }
 
 class Symbols extends TreeSet<String> {
