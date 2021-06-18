@@ -59,7 +59,6 @@ class Grammar {
             firstMap = grammar.first();
             followMap = grammar.follow(firstMap);
             ll1ParseTable = grammar.generateLL1ParseTable(firstMap, followMap);
-
         }
 
         LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
@@ -84,16 +83,18 @@ class Grammar {
 
             productions.add(new Production(lhs, rhs));
             nonTerminals.add(lhs);
-            Arrays
-                    .stream(rhs)
-                    .filter(symbol -> !nonTerminals.contains(symbol))
-                    .forEach(terminals::add);
 
             if (!sawStart) {
                 start = lhs;
                 sawStart = true;
             }
         }
+
+        productions
+                .forEach(production -> production.getRhs()
+                        .stream()
+                        .filter(symbol -> !nonTerminals.contains(symbol))
+                        .forEach(terminals::add));
 
         return new Grammar(nonTerminals, terminals, start, productions);
     }

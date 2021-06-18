@@ -1,5 +1,6 @@
 package algorithms;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -10,21 +11,71 @@ import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
+    Grammar arithmeticExpression;
+    Grammar arithmeticExpressionRedux;
+    Grammar firstSampleExamQuestion;
+    Grammar leftRecursionExample;
+
+    @BeforeEach
+    void setUp() {
+        firstSampleExamQuestion = new Grammar(
+                makeNonTerminals("A", "B"),
+                makeTerminals("a", "b", "c", EPSILON),
+                "S",
+                makeProductions(
+                        "S ::= A a",
+                        "S ::= a",
+                        "A ::= c",
+                        "A ::= b B",
+                        "B ::= c B",
+                        "B ::= " + EPSILON
+                )
+        );
+        arithmeticExpression = new Grammar(
+                makeNonTerminals("T", "F"),
+                makeTerminals("+", "*", "(", ")", "id"),
+                "E",
+                makeProductions(
+                        "E ::= E + T",
+                        "E ::= T",
+                        "T ::= T * F",
+                        "T ::= F",
+                        "F ::= ( E )",
+                        "F ::= id"
+                )
+        );
+        arithmeticExpressionRedux = new Grammar(
+                makeNonTerminals("E'", "T", "T'", "F"),
+                makeTerminals("+", EPSILON, "*", "(", ")", "id"),
+                "E",
+                makeProductions(
+                        "E ::= T E'",
+                        "E' ::= + T E'",
+                        "E' ::= " + EPSILON,
+                        "T ::= F T'",
+                        "T' ::= * F T'",
+                        "T' ::= " + EPSILON,
+                        "F ::= ( E )",
+                        "F ::= id"
+                )
+        );
+        leftRecursionExample = new Grammar(
+                makeNonTerminals("A"),
+                makeTerminals("a", "b", "c", "d"),
+                "S",
+                makeProductions(
+                        "S ::= A a",
+                        "S ::= b",
+                        "A ::= S c",
+                        "A ::= d"
+                )
+        );
+    }
 
     @Test
     void first() {
         // From sample exam 1
-        Symbols nonTerminals = makeNonTerminals("A", "B");
-        Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
-        Productions productions = makeProductions(
-                "S ::= A a",
-                "S ::= a",
-                "A ::= c",
-                "A ::= b B",
-                "B ::= c B",
-                "B ::= " + EPSILON
-        );
-        Grammar cfg = new Grammar(nonTerminals, terminals, "S", productions);
+        Grammar cfg = firstSampleExamQuestion;
         FirstMap actual = cfg.first();
         FirstMap expected = new FirstMap();
         expected.put("a", new First("a"));
@@ -37,19 +88,7 @@ class GrammarTest {
         assertEquals(expected, actual);
 
         // From lecture slides, LL(1) grammar
-        nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= T E'",
-                "E' ::= + T E'",
-                "E' ::= " + EPSILON,
-                "T ::= F T'",
-                "T' ::= * F T'",
-                "T' ::= " + EPSILON,
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpressionRedux;
         actual = cfg.first();
         expected = new FirstMap();
         expected.put("(", new First("("));
@@ -66,17 +105,7 @@ class GrammarTest {
         assertEquals(expected, actual);
 
         // From lecture slides, non LL(1) grammar
-        nonTerminals = makeNonTerminals("T", "F");
-        terminals = makeTerminals("+", "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= E + T",
-                "E ::= T",
-                "T ::= T * F",
-                "T ::= F",
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpression;
         actual = cfg.first();
 
         expected = new FirstMap();
@@ -99,17 +128,7 @@ class GrammarTest {
         expected.put("A", new Follow("a"));
         expected.put("B", new Follow("a"));
 
-        Symbols nonTerminals = makeNonTerminals("A", "B");
-        Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
-        Productions productions = makeProductions(
-                "S ::= A a",
-                "S ::= a",
-                "A ::= c",
-                "A ::= b B",
-                "B ::= c B",
-                "B ::= " + EPSILON
-        );
-        Grammar cfg = new Grammar(nonTerminals, terminals, "S", productions);
+        Grammar cfg = firstSampleExamQuestion;
 
         FirstMap firstMap = new FirstMap();
         firstMap.put("a", new First("a"));
@@ -131,19 +150,7 @@ class GrammarTest {
         expected.put("T", new Follow("+", ")", TERMINATOR));
         expected.put("T'", new Follow("+", ")", TERMINATOR));
 
-        nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= T E'",
-                "E' ::= + T E'",
-                "E' ::= " + EPSILON,
-                "T ::= F T'",
-                "T' ::= * F T'",
-                "T' ::= " + EPSILON,
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpressionRedux;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -167,17 +174,7 @@ class GrammarTest {
         expected.put("F", new Follow("+", "*", ")", TERMINATOR));
         expected.put("T", new Follow("+", "*", ")", TERMINATOR));
 
-        nonTerminals = makeNonTerminals("T", "F");
-        terminals = makeTerminals("+", "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= E + T",
-                "E ::= T",
-                "T ::= T * F",
-                "T ::= F",
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpression;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -205,17 +202,7 @@ class GrammarTest {
         expected.set("B", "a", 3);
         expected.set("B", "c", 2);
 
-        Symbols nonTerminals = makeNonTerminals("A", "B");
-        Symbols terminals = makeTerminals("a", "b", "c", EPSILON);
-        Productions productions = makeProductions(
-                "S ::= A a",
-                "S ::= a",
-                "A ::= c",
-                "A ::= b B",
-                "B ::= c B",
-                "B ::= " + EPSILON
-        );
-        Grammar cfg = new Grammar(nonTerminals, terminals, "S", productions);
+        Grammar cfg = firstSampleExamQuestion;
 
         FirstMap firstMap = new FirstMap();
         firstMap.put("a", new First("a"));
@@ -250,19 +237,7 @@ class GrammarTest {
         expected.set("F", "(", 3);
         expected.set("F", "id", 4);
 
-        nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= T E'",
-                "E' ::= + T E'",
-                "E' ::= " + EPSILON,
-                "T ::= F T'",
-                "T' ::= * F T'",
-                "T' ::= " + EPSILON,
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpressionRedux;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -301,17 +276,7 @@ class GrammarTest {
         expected.set("F", "(", 2);
         expected.set("F", "id", 3);
 
-        nonTerminals = makeNonTerminals("T", "F");
-        terminals = makeTerminals("+", "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= E + T",
-                "E ::= T",
-                "T ::= T * F",
-                "T ::= F",
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpression;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -436,20 +401,7 @@ class GrammarTest {
         table.set("F", "(", 3);
         table.set("F", "id", 4);
 
-        Symbols nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        Symbols terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        Productions productions = makeProductions(
-                "E ::= T E'",
-                "E' ::= + T E'",
-                "E' ::= " + EPSILON,
-                "T ::= F T'",
-                "T' ::= * F T'",
-                "T' ::= " + EPSILON,
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        Grammar cfg = new Grammar(nonTerminals, terminals, "E", productions);
-
+        Grammar cfg = arithmeticExpressionRedux;
         String w = "id + id * id " + TERMINATOR;
         LL1ParseOutput actual = cfg.parseSentence(table, w);
         assertEquals(expected, actual);
@@ -457,18 +409,8 @@ class GrammarTest {
 
     @Test
     void isLL1() {
-        // Non LL(1) grammar with direct left recursion
-        Symbols nonTerminals = makeNonTerminals("T", "F");
-        Symbols terminals = makeTerminals("+", "*", "(", ")", "id");
-        Productions productions = makeProductions(
-                "E ::= E + T",
-                "E ::= T",
-                "T ::= T * F",
-                "T ::= F",
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        Grammar cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        // Non LL(1) grammar with left recursion
+        Grammar cfg = arithmeticExpression;
         LL1ParseTable table = new LL1ParseTable();
         table.set("E", "(", 0);
         table.set("E", "(", 1);
@@ -484,19 +426,7 @@ class GrammarTest {
         assertFalse(cfg.isLL1(table));
 
         // Equivalent LL(1) grammar
-        nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        productions = makeProductions(
-                "E ::= T E'",
-                "E' ::= + T E'",
-                "E' ::= " + EPSILON,
-                "T ::= F T'",
-                "T' ::= * F T'",
-                "T' ::= " + EPSILON,
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        cfg = new Grammar(nonTerminals, terminals, "E", productions);
+        cfg = arithmeticExpressionRedux;
         table = new LL1ParseTable();
         table.set("E", "(", 0);
         table.set("E", "id", 0);
@@ -531,36 +461,35 @@ class GrammarTest {
                         "A' ::= " + EPSILON
                 )
         );
-        Grammar cfg = new Grammar(
-                makeNonTerminals("A"),
-                makeTerminals("a", "b", "c", "d"),
-                "S",
+        Grammar cfg = leftRecursionExample;
+        Grammar actual = cfg.removeLeftRecursion();
+        assertEquals(expected, actual);
+
+        // From lecture slides, non LL(1) grammar with left recursion removed
+        expected = new Grammar(
+                makeNonTerminals("E'", "T", "T'", "F"),
+                makeTerminals("+", EPSILON, "*", "(", ")", "id"),
+                "E",
                 makeProductions(
-                        "S ::= A a",
-                        "S ::= b",
-                        "A ::= S c",
-                        "A ::= d"
+                        "E ::= T E'",
+                        "E' ::= + T E'",
+                        "E' ::= " + EPSILON,
+                        "T ::= ( E ) T'",
+                        "T ::= id T'",
+                        "T' ::= * F T'",
+                        "T' ::= " + EPSILON,
+                        "F ::= ( E )",
+                        "F ::= id"
                 )
         );
-        Grammar actual = cfg.removeLeftRecursion();
+        cfg = arithmeticExpression;
+        actual = cfg.removeLeftRecursion();
         assertEquals(expected, actual);
     }
 
     @Test
     void deepClone() {
-        Symbols nonTerminals = makeNonTerminals("E'", "T", "T'", "F");
-        Symbols terminals = makeTerminals("+", EPSILON, "*", "(", ")", "id");
-        Productions productions = makeProductions(
-                "E ::= T E'",
-                "E' ::= + T E'",
-                "E' ::= " + EPSILON,
-                "T ::= F T'",
-                "T' ::= * F T'",
-                "T' ::= " + EPSILON,
-                "F ::= ( E )",
-                "F ::= id"
-        );
-        Grammar expected = new Grammar(nonTerminals, terminals, "E", productions);
+        Grammar expected = arithmeticExpressionRedux;
         Grammar actual = expected.deepClone();
         assertEquals(expected, actual);
         assertNotSame(expected, actual);
