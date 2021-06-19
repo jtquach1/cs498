@@ -64,7 +64,6 @@ class Grammar {
 
         LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
         System.out.println(output);
-
     }
 
     @NotNull

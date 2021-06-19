@@ -112,9 +112,9 @@ class Utility {
         return new Symbols(Arrays.asList(symbols));
     }
 
-    static Productions makeProductions(String... productionStrings) {
+    static Productions makeProductions(String... productionLines) {
         return Arrays
-                .stream(productionStrings)
+                .stream(productionLines)
                 .map(Utility::getProductionFromLine)
                 .collect(Collectors.toCollection(Productions::new));
     }
@@ -125,7 +125,6 @@ class Utility {
         String[] rhs = sides[1].trim().split(" ");
         return new Production(lhs, rhs);
     }
-
 }
 
 class Queue<T> extends ArrayList<T> {
