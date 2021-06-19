@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
+import static algorithms.Utility.getProductionFromLine;
 
 class Grammar {
     static final String EPSILON = Character.toString('\u025B');
@@ -70,31 +71,28 @@ class Grammar {
     private static Grammar initializeGrammar(String grammar) {
         grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
         String[] lines = grammar.split("\r?\n|\r");
-        Productions productions = new Productions();
-        boolean sawStart = false;
-        String start = null;
+
         Symbols nonTerminals = new Symbols();
         Symbols terminals = new Symbols();
+        String start = null;
+        Productions productions = new Productions();
 
-        for (String line : lines) {
-            String[] sides = line.split("::=");
-            String lhs = sides[0].trim();
-            String[] rhs = sides[1].trim().split(" ");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            Production production = getProductionFromLine(line);
+            productions.add(production);
+            nonTerminals.add(production.getLhs());
 
-            productions.add(new Production(lhs, rhs));
-            nonTerminals.add(lhs);
-
-            if (!sawStart) {
-                start = lhs;
-                sawStart = true;
+            if (i == 0) {
+                start = production.getLhs();
             }
         }
 
-        productions
-                .forEach(production -> production.getRhs()
-                        .stream()
-                        .filter(symbol -> !nonTerminals.contains(symbol))
-                        .forEach(terminals::add));
+        productions.forEach(production -> production
+                .getRhs()
+                .stream()
+                .filter(symbol -> !nonTerminals.contains(symbol))
+                .forEach(terminals::add));
 
         return new Grammar(nonTerminals, terminals, start, productions);
     }
