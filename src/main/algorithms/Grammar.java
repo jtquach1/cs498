@@ -464,6 +464,11 @@ class Grammar {
         return new Grammar(nonTerminals, terminals, start, productions);
     }
 
+    Items closure(Items items) {
+        Items closure = new Items();
+        return closure;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(nonTerminals, terminals, start, productions);
@@ -603,3 +608,66 @@ class Productions extends ListWithUniques<Production> {
         super(items, Production::compareTo);
     }
 }
+
+class Item extends Production {
+    static final String MARKER = Character.toString('\u00B7');
+    private final String lhs;
+    private final ArrayList<String> rhs;
+    private final String lookahead;
+
+    Item(String lookahead, String lhs, String... rhs) {
+        super(lhs, rhs);
+        this.lhs = lhs;
+        this.rhs = new ArrayList<>(Arrays.asList(rhs));
+        this.lookahead = lookahead;
+    }
+
+    List<String> getAlpha() {
+        int untilMarker = rhs.indexOf(MARKER);
+        return rhs.subList(0, untilMarker);
+    }
+
+    List<String> getBeta() {
+        int afterMarker = rhs.indexOf(MARKER) + 1;
+        int toEnd = rhs.size();
+        return rhs.subList(afterMarker, toEnd);
+    }
+
+    public int compareTo(@NotNull Item other) {
+        return Comparator
+                .comparing(Item::getLhs)
+                .thenComparing(item -> item.getRhs().toString())
+                .thenComparing(Item::getLookahead)
+                .compare(this, other);
+    }
+
+    public String getLookahead() {
+        return lookahead;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lhs, rhs, lookahead);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Item other = (Item) o;
+        return Objects.equals(lhs, other.lhs) &&
+                Objects.equals(rhs, other.rhs) &&
+                Objects.equals(lookahead, other.lookahead);
+    }
+
+    @Override
+    public String toString() {
+        String rule = super.toString();
+        return "[" + rule + ", " + lookahead + "]";
+    }
+}
+
+class Items extends TreeSet<Item> {
+}
+
