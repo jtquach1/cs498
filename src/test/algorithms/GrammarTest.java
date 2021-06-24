@@ -515,8 +515,7 @@ class GrammarTest {
     @Test
     void closure() {
         // From lecture slides
-        Items expected = new Items();
-        expected.addAll(makeItems(
+        Items expected = makeItems(
                 "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
                 "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]",
                 "[E ::= " + MARKER + " E + T, +]",
@@ -534,7 +533,7 @@ class GrammarTest {
                 "[F ::= " + MARKER + " id, " + TERMINATOR + "]",
                 "[F ::= " + MARKER + " id, +]",
                 "[F ::= " + MARKER + " id, *]"
-        ));
+        );
 
         Item kernel = new Item(TERMINATOR, "E'", MARKER, "E");
         Items set = new Items(Collections.singletonList(kernel));
@@ -551,5 +550,108 @@ class GrammarTest {
         Items actual = augmentedArithmeticExpression.closure(set, firstMap);
 
         assertEquals(expected, actual);
+    }
+
+
+    @Test
+    void computeGoto() {
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E'", new First("(", "id"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("id", new First("id"));
+
+        // goto(s0, E) = s1
+        Items state = makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, +]",
+                "[E ::= " + MARKER + " T, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " T, +]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "]",
+                "[T ::= " + MARKER + " T * F, +]",
+                "[T ::= " + MARKER + " T * F, *]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "]",
+                "[T ::= " + MARKER + " F, +]",
+                "[T ::= " + MARKER + " F, *]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "]",
+                "[F ::= " + MARKER + " ( E ), +]",
+                "[F ::= " + MARKER + " ( E ), *]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "]",
+                "[F ::= " + MARKER + " id, +]",
+                "[F ::= " + MARKER + " id, *]"
+        );
+        assertEquals(
+                makeItems(
+                        "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
+                        "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
+                        "[E ::= E " + MARKER + " + T, +]"
+                ),
+                augmentedArithmeticExpression.computeGoto(state, "E", firstMap)
+        );
+
+        // goto(s0, T) = s2
+        assertEquals(
+                makeItems(
+                        "[E ::= T " + MARKER + ", " + TERMINATOR + "]",
+                        "[E ::= T " + MARKER + ", +]",
+                        "[T ::= T " + MARKER + " * F, " + TERMINATOR + "]",
+                        "[T ::= T " + MARKER + " * F, +]",
+                        "[T ::= T " + MARKER + " * F, *]"
+                ),
+                augmentedArithmeticExpression.computeGoto(state, "T", firstMap)
+        );
+
+
+        // goto(s0, F) = s3
+        assertEquals(
+                makeItems(
+                        "[T ::= F " + MARKER + ", " + TERMINATOR + "]",
+                        "[T ::= F " + MARKER + ", +]",
+                        "[T ::= F " + MARKER + ", *]"
+                ),
+                augmentedArithmeticExpression.computeGoto(state, "F", firstMap)
+        );
+
+        // goto(s0, () = s4
+        assertEquals(
+                makeItems(
+                        "[F ::= ( " + MARKER + " E ), " + TERMINATOR + "]",
+                        "[F ::= ( " + MARKER + " E ), +]",
+                        "[F ::= ( " + MARKER + " E ), *]",
+                        "[E ::= " + MARKER + " E + T, +]",
+                        "[E ::= " + MARKER + " E + T, )]",
+                        "[E ::= " + MARKER + " T, +]",
+                        "[E ::= " + MARKER + " T, )]",
+                        "[T ::= " + MARKER + " T * F, +]",
+                        "[T ::= " + MARKER + " T * F, *]",
+                        "[T ::= " + MARKER + " T * F, )]",
+                        "[T ::= " + MARKER + " F, +]",
+                        "[T ::= " + MARKER + " F, *]",
+                        "[T ::= " + MARKER + " F, )]",
+                        "[F ::= " + MARKER + " ( E ), +]",
+                        "[F ::= " + MARKER + " ( E ), *]",
+                        "[F ::= " + MARKER + " ( E ), )]",
+                        "[F ::= " + MARKER + " id, +]",
+                        "[F ::= " + MARKER + " id, *]",
+                        "[F ::= " + MARKER + " id, )]"
+                ),
+                augmentedArithmeticExpression.computeGoto(state, "(", firstMap)
+        );
+
+        // goto(s0, id) = s5
+        assertEquals(
+                makeItems(
+                        "[F ::= id " + MARKER + ", " + TERMINATOR + "]",
+                        "[F ::= id " + MARKER + ", +]",
+                        "[F ::= id " + MARKER + ", *]"
+                ),
+                augmentedArithmeticExpression.computeGoto(state, "id", firstMap)
+        );
     }
 }
