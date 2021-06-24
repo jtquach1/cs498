@@ -54,14 +54,14 @@ class FirstMapTest {
     }
 
     @Test
-    void addEpsilonToFirstSetOfSymbol() {
+    void addEpsilonToFirstSetOfNonTerminal() {
         FirstMap expected = new FirstMap();
         expected.put("E", new First(EPSILON));
 
         Production p = new Production("E", "T", "E'");
         FirstMap actual = new FirstMap();
         actual.put("E", new First());
-        actual.addEpsilonToFirstSetOfSymbol(p);
+        actual.addEpsilonToFirstSetOfNonTerminal(p);
 
         assertEquals(expected, actual);
     }

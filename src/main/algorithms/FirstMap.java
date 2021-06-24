@@ -43,7 +43,7 @@ class FirstMap extends TreeMap<String, First> {
         this.put(symbol, set);
     }
 
-    void addEpsilonToFirstSetOfSymbol(Production p) {
+    void addEpsilonToFirstSetOfNonTerminal(Production p) {
         String lhs = p.getLhs();
         First set = this.get(lhs);
         set.add(EPSILON);

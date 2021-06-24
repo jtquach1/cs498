@@ -1,6 +1,7 @@
 package algorithms;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -105,7 +106,7 @@ class Grammar {
         productions
                 .stream()
                 .filter(Production::beginsWithEpsilon)
-                .forEach(map::addEpsilonToFirstSetOfSymbol);
+                .forEach(map::addEpsilonToFirstSetOfNonTerminal);
         FirstMap previous;
 
         boolean newSymbolsAreBeingAdded = true;
@@ -119,41 +120,63 @@ class Grammar {
     }
 
     FollowMap follow(FirstMap firstMap) {
-        FollowMap followMap = new FollowMap();
-        nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
-        followMap.get(start).add(TERMINATOR);
+        FollowMap followMap = initializeFollowMap();
         FollowMap previous;
 
         boolean newSymbolsAreBeingAdded = true;
         while (newSymbolsAreBeingAdded) {
             previous = followMap.deepClone();
-
-            for (Production p : productions) {
-                String lhs = p.getLhs();
-                List<String> rhs = p.getRhs();
-                int n = rhs.size();
-                for (int i = 0; i < n; i++) {
-                    String symbol = rhs.get(i);
-                    if (!isNonTerminal(symbol)) {
-                        continue;
-                    }
-                    Follow followOfSymbol = followMap.get(symbol);
-                    List<String> subsequence = rhs.subList(i + 1, n);
-                    First firstOfSubsequence = firstMap.first(subsequence);
-                    followOfSymbol.addAll(firstOfSubsequence);
-                    followOfSymbol.remove(EPSILON);
-                    if (i == n - 1 || firstOfSubsequence.contains(EPSILON)) {
-                        followOfSymbol.addAll(followMap.get(lhs));
-                    }
-                }
-            }
+            productions.forEach(populateFollowMap(firstMap, followMap));
             newSymbolsAreBeingAdded = !followMap.equals(previous);
         }
         return followMap;
     }
 
+    @NotNull
+    private Consumer<Production> populateFollowMap(FirstMap firstMap, FollowMap followMap) {
+        return production -> {
+            String lhs = production.getLhs();
+            List<String> rhs = production.getRhs();
+            int n = rhs.size();
+
+            for (int i = 0; i < n; i++) {
+                Follow followOfSymbol = getFollowOfSymbol(followMap, rhs, i);
+                if (followOfSymbol == null) continue;
+
+                List<String> subsequence = rhs.subList(i + 1, n);
+                First firstOfSubsequence = firstMap.first(subsequence);
+                followOfSymbol.addAll(firstOfSubsequence);
+                followOfSymbol.remove(EPSILON);
+
+                if (i == n - 1 || firstOfSubsequence.contains(EPSILON)) {
+                    followOfSymbol.addAll(followMap.get(lhs));
+                }
+            }
+        };
+    }
+
+    @Nullable
+    private Follow getFollowOfSymbol(FollowMap followMap, List<String> rhs, int i) {
+        String symbol = rhs.get(i);
+
+        // Terminals do not have follow sets.
+        if (!isNonTerminal(symbol)) {
+            return null;
+        }
+
+        return followMap.get(symbol);
+    }
+
     private boolean isNonTerminal(String symbol) {
         return nonTerminals.contains(symbol);
+    }
+
+    @NotNull
+    private FollowMap initializeFollowMap() {
+        FollowMap followMap = new FollowMap();
+        nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
+        followMap.get(start).add(TERMINATOR);
+        return followMap;
     }
 
     LL1ParseTable generateLL1ParseTable(FirstMap firstMap, FollowMap followMap) {
