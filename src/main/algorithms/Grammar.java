@@ -3,6 +3,7 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -105,13 +106,13 @@ class Grammar {
                 .stream()
                 .filter(Production::beginsWithEpsilon)
                 .forEach(map::addEpsilonToFirstSetOfSymbol);
-        FirstMap previous = map.deepClone();
+        FirstMap previous;
 
         boolean newSymbolsAreBeingAdded = true;
         while (newSymbolsAreBeingAdded) {
+            previous = map.deepClone();
             productions.forEach(map::addFirstSetOfSequenceToFirstSetOfSymbol);
             newSymbolsAreBeingAdded = !map.equals(previous);
-            previous = map.deepClone();
         }
 
         return map;
@@ -121,10 +122,12 @@ class Grammar {
         FollowMap followMap = new FollowMap();
         nonTerminals.forEach(followMap::initializeFollowSetOfNonTerminal);
         followMap.get(start).add(TERMINATOR);
-        FollowMap previous = followMap.deepClone();
+        FollowMap previous;
 
         boolean newSymbolsAreBeingAdded = true;
         while (newSymbolsAreBeingAdded) {
+            previous = followMap.deepClone();
+
             for (Production p : productions) {
                 String lhs = p.getLhs();
                 List<String> rhs = p.getRhs();
@@ -145,7 +148,6 @@ class Grammar {
                 }
             }
             newSymbolsAreBeingAdded = !followMap.equals(previous);
-            previous = followMap.deepClone();
         }
         return followMap;
     }
@@ -466,46 +468,71 @@ class Grammar {
     }
 
     Items closure(Items items, FirstMap firstMap) {
-        Items closure = new Items();
-        closure.addAll(items);
+        Items closure = new Items(items);
         boolean newItemsAreBeingAdded = true;
         Items previous;
+
         while (newItemsAreBeingAdded) {
             previous = closure.deepClone();
-
-            for (Production rule : productions) {
-                String lhs = rule.getLhs();
-                List<String> rhs = rule.getRhs();
-                Items partiallyParsedForms = closure
-                        .stream()
-                        .filter(isPartiallyParsed(lhs))
-                        .collect(Collectors.toCollection(Items::new));
-                if (!partiallyParsedForms.isEmpty()) {
-                    for (Item item : partiallyParsedForms) {
-                        List<String> beta = item.getBeta();
-                        List<String> subBeta = beta.subList(1, beta.size());
-                        String lookahead = item.getLookahead();
-                        List<String> sequence = new ArrayList<>(subBeta);
-                        sequence.add(lookahead);
-                        First tokens = firstMap.first(sequence);
-                        for (String token : tokens) {
-                            List<String> newRhs = new ArrayList<>();
-                            newRhs.add(MARKER);
-                            newRhs.addAll(rhs);
-                            Item newItem = new Item(token, lhs, newRhs.toArray(new String[0]));
-                            closure.add(newItem);
-                        }
-                    }
-
-                }
-            }
-
+            productions.forEach(addCorrespondingItems(firstMap, closure));
             newItemsAreBeingAdded = !closure.equals(previous);
         }
         return closure;
     }
 
-    private Predicate<Item> isPartiallyParsed(String lhs) {
+    @NotNull
+    private static Consumer<Production> addCorrespondingItems(FirstMap firstMap, Items closure) {
+        return rule -> {
+            Items partiallyParsedForms = getPartiallyParsedForms(closure, rule);
+
+            partiallyParsedForms.forEach(item -> {
+                        List<String> betaLookahead = getBetaLookahead(item);
+                        First first = firstMap.first(betaLookahead);
+                        first.forEach(addCorrespondingItem(closure, rule));
+                    }
+            );
+        };
+    }
+
+    @NotNull
+    private static Consumer<String> addCorrespondingItem(Items closure, Production rule) {
+        String lhs = rule.getLhs();
+        List<String> rhs = rule.getRhs();
+
+        return token -> {
+            Item newItem = getNewItem(token, lhs, rhs);
+            closure.add(newItem);
+        };
+    }
+
+    @NotNull
+    private static Item getNewItem(String token, String lhs, List<String> rhs) {
+        List<String> gamma = new ArrayList<>();
+        gamma.add(MARKER);
+        gamma.addAll(rhs);
+        return new Item(token, lhs, gamma.toArray(new String[0]));
+    }
+
+    @NotNull
+    private static List<String> getBetaLookahead(Item item) {
+        List<String> beta = item.getBeta();
+        List<String> subBeta = beta.subList(1, beta.size());
+        String lookahead = item.getLookahead();
+        List<String> sequence = new ArrayList<>(subBeta);
+        sequence.add(lookahead);
+        return sequence;
+    }
+
+    @NotNull
+    private static Items getPartiallyParsedForms(Items closure, Production rule) {
+        String lhs = rule.getLhs();
+        return closure
+                .stream()
+                .filter(hasNonTerminalToParse(lhs))
+                .collect(Collectors.toCollection(Items::new));
+    }
+
+    private static Predicate<Item> hasNonTerminalToParse(String lhs) {
         return item -> {
             List<String> beta = item.getBeta();
             if (!beta.isEmpty()) {
