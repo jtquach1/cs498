@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static algorithms.Grammar.TERMINATOR;
+import static algorithms.Item.MARKER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UtilityTest {
@@ -227,6 +229,26 @@ class UtilityTest {
         line = "E ::= T\n";
         actual = Utility.getProductionFromLine(line);
         expected = new Production("E", "T");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeItems() {
+        Items expected = new Items();
+        expected.add(new Item(TERMINATOR, "E'", MARKER, "E"));
+        expected.add(new Item(TERMINATOR, "E", MARKER, "E", "+", "T"));
+        Items actual = Utility.makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]"
+        );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getItemFromLine() {
+        String line = "[E' ::= " + MARKER + " E, " + TERMINATOR + "]";
+        Item actual = Utility.getItemFromLine(line);
+        Item expected = new Item(TERMINATOR, "E'", MARKER, "E");
         assertEquals(expected, actual);
     }
 }

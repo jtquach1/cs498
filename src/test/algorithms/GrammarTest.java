@@ -4,14 +4,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
+import static algorithms.Item.MARKER;
 import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
     Grammar arithmeticExpression;
+    Grammar augmentedArithmeticExpression;
     Grammar arithmeticExpressionRedux;
     Grammar firstSampleExamQuestion;
     Grammar leftRecursionExample;
@@ -36,6 +39,20 @@ class GrammarTest {
                 makeTerminals("+", "*", "(", ")", "id"),
                 "E",
                 makeProductions(
+                        "E ::= E + T",
+                        "E ::= T",
+                        "T ::= T * F",
+                        "T ::= F",
+                        "F ::= ( E )",
+                        "F ::= id"
+                )
+        );
+        augmentedArithmeticExpression = new Grammar(
+                makeNonTerminals("E", "T", "F"),
+                makeTerminals("+", "*", "(", ")", "id"),
+                "E'",
+                makeProductions(
+                        "E' ::= E",
                         "E ::= E + T",
                         "E ::= T",
                         "T ::= T * F",
@@ -493,5 +510,46 @@ class GrammarTest {
         Grammar actual = expected.deepClone();
         assertEquals(expected, actual);
         assertNotSame(expected, actual);
+    }
+
+    @Test
+    void closure() {
+        // From lecture slides
+        Items expected = new Items();
+        expected.addAll(makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, +]",
+                "[E ::= " + MARKER + " T, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " T, +]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "]",
+                "[T ::= " + MARKER + " T * F, +]",
+                "[T ::= " + MARKER + " T * F, *]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "]",
+                "[T ::= " + MARKER + " F, +]",
+                "[T ::= " + MARKER + " F, *]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "]",
+                "[F ::= " + MARKER + " ( E ), +]",
+                "[F ::= " + MARKER + " ( E ), *]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "]",
+                "[F ::= " + MARKER + " id, +]",
+                "[F ::= " + MARKER + " id, *]"
+        ));
+
+        Item kernel = new Item(TERMINATOR, "E'", MARKER, "E");
+        Items set = new Items(Collections.singletonList(kernel));
+        FirstMap firstMap = new FirstMap();
+        firstMap.put("(", new First("("));
+        firstMap.put(")", new First(")"));
+        firstMap.put("*", new First("*"));
+        firstMap.put("+", new First("+"));
+        firstMap.put("E'", new First("(", "id"));
+        firstMap.put("E", new First("(", "id"));
+        firstMap.put("F", new First("(", "id"));
+        firstMap.put("T", new First("(", "id"));
+        firstMap.put("id", new First("id"));
+        Items actual = augmentedArithmeticExpression.closure(set, firstMap);
+
+        assertEquals(expected, actual);
     }
 }

@@ -62,7 +62,15 @@ class FirstMap extends TreeMap<String, First> {
         if (sequence.size() != 0) {
 
             String firstSymbol = sequence.get(0);
-            F.addAll(this.get(firstSymbol));
+            First entry = this.get(firstSymbol);
+
+            if (entry == null) {
+                // If the entry doesn't already exist, it must be the terminator
+                entry = new First();
+                entry.add(firstSymbol);
+            }
+
+            F.addAll(entry);
             int i = 1;
             int n = sequence.size();
 

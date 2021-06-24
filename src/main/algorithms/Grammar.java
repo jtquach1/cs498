@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
+import static algorithms.Item.MARKER;
 import static algorithms.Utility.getProductionFromLine;
 
 class Grammar {
@@ -464,10 +465,56 @@ class Grammar {
         return new Grammar(nonTerminals, terminals, start, productions);
     }
 
-    Items closure(Items items) {
+    Items closure(Items items, FirstMap firstMap) {
         Items closure = new Items();
+        closure.addAll(items);
+        boolean newItemsAreBeingAdded = true;
+        Items previous;
+        while (newItemsAreBeingAdded) {
+            previous = closure.deepClone();
+
+            for (Production rule : productions) {
+                String lhs = rule.getLhs();
+                List<String> rhs = rule.getRhs();
+                Items partiallyParsedForms = closure
+                        .stream()
+                        .filter(isPartiallyParsed(lhs))
+                        .collect(Collectors.toCollection(Items::new));
+                if (!partiallyParsedForms.isEmpty()) {
+                    for (Item item : partiallyParsedForms) {
+                        List<String> beta = item.getBeta();
+                        List<String> subBeta = beta.subList(1, beta.size());
+                        String lookahead = item.getLookahead();
+                        List<String> sequence = new ArrayList<>(subBeta);
+                        sequence.add(lookahead);
+                        First tokens = firstMap.first(sequence);
+                        for (String token : tokens) {
+                            List<String> newRhs = new ArrayList<>();
+                            newRhs.add(MARKER);
+                            newRhs.addAll(rhs);
+                            Item newItem = new Item(token, lhs, newRhs.toArray(new String[0]));
+                            closure.add(newItem);
+                        }
+                    }
+
+                }
+            }
+
+            newItemsAreBeingAdded = !closure.equals(previous);
+        }
         return closure;
     }
+
+    private Predicate<Item> isPartiallyParsed(String lhs) {
+        return item -> {
+            List<String> beta = item.getBeta();
+            if (!beta.isEmpty()) {
+                return beta.get(0).equals(lhs);
+            }
+            return false;
+        };
+    }
+
 
     @Override
     public int hashCode() {
@@ -668,6 +715,19 @@ class Item extends Production {
     }
 }
 
-class Items extends TreeSet<Item> {
+class Items extends ListWithUniques<Item> {
+    public Items() {
+        super(Item::compareTo);
+    }
+
+    public Items(@NotNull Collection<? extends Item> items) {
+        super(items, Item::compareTo);
+    }
+
+    Items deepClone() {
+        Items clone = new Items();
+        clone.addAll(this);
+        return clone;
+    }
 }
 

@@ -112,9 +112,9 @@ class Utility {
         return new Symbols(Arrays.asList(symbols));
     }
 
-    static Productions makeProductions(String... productionLines) {
+    static Productions makeProductions(String... lines) {
         return Arrays
-                .stream(productionLines)
+                .stream(lines)
                 .map(Utility::getProductionFromLine)
                 .collect(Collectors.toCollection(Productions::new));
     }
@@ -124,6 +124,30 @@ class Utility {
         String lhs = sides[0].trim();
         String[] rhs = sides[1].trim().split(" ");
         return new Production(lhs, rhs);
+    }
+
+    static Items makeItems(String... lines) {
+        return Arrays
+                .stream(lines)
+                .map(Utility::getItemFromLine)
+                .collect(Collectors.toCollection(Items::new));
+    }
+
+    static Item getItemFromLine(String line) {
+        line = line.trim();
+        if (line.startsWith("[") && line.endsWith("]")) {
+            line = line.substring(1, line.length() - 1);
+            line = line.trim();
+        }
+        String[] item = Arrays
+                .stream(line.split(","))
+                .map(String::trim)
+                .toArray(String[]::new);
+        Production production = getProductionFromLine(item[0]);
+        String lookahead = item[1];
+        String lhs = production.getLhs();
+        String[] rhs = production.getRhs().toArray(new String[0]);
+        return new Item(lookahead, lhs, rhs);
     }
 }
 
