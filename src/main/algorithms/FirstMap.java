@@ -7,12 +7,12 @@ import java.util.*;
 import static algorithms.Grammar.EPSILON;
 
 class First extends TreeSet<String> {
-    public First(String... symbols) {
+    First(String... symbols) {
         super();
         this.addAll(Arrays.asList(symbols));
     }
 
-    public First(@NotNull Collection<? extends String> sets) {
+    First(@NotNull Collection<? extends String> sets) {
         super(sets);
     }
 }

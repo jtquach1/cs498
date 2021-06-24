@@ -1,5 +1,7 @@
 package algorithms;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -186,5 +188,46 @@ class Stack<T> extends ArrayList<T> {
         }
         int last = this.size() - 1;
         return this.get(last);
+    }
+}
+
+class ListWithUniques<T> extends ArrayList<T> {
+    /* Similar to a set, where only unique elements are stored but
+    their order of insertion is preserved. */
+    private final Comparator<T> comparator;
+
+    ListWithUniques(final Comparator<T> comparator) {
+        super();
+        this.comparator = comparator;
+    }
+
+    ListWithUniques(@NotNull Collection<? extends T> items, Comparator<T> comparator) {
+        super();
+        this.comparator = comparator;
+        this.addAll(items);
+    }
+
+    @Override
+    public void add(int index, T item) {
+        this.add(item);
+    }
+
+    @Override
+    public boolean add(T item) {
+        boolean isAdded = false;
+        if (!contains(item)) {
+            isAdded = super.add(item);
+            this.sort(this.comparator);
+        }
+        return isAdded;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends T> items) {
+        boolean hasChanged = false;
+        for (T item : items) {
+            hasChanged |= add(item);
+        }
+        return hasChanged;
     }
 }

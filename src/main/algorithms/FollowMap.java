@@ -8,12 +8,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 class Follow extends TreeSet<String> {
-    public Follow(String... symbols) {
+    Follow(String... symbols) {
         super();
         this.addAll(Arrays.asList(symbols));
     }
 
-    public Follow(@NotNull Collection<? extends String> sets) {
+    Follow(@NotNull Collection<? extends String> sets) {
         super(sets);
     }
 }

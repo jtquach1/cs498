@@ -487,7 +487,7 @@ class Partition extends TreeSet<PSet> {
 }
 
 class PSet extends TreeSet<State> implements Comparable<PSet> {
-    public PSet(@NotNull Collection<? extends State> states) {
+    PSet(@NotNull Collection<? extends State> states) {
         super(states);
     }
 
