@@ -498,13 +498,10 @@ class Grammar {
 
         boolean newStatesAreBeingAdded = true;
         LR1Collection previous;
-        Collection<Items> states;
 
         while (newStatesAreBeingAdded) {
             previous = collection.deepClone();
-            states = previous.values();
-
-            states.forEach(collection.populate(firstMap, augmented));
+            previous.forEach(collection.populate(firstMap, augmented));
             newStatesAreBeingAdded = !collection.equals(previous);
         }
 

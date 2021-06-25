@@ -3,6 +3,8 @@ package algorithms;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
 import static algorithms.Utility.makeItems;
@@ -31,9 +33,7 @@ class LR1CollectionTest {
                 "[E ::= E " + MARKER + " + T, +]"
         );
 
-        collection = new LR1Collection();
-        collection.put(0, s0);
-        collection.put(1, s1);
+        collection = new LR1Collection(Arrays.asList(s0, s1));
     }
 
     @Test
@@ -75,9 +75,4 @@ class LR1CollectionTest {
         );
     }
     */
-
-    @Test
-    void nextIndex() {
-        assertEquals(2, collection.nextIndex());
-    }
 }

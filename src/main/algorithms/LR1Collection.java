@@ -10,22 +10,19 @@ import java.util.stream.Collectors;
 
 import static algorithms.Item.MARKER;
 
-class LR1Collection extends TreeMap<Integer, Items> {
+class LR1Collection extends ListWithUniques<Items> {
     LR1Collection() {
-        super();
+        super(Items::compareTo);
     }
 
     LR1Collection(@NotNull Collection<? extends Items> c) {
-        super();
-        int i = 0;
-        for (Items items : c) {
-            this.put(i++, items);
-        }
+        super(Items::compareTo);
+        this.addAll(c);
     }
 
     LR1Collection deepClone() {
         LR1Collection clone = new LR1Collection();
-        clone.putAll(this);
+        clone.addAll(this);
         return clone;
     }
 
@@ -43,29 +40,10 @@ class LR1Collection extends TreeMap<Integer, Items> {
                                         Items state) {
         return symbol -> {
             Items entry = state.computeGoto(symbol, firstMap, productions);
-            if (!entry.isEmpty() && !this.containsValue(entry)) {
-                this.put(nextIndex(), entry);
+            if (!entry.isEmpty() && !this.contains(entry)) {
+                this.add(entry);
             }
         };
-    }
-
-    int nextIndex() {
-        return this.size();
-    }
-
-
-    // for testing purposes
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-
-        for (int index : this.keySet()) {
-            sb.append("\"" + index + "\": " + this.get(index) + ",\n");
-        }
-
-        sb.append("\n}");
-        return sb.toString();
     }
 }
 
@@ -121,11 +99,10 @@ class Item extends Production {
                 Objects.equals(lookahead, other.lookahead);
     }
 
-    // for testing purposes
     @Override
     public String toString() {
         String rule = super.toString();
-        return "\n\"[" + rule + ", " + lookahead + "]\"";
+        return "[" + rule + ", " + lookahead + "]";
     }
 }
 

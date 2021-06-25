@@ -3,9 +3,7 @@ package algorithms;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -642,20 +640,18 @@ class GrammarTest {
 
         Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
 
-        LR1Collection expected = new LR1Collection();
-        List<Items> itemsList = new ArrayList<>(Arrays.asList(
-                s0, s1, s2, s3, s4, s5, s6, s7,
-                s8, s9, s10, s11, s12, s13, s14,
-                s15, s16, s17, s18, s19, s20, s21)
+        LR1Collection expected = new LR1Collection(
+                Arrays.asList(
+                        s0, s1, s2, s3, s4, s5, s6, s7,
+                        s8, s9, s10, s11, s12, s13, s14,
+                        s15, s16, s17, s18, s19, s20, s21
+                )
         );
-        for (int i = 0; i < itemsList.size(); i++) {
-            expected.put(i, itemsList.get(i));
-        }
 
         LR1Collection actual = arithmeticExpression.computeLR1Collection();
         assertEquals(
-                new TreeSet<>(expected.values()),
-                new TreeSet<>(actual.values())
+                new TreeSet<>(expected),
+                new TreeSet<>(actual)
         );
     }
 }
