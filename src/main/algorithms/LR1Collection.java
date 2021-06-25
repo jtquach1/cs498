@@ -52,6 +52,21 @@ class LR1Collection extends TreeMap<Integer, Items> {
     int nextIndex() {
         return this.size();
     }
+
+
+    // for testing purposes
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+
+        for (int index : this.keySet()) {
+            sb.append("\"" + index + "\": " + this.get(index) + ",\n");
+        }
+
+        sb.append("\n}");
+        return sb.toString();
+    }
 }
 
 class Item extends Production {
@@ -106,10 +121,11 @@ class Item extends Production {
                 Objects.equals(lookahead, other.lookahead);
     }
 
+    // for testing purposes
     @Override
     public String toString() {
         String rule = super.toString();
-        return "[" + rule + ", " + lookahead + "]";
+        return "\n\"[" + rule + ", " + lookahead + "]\"";
     }
 }
 

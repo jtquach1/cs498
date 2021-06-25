@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
@@ -651,6 +653,9 @@ class GrammarTest {
         }
 
         LR1Collection actual = arithmeticExpression.computeLR1Collection();
-        assertEquals(expected, actual);
+        assertEquals(
+                new TreeSet<>(expected.values()),
+                new TreeSet<>(actual.values())
+        );
     }
 }

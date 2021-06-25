@@ -515,8 +515,7 @@ class Grammar {
         Item kernel = getKernel();
         Items s0 = new Items();
         s0.add(kernel);
-        s0.closure(firstMap, productions);
-        return s0;
+        return s0.closure(firstMap, productions);
     }
 
     @NotNull
