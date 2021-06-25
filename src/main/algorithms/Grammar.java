@@ -493,8 +493,8 @@ class Grammar {
     LR1Collection computeLR1Collection() {
         Grammar augmented = this.augment();
         FirstMap firstMap = augmented.first();
-        Items s0 = augmented.getFirstState(firstMap);
-        LR1Collection collection = new LR1Collection(Collections.singletonList(s0));
+        Items startState = augmented.getStartState(firstMap);
+        LR1Collection collection = new LR1Collection(Collections.singletonList(startState));
 
         boolean newStatesAreBeingAdded = true;
         LR1Collection previous;
@@ -511,11 +511,11 @@ class Grammar {
         return collection;
     }
 
-    private Items getFirstState(FirstMap firstMap) {
+    private Items getStartState(FirstMap firstMap) {
         Item kernel = getKernel();
-        Items s0 = new Items();
-        s0.add(kernel);
-        return s0.closure(firstMap, productions);
+        Items startState = new Items();
+        startState.add(kernel);
+        return startState.closure(firstMap, productions);
     }
 
     @NotNull
