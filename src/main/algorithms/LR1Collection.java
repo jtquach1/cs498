@@ -10,8 +10,28 @@ import java.util.stream.Collectors;
 
 import static algorithms.Item.MARKER;
 
-class LR1Collection extends TreeSet<Items> {
-    
+class LR1Collection extends TreeMap<Items, Integer> {
+    LR1Collection() {
+        super();
+    }
+
+    LR1Collection(@NotNull Collection<? extends Items> c) {
+        super();
+        int i = 0;
+        for (Items items : c) {
+            this.put(items, i++);
+        }
+    }
+
+    int nextIndex() {
+        return this.size();
+    }
+
+    LR1Collection deepClone() {
+        LR1Collection clone = new LR1Collection();
+        clone.putAll(this);
+        return clone;
+    }
 }
 
 class Item extends Production {
@@ -73,7 +93,7 @@ class Item extends Production {
     }
 }
 
-class Items extends TreeSet<Item> {
+class Items extends TreeSet<Item> implements Comparable<Items> {
     Items(@NotNull Collection<? extends Item> items) {
         super(items);
     }
@@ -207,4 +227,10 @@ class Items extends TreeSet<Item> {
         };
     }
 
+    @Override
+    public int compareTo(@NotNull Items other) {
+        return Comparator
+                .comparing(Items::toString)
+                .compare(this, other);
+    }
 }

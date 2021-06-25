@@ -3,10 +3,13 @@ package algorithms;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
+import static algorithms.Item.MARKER;
 import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -510,4 +513,147 @@ class GrammarTest {
         assertNotSame(expected, actual);
     }
 
+    @Test
+    void augment() {
+        Grammar expected = augmentedArithmeticExpression;
+        Grammar actual = arithmeticExpression.augment();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void computeLR1Collection() {
+//        FirstMap firstMap = new FirstMap();
+//        firstMap.put("(", new First("("));
+//        firstMap.put(")", new First(")"));
+//        firstMap.put("*", new First("*"));
+//        firstMap.put("+", new First("+"));
+//        firstMap.put("E'", new First("(", "id"));
+//        firstMap.put("E", new First("(", "id"));
+//        firstMap.put("F", new First("(", "id"));
+//        firstMap.put("T", new First("(", "id"));
+//        firstMap.put("id", new First("id"));
+
+        Items s0 = makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
+                "[E ::= " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s1 = makeItems(
+                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, +]"
+        );
+
+        Items s2 = makeItems(
+                "[E ::= T " + MARKER + ", " + TERMINATOR + "/+]",
+                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s3 = makeItems("[T ::= F " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s4 = makeItems(
+                "[F ::= ( " + MARKER + " E ), " + TERMINATOR + "/+/*]",
+                "[E ::= " + MARKER + " E + T, +/)]",
+                "[E ::= " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s5 = makeItems("[F ::= id " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s6 = makeItems(
+                "[E ::= E + " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s7 = makeItems(
+                "[T ::= T * " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s8 = makeItems(
+                "[F ::= ( E " + MARKER + " ), " + TERMINATOR + "/+/*]",
+                "[E ::= E " + MARKER + " + T, +/)]"
+        );
+
+        Items s9 = makeItems(
+                "[E ::= T " + MARKER + ", +/)]",
+                "[T ::= T " + MARKER + " * F, +/*/)]"
+        );
+
+        Items s10 = makeItems("[T ::= F " + MARKER + ", +/*/)]");
+
+        Items s11 = makeItems(
+                "[F ::= ( " + MARKER + " E ), +/*/)]",
+                "[E ::= " + MARKER + " E + T, +/)]",
+                "[E ::= " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s12 = makeItems("[F ::= id " + MARKER + ", +/*/)]");
+
+        Items s13 = makeItems(
+                "[E ::= E + T " + MARKER + ", " + TERMINATOR + "/+]",
+                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s14 = makeItems("[T ::= T * F " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s15 = makeItems("[F ::= ( E ) " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s16 = makeItems(
+                "[E ::= E + " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s17 = makeItems(
+                "[T ::= T * " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s18 = makeItems(
+                "[F ::= ( E " + MARKER + " ), +/*/)]",
+                "[E ::= E " + MARKER + " + T, +/)]"
+        );
+
+        Items s19 = makeItems(
+                "[E ::= E + T " + MARKER + ", +/)]",
+                "[T ::= T " + MARKER + " * F, +/*/)]"
+        );
+
+        Items s20 = makeItems("[T ::= T * F " + MARKER + ", +/*/)]");
+
+        Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
+
+        LR1Collection expected = new LR1Collection();
+        List<Items> itemsList = new ArrayList<>(Arrays.asList(
+                s0, s1, s2, s3, s4, s5, s6, s7,
+                s8, s9, s10, s11, s12, s13, s14,
+                s15, s16, s17, s18, s19, s20, s21)
+        );
+        for (int i = 0; i < itemsList.size(); i++) {
+            expected.put(itemsList.get(i), i);
+        }
+
+        LR1Collection actual = arithmeticExpression.computeLR1Collection();
+        assertEquals(expected, actual);
+    }
 }

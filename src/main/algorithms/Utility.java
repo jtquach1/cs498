@@ -131,25 +131,34 @@ class Utility {
     static Items makeItems(String... lines) {
         return Arrays
                 .stream(lines)
-                .map(Utility::getItemFromLine)
+                .map(Utility::getItemsFromLine)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toCollection(Items::new));
     }
 
-    static Item getItemFromLine(String line) {
+    static Items getItemsFromLine(String line) {
+        Items items = new Items();
         line = line.trim();
         if (line.startsWith("[") && line.endsWith("]")) {
             line = line.substring(1, line.length() - 1);
             line = line.trim();
         }
+
         String[] item = Arrays
                 .stream(line.split(","))
                 .map(String::trim)
                 .toArray(String[]::new);
+
         Production production = getProductionFromLine(item[0]);
-        String lookahead = item[1];
+        String[] lookaheads = item[1].split("/");
         String lhs = production.getLhs();
         String[] rhs = production.getRhs().toArray(new String[0]);
-        return new Item(lookahead, lhs, rhs);
+
+        for (String lookahead : lookaheads) {
+            items.add(new Item(lookahead, lhs, rhs));
+        }
+
+        return items;
     }
 }
 

@@ -245,10 +245,12 @@ class UtilityTest {
     }
 
     @Test
-    void getItemFromLine() {
-        String line = "[E' ::= " + MARKER + " E, " + TERMINATOR + "]";
-        Item actual = Utility.getItemFromLine(line);
-        Item expected = new Item(TERMINATOR, "E'", MARKER, "E");
+    void getItemsFromLine() {
+        String line = "[E' ::= " + MARKER + " E, " + TERMINATOR + "/+]";
+        Items actual = Utility.getItemsFromLine(line);
+        Items expected = new Items();
+        expected.add(new Item(TERMINATOR, "E'", MARKER, "E"));
+        expected.add(new Item("+", "E'", MARKER, "E"));
         assertEquals(expected, actual);
     }
 }
