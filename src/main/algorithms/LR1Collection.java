@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static algorithms.Item.MARKER;
 
-class LR1Collection extends TreeMap<Items, Integer> {
+class LR1Collection extends TreeMap<Integer, Items> {
     LR1Collection() {
         super();
     }
@@ -19,18 +19,38 @@ class LR1Collection extends TreeMap<Items, Integer> {
         super();
         int i = 0;
         for (Items items : c) {
-            this.put(items, i++);
+            this.put(i++, items);
         }
-    }
-
-    int nextIndex() {
-        return this.size();
     }
 
     LR1Collection deepClone() {
         LR1Collection clone = new LR1Collection();
         clone.putAll(this);
         return clone;
+    }
+
+    @NotNull
+    Consumer<Items> populate(FirstMap firstMap, Grammar augmented) {
+        Symbols symbols = new Symbols(augmented.getTerminals());
+        symbols.addAll(augmented.getNonTerminals());
+        Productions productions = augmented.getProductions();
+
+        return state -> symbols.forEach(addNewGoto(firstMap, productions, state));
+    }
+
+    @NotNull
+    private Consumer<String> addNewGoto(FirstMap firstMap, Productions productions,
+                                        Items state) {
+        return symbol -> {
+            Items entry = state.computeGoto(symbol, firstMap, productions);
+            if (!entry.isEmpty() && !this.containsValue(entry)) {
+                this.put(nextIndex(), entry);
+            }
+        };
+    }
+
+    int nextIndex() {
+        return this.size();
     }
 }
 
@@ -139,7 +159,7 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
     private Predicate<Item> aboutToParseSymbol(String symbol) {
         return item -> {
             List<String> beta = item.getBeta();
-            if (beta == null) {
+            if (beta == null || beta.isEmpty()) {
                 return false;
             }
             return beta.get(0).equals(symbol);

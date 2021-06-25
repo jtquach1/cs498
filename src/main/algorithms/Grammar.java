@@ -493,49 +493,37 @@ class Grammar {
     LR1Collection computeLR1Collection() {
         Grammar augmented = this.augment();
         FirstMap firstMap = augmented.first();
-        Items s0 = getFirstState(firstMap, augmented);
+        Items s0 = augmented.getFirstState(firstMap);
         LR1Collection collection = new LR1Collection(Collections.singletonList(s0));
+
         boolean newStatesAreBeingAdded = true;
         LR1Collection previous;
-        Symbols symbols = new Symbols(augmented.terminals);
-        symbols.addAll(augmented.nonTerminals);
-        Productions productions = augmented.productions;
+        Collection<Items> states;
 
         while (newStatesAreBeingAdded) {
             previous = collection.deepClone();
+            states = previous.values();
 
-            for (Items state : collection.keySet()) {
-                for (String symbol : symbols) {
-                    Items entry = state.computeGoto(symbol, firstMap, productions);
-                    if (!entry.isEmpty() && !collection.containsKey(entry)) {
-                        int index = collection.nextIndex();
-                        collection.put(entry, index);
-                    }
-                }
-            }
-
+            states.forEach(collection.populate(firstMap, augmented));
             newStatesAreBeingAdded = !collection.equals(previous);
         }
 
         return collection;
     }
 
-    private Items getFirstState(FirstMap firstMap, Grammar augmented) {
-        Item kernel = getKernel(augmented);
+    private Items getFirstState(FirstMap firstMap) {
+        Item kernel = getKernel();
         Items s0 = new Items();
         s0.add(kernel);
-        s0.closure(firstMap, augmented.productions);
+        s0.closure(firstMap, productions);
         return s0;
     }
 
     @NotNull
-    private Item getKernel(Grammar augmented) {
-        Production startRule = augmented
-                .productions
+    private Item getKernel() {
+        Production startRule = productions
                 .stream()
-                .filter(p -> p.getLhs().equals(augmented.start))
-                .findAny()
-                .stream()
+                .filter(p -> p.getLhs().equals(start))
                 .toArray(Production[]::new)[0];
 
         String lhs = startRule.getLhs();
@@ -557,6 +545,7 @@ class Grammar {
         return new Grammar(nonTerminals, terminals, newStart, productions);
     }
 
+
     @Override
     public int hashCode() {
         return Objects.hash(nonTerminals, terminals, start, productions);
@@ -571,6 +560,18 @@ class Grammar {
                 Objects.equals(terminals, grammar.terminals) &&
                 Objects.equals(start, grammar.start) &&
                 Objects.equals(productions, grammar.productions);
+    }
+
+    Symbols getNonTerminals() {
+        return nonTerminals;
+    }
+
+    Symbols getTerminals() {
+        return terminals;
+    }
+
+    Productions getProductions() {
+        return productions;
     }
 }
 

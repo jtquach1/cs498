@@ -14,11 +14,8 @@ import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
-    Grammar arithmeticExpression;
-    Grammar augmentedArithmeticExpression;
-    Grammar arithmeticExpressionRedux;
-    Grammar firstSampleExamQuestion;
-    Grammar leftRecursionExample;
+    Grammar arithmeticExpression, augmentedArithmeticExpression, arithmeticExpressionRedux,
+            firstSampleExamQuestion, leftRecursionExample;
 
     @BeforeEach
     void setUp() {
@@ -650,7 +647,7 @@ class GrammarTest {
                 s15, s16, s17, s18, s19, s20, s21)
         );
         for (int i = 0; i < itemsList.size(); i++) {
-            expected.put(itemsList.get(i), i);
+            expected.put(i, itemsList.get(i));
         }
 
         LR1Collection actual = arithmeticExpression.computeLR1Collection();
