@@ -11,52 +11,56 @@ import java.util.stream.Collectors;
 import static algorithms.Item.MARKER;
 
 class LR1Collection extends ListWithUniques<Items> {
-    LR1Collection() {
+    private final GotoMap gotoMap;
+
+    LR1Collection(GotoMap gotoMap) {
         super(Items::compareTo);
+        this.gotoMap = gotoMap;
     }
 
-    LR1Collection(@NotNull Collection<? extends Items> c) {
+    LR1Collection(@NotNull Collection<? extends Items> c, GotoMap gotoMap) {
         super(Items::compareTo);
         this.addAll(c);
+        this.gotoMap = gotoMap;
+    }
+
+    GotoMap getGotoMap() {
+        return gotoMap;
     }
 
     LR1Collection deepClone() {
-        LR1Collection clone = new LR1Collection();
+        GotoMap map = this.gotoMap.deepClone();
+        LR1Collection clone = new LR1Collection(map);
         clone.addAll(this);
         return clone;
     }
 
-    @NotNull
-    Consumer<Items> populate(FirstMap firstMap, Grammar augmented) {
-        Symbols symbols = new Symbols(augmented.getTerminals());
-        symbols.addAll(augmented.getNonTerminals());
-        Productions productions = augmented.getProductions();
-
-        return state -> symbols.forEach(addNewGoto(firstMap, productions, state));
+    void add(Items from, String symbol, Items to) {
+        super.add(to);
+        gotoMap.put(to, new Goto(from, symbol));
     }
 
-    @NotNull
-    private Consumer<String> addNewGoto(FirstMap firstMap, Productions productions,
-                                        Items state) {
-        return symbol -> {
-            Items entry = state.computeGoto(symbol, firstMap, productions);
-            if (!entry.isEmpty() && !this.contains(entry)) {
-                this.add(entry);
-            }
-        };
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        LR1Collection items = (LR1Collection) o;
+        return gotoMap.equals(items.gotoMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), gotoMap);
     }
 }
 
 class Item extends Production {
     static final String MARKER = Character.toString('\u00B7');
-    private final String lhs;
-    private final ArrayList<String> rhs;
     private final String lookahead;
 
     Item(String lookahead, String lhs, String... rhs) {
         super(lhs, rhs);
-        this.lhs = lhs;
-        this.rhs = new ArrayList<>(Arrays.asList(rhs));
         this.lookahead = lookahead;
     }
 
@@ -94,9 +98,7 @@ class Item extends Production {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Item other = (Item) o;
-        return Objects.equals(lhs, other.lhs) &&
-                Objects.equals(rhs, other.rhs) &&
-                Objects.equals(lookahead, other.lookahead);
+        return lookahead.equals(other.lookahead);
     }
 
     @Override
@@ -245,5 +247,52 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
         return Comparator
                 .comparing(Items::toString)
                 .compare(this, other);
+    }
+}
+
+class Goto implements Comparable<Goto> {
+    private final Items from;
+    private final String symbol;
+
+    Goto(Items from, String symbol) {
+        this.from = from;
+        this.symbol = symbol;
+    }
+
+    @Override
+    public int compareTo(@NotNull Goto other) {
+        return Comparator
+                .comparing(Goto::getFrom)
+                .thenComparing(Goto::getSymbol)
+                .compare(this, other);
+    }
+
+    Items getFrom() {
+        return from;
+    }
+
+    String getSymbol() {
+        return symbol;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(from, symbol);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Goto other = (Goto) o;
+        return from.equals(other.from) && symbol.equals(other.symbol);
+    }
+}
+
+class GotoMap extends TreeMap<Items, Goto> {
+    GotoMap deepClone() {
+        GotoMap clone = new GotoMap();
+        clone.putAll(this);
+        return clone;
     }
 }

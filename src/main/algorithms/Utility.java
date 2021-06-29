@@ -160,6 +160,10 @@ class Utility {
 
         return items;
     }
+
+    static Goto makeGoto(Items from, String symbol) {
+        return new Goto(from, symbol);
+    }
 }
 
 class Queue<T> extends ArrayList<T> {
@@ -218,7 +222,7 @@ class ListWithUniques<T> extends ArrayList<T> {
 
     @Override
     public void add(int index, T item) {
-        this.add(item);
+        add(item);
     }
 
     @Override
@@ -226,7 +230,7 @@ class ListWithUniques<T> extends ArrayList<T> {
         boolean isAdded = false;
         if (!contains(item)) {
             isAdded = super.add(item);
-            this.sort(this.comparator);
+            sort(comparator);
         }
         return isAdded;
     }

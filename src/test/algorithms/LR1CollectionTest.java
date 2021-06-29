@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
@@ -33,46 +34,25 @@ class LR1CollectionTest {
                 "[E ::= E " + MARKER + " + T, +]"
         );
 
-        collection = new LR1Collection(Arrays.asList(s0, s1));
+        collection = new LR1Collection(Collections.singletonList(s0), new GotoMap());
     }
 
     @Test
     void deepClone() {
         LR1Collection expected = collection;
-
         LR1Collection actual = expected.deepClone();
         assertEquals(expected, actual);
         assertNotSame(expected, actual);
     }
 
-    /*
     @Test
-    void populate() {
-        FirstMap firstMap = new FirstMap();
-        firstMap.put("(", new First("("));
-        firstMap.put(")", new First(")"));
-        firstMap.put("*", new First("*"));
-        firstMap.put("+", new First("+"));
-        firstMap.put("E'", new First("(", "id"));
-        firstMap.put("E", new First("(", "id"));
-        firstMap.put("F", new First("(", "id"));
-        firstMap.put("T", new First("(", "id"));
-        firstMap.put("id", new First("id"));
+    void add() {
+        GotoMap map = new GotoMap();
+        map.put(s1, new Goto(s0, "E"));
+        LR1Collection expected = new LR1Collection(Arrays.asList(s0, s1), map);
 
-        Grammar augmentedArithmeticExpression = new Grammar(
-                makeNonTerminals("E", "T", "F"),
-                makeTerminals("+", "*", "(", ")", "id"),
-                "E'",
-                makeProductions(
-                        "E' ::= E",
-                        "E ::= E + T",
-                        "E ::= T",
-                        "T ::= T * F",
-                        "T ::= F",
-                        "F ::= ( E )",
-                        "F ::= id"
-                )
-        );
+        LR1Collection actual = collection;
+        actual.add(s0, "E", s1);
+        assertEquals(expected, actual);
     }
-    */
 }

@@ -494,18 +494,36 @@ class Grammar {
         Grammar augmented = this.augment();
         FirstMap firstMap = augmented.first();
         Items startState = augmented.getStartState(firstMap);
-        LR1Collection collection = new LR1Collection(Collections.singletonList(startState));
+        LR1Collection collection = new LR1Collection(
+                Collections.singletonList(startState),
+                new GotoMap()
+        );
 
         boolean newStatesAreBeingAdded = true;
         LR1Collection previous;
 
         while (newStatesAreBeingAdded) {
             previous = collection.deepClone();
-            previous.forEach(collection.populate(firstMap, augmented));
+            previous.forEach(augmented.populate(collection, firstMap));
             newStatesAreBeingAdded = !collection.equals(previous);
         }
 
         return collection;
+    }
+
+    @NotNull
+    private Consumer<Items> populate(LR1Collection collection, FirstMap firstMap) {
+        Symbols symbols = new Symbols(terminals);
+        symbols.addAll(nonTerminals);
+
+        return from -> {
+            symbols.forEach(symbol -> {
+                Items to = from.computeGoto(symbol, firstMap, productions);
+                if (!to.isEmpty() && !collection.contains(to)) {
+                    collection.add(from, symbol, to);
+                }
+            });
+        };
     }
 
     private Items getStartState(FirstMap firstMap) {
@@ -541,7 +559,6 @@ class Grammar {
         return new Grammar(nonTerminals, terminals, newStart, productions);
     }
 
-
     @Override
     public int hashCode() {
         return Objects.hash(nonTerminals, terminals, start, productions);
@@ -557,23 +574,11 @@ class Grammar {
                 Objects.equals(start, grammar.start) &&
                 Objects.equals(productions, grammar.productions);
     }
-
-    Symbols getNonTerminals() {
-        return nonTerminals;
-    }
-
-    Symbols getTerminals() {
-        return terminals;
-    }
-
-    Productions getProductions() {
-        return productions;
-    }
 }
 
 class Production implements Comparable<Production> {
-    private final String lhs;
-    private final ArrayList<String> rhs;
+    protected final String lhs;
+    protected final ArrayList<String> rhs;
 
     Production(String lhs, String... rhs) {
         this.lhs = lhs;
