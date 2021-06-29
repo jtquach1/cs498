@@ -517,17 +517,6 @@ class GrammarTest {
 
     @Test
     void computeLR1Collection() {
-//        FirstMap firstMap = new FirstMap();
-//        firstMap.put("(", new First("("));
-//        firstMap.put(")", new First(")"));
-//        firstMap.put("*", new First("*"));
-//        firstMap.put("+", new First("+"));
-//        firstMap.put("E'", new First("(", "id"));
-//        firstMap.put("E", new First("(", "id"));
-//        firstMap.put("F", new First("(", "id"));
-//        firstMap.put("T", new First("(", "id"));
-//        firstMap.put("id", new First("id"));
-
         Items s0 = makeItems(
                 "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
                 "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
@@ -656,13 +645,8 @@ class GrammarTest {
         gotoMap.put(s12, makeGoto(s4, "id"));
 
         gotoMap.put(s13, makeGoto(s6, "T"));
-//        gotoMap.put(s3, makeGoto(s6, "F"));
-//        gotoMap.put(s4, makeGoto(s6, "("));
-//        gotoMap.put(s5, makeGoto(s6, "id"));
 
         gotoMap.put(s14, makeGoto(s7, "F"));
-//        gotoMap.put(s4, makeGoto(s7, "("));
-//        gotoMap.put(s5, makeGoto(s7, "id"));
 
         gotoMap.put(s15, makeGoto(s8, ")"));
         gotoMap.put(s16, makeGoto(s8, "+"));
@@ -670,26 +654,12 @@ class GrammarTest {
         gotoMap.put(s17, makeGoto(s9, "*"));
 
         gotoMap.put(s18, makeGoto(s11, "E"));
-//        gotoMap.put(s9, makeGoto(s11, "T"));
-//        gotoMap.put(s10, makeGoto(s11, "F"));
-//        gotoMap.put(s11, makeGoto(s11, "("));
-//        gotoMap.put(s12, makeGoto(s11, "id"));
-
-//        gotoMap.put(s7, makeGoto(s13, "*"));
 
         gotoMap.put(s19, makeGoto(s16, "T"));
-//        gotoMap.put(s10, makeGoto(s16, "F"));
-//        gotoMap.put(s11, makeGoto(s16, "("));
-//        gotoMap.put(s12, makeGoto(s16, "id"));
 
         gotoMap.put(s20, makeGoto(s17, "F"));
-//        gotoMap.put(s11, makeGoto(s17, "("));
-//        gotoMap.put(s12, makeGoto(s17, "id"));
 
         gotoMap.put(s21, makeGoto(s18, ")"));
-//        gotoMap.put(s16, makeGoto(s18, "+"));
-
-//        gotoMap.put(s17, makeGoto(s19, "*"));
 
         LR1Collection expected = new LR1Collection(
                 Arrays.asList(
@@ -699,9 +669,7 @@ class GrammarTest {
                 ),
                 gotoMap
         );
-
         LR1Collection actual = arithmeticExpression.computeLR1Collection();
-
         assertEquals(expected, actual);
     }
 }

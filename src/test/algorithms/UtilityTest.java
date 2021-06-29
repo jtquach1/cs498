@@ -253,4 +253,16 @@ class UtilityTest {
         expected.add(new Item("+", "E'", MARKER, "E"));
         assertEquals(expected, actual);
     }
+
+    @Test
+    void makeGoto() {
+        Items s0 = Utility.makeItems(
+                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "/+]"
+        );
+        Goto expected = new Goto(s0, "E");
+        Goto actual = Utility.makeGoto(s0, "E");
+
+        assertEquals(expected, actual);
+    }
 }
