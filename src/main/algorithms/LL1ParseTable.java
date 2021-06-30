@@ -90,10 +90,10 @@ class LL1ParseOutputEntry {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LL1ParseOutputEntry that = (LL1ParseOutputEntry) o;
-        return Objects.equals(stack, that.stack) &&
-                Objects.equals(input, that.input) &&
-                Objects.equals(output, that.output);
+        LL1ParseOutputEntry other = (LL1ParseOutputEntry) o;
+        return Objects.equals(stack, other.stack) &&
+                Objects.equals(input, other.input) &&
+                Objects.equals(output, other.output);
     }
 
     @Override

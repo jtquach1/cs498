@@ -11,11 +11,11 @@ class FSA {
     static final char EPSILON = '\u025B';
     static final char PHI = '\u03C6';
 
-    private final Alphabet alphabet;
-    private final Set<State> states;
-    private final Set<State> finalStates;
-    private final Set<Move> moves;
-    private State start;
+    protected final Alphabet alphabet;
+    protected final Set<State> states;
+    protected final Set<State> finalStates;
+    protected final Set<Move> moves;
+    protected State start;
 
     FSA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
         Set<Move> moves) {
@@ -24,15 +24,6 @@ class FSA {
         this.start = start;
         this.finalStates = finalStates;
         this.moves = moves;
-    }
-
-    FSA(State start) {
-        alphabet = new Alphabet();
-        states = new TreeSet<>();
-        finalStates = new TreeSet<>();
-        moves = new TreeSet<>();
-        states.add(start);
-        this.start = start;
     }
 
     public static void main(String[] args) throws IOException {
@@ -86,14 +77,6 @@ class FSA {
         return result;
     }
 
-    void addSymbol(Character symbol) {
-        alphabet.add(symbol);
-    }
-
-    void removeSymbol(Character symbol) {
-        alphabet.remove(symbol);
-    }
-
     void addState(State state) {
         states.add(state);
     }
@@ -108,34 +91,6 @@ class FSA {
 
     void addMove(State from, Character consumed, State to) {
         moves.add(new Move(from, consumed, to));
-    }
-
-    void addMove(Move move) {
-        moves.add(move);
-    }
-
-    Alphabet getAlphabet() {
-        return alphabet;
-    }
-
-    Set<State> getStates() {
-        return states;
-    }
-
-    State getStart() {
-        return start;
-    }
-
-    void setStart(State state) {
-        start = state;
-    }
-
-    Set<State> getFinalStates() {
-        return finalStates;
-    }
-
-    Set<Move> getMoves() {
-        return moves;
     }
 
     @Override
@@ -258,6 +213,19 @@ class FSA {
         sb.append("\tnode [shape = none, label =\"\"];\n" +
                 "\tENTRY -> " + start.getId() + ";\n");
     }
+
+    public Set<State> getStates() {
+        return states;
+    }
+
+    public Set<State> getFinalStates() {
+        return finalStates;
+    }
+
+    public Set<Move> getMoves() {
+        return moves;
+    }
+
 }
 
 class Alphabet extends TreeSet<Character> {
@@ -308,31 +276,33 @@ class State implements Comparable<State> {
     }
 
     @Override
-    public int compareTo(@NotNull State other) {
-        return Comparator.comparing(State::getId)
-                .compare(this, other);
-    }
-
-    int getId() {
-        return id;
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, alternativeLabel);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        State state = (State) o;
-        return id == state.id;
+        State other = (State) o;
+        return id == other.id && Objects.equals(alternativeLabel, other.alternativeLabel);
     }
 
     @Override
     public String toString() {
         return Integer.toString(id);
+    }
+
+    @Override
+    public int compareTo(@NotNull State other) {
+        return Comparator.comparing(State::getId)
+                .thenComparing(state -> Objects.equals(this.alternativeLabel,
+                        other.alternativeLabel))
+                .compare(this, other);
+    }
+
+    int getId() {
+        return id;
     }
 }
 
@@ -384,10 +354,9 @@ class Move implements Comparable<Move> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Move move = (Move) o;
-        return Objects.equals(from, move.from)
-                && Objects.equals(consumed, move.consumed)
-                && Objects.equals(to, move.to);
+        Move other = (Move) o;
+        return Objects.equals(from, other.from)
+                && Objects.equals(consumed, other.consumed)
+                && Objects.equals(to, other.to);
     }
 }
-

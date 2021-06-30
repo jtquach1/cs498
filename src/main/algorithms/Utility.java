@@ -6,64 +6,37 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class Utility {
-    static void addSymbols(FSA fsa, Character... symbols) {
-        for (Character symbol : symbols) {
-            fsa.addSymbol(symbol);
-        }
+    static Alphabet makeAlphabet(Character... symbols) {
+        return new Alphabet(Arrays.asList(symbols));
     }
 
-    static void addStates(FSA fsa, Integer... stateIds) {
-        for (Integer id : stateIds) {
-            fsa.addState(new State(id));
-        }
-    }
-
-    static void addStates(Set<State> states, Integer... stateIds) {
-        for (Integer id : stateIds) {
-            states.add(new State(id));
-        }
-    }
-
-    static void addStates(FSA fsa, State... states) {
-        for (State state : states) {
-            fsa.addState(state);
-        }
-    }
-
-    static void addFinalStates(FSA fsa, Integer... stateIds) {
-        for (Integer id : stateIds) {
-            fsa.addFinalState(new State(id));
-        }
-    }
-
-    static void addMoves(FSA fsa, Move... moves) {
-        for (Move move : moves) {
-            fsa.addMove(move);
-        }
-    }
-
-    static void addMoves(Set<Move> set, Move... moves) {
-        set.addAll(Arrays.asList(moves));
+    static Set<Move> makeMoves(Move... moves) {
+        return new TreeSet<>(Arrays.asList(moves));
     }
 
     static Move makeMove(Integer fromId, Character consumed, Integer toId) {
         return new Move(new State(fromId), consumed, new State(toId));
     }
 
-    static DFA makeDFA(Integer start) {
-        return new DFA(new State(start), null);
+    static DFA makeDFA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
+                       Set<Move> moves) {
+        return new DFA(alphabet, states, start, finalStates, moves);
     }
 
-    static DFA makeDFA(Integer start, Integer phi) {
-        return new DFA(new State(start), new State(phi));
+    static DFA makeDFA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
+                       Set<Move> moves, State phi) {
+        return new DFA(alphabet, states, start, finalStates, moves, phi);
     }
 
-    static DFA makeDFA(State start, State phi) {
-        return new DFA(start, phi);
-    }
-
-    static NFA makeNFA(Integer start) {
-        return new NFA(new State(start));
+    static NFA makeNFA(Alphabet alphabet, Set<State> states, State start,
+                       Set<State> finalStates, Set<Move> moves) {
+        return new NFA(
+                alphabet,
+                states,
+                start,
+                finalStates,
+                moves
+        );
     }
 
     static PSet makePSet(Integer... stateIds) {
@@ -74,8 +47,8 @@ class Utility {
         return set;
     }
 
-    static void addPSets(Partition partition, PSet... sets) {
-        partition.addAll(Arrays.asList(sets));
+    static Partition makePartition(PSet... sets) {
+        return new Partition(Arrays.asList(sets));
     }
 
     static State makeState(Integer stateId, Set<State> states) {
@@ -88,6 +61,10 @@ class Utility {
             states.add(new State(stateId));
         }
         return states;
+    }
+
+    static Set<State> makeStates(State... states) {
+        return new TreeSet<>(Arrays.asList(states));
     }
 
     static LL1ParseOutputEntry makeEntry(Stack<String> stack, Queue<String> input, Integer output) {

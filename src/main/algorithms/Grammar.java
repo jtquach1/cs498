@@ -495,7 +495,7 @@ class Grammar {
         FirstMap firstMap = augmented.first();
         Items startState = augmented.getStartState(firstMap);
         LR1Collection collection = new LR1Collection(
-                Collections.singletonList(startState),
+                Collections.singleton(startState),
                 new GotoMap()
         );
 
@@ -568,11 +568,11 @@ class Grammar {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Grammar grammar = (Grammar) o;
-        return Objects.equals(nonTerminals, grammar.nonTerminals) &&
-                Objects.equals(terminals, grammar.terminals) &&
-                Objects.equals(start, grammar.start) &&
-                Objects.equals(productions, grammar.productions);
+        Grammar other = (Grammar) o;
+        return Objects.equals(nonTerminals, other.nonTerminals) &&
+                Objects.equals(terminals, other.terminals) &&
+                Objects.equals(start, other.start) &&
+                Objects.equals(productions, other.productions);
     }
 }
 

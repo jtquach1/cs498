@@ -7,15 +7,12 @@ import java.util.TreeSet;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.GREEK_EPSILON;
+import static algorithms.Utility.*;
 
 class NFA extends FSA {
     NFA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
         Set<Move> moves) {
         super(alphabet, states, start, finalStates, moves);
-    }
-
-    NFA(State start) {
-        super(start);
     }
 
     static NFA regexToNFA(String infix) {
@@ -53,18 +50,18 @@ class NFA extends FSA {
         State start = new State();
         State finalState = new State();
 
-        NFA nfa = new NFA(start);
-        nfa.addState(finalState);
-        nfa.addFinalState(finalState);
-        nfa.addMove(nfa.getStart(), consumed, finalState);
-        nfa.addSymbol(consumed);
-        return nfa;
+        Alphabet alphabet = makeAlphabet(consumed);
+        Set<State> states = makeStates(start, finalState);
+        Set<State> finalStates = makeStates(finalState);
+        Set<Move> moves = makeMoves(new Move(start, consumed, finalState));
+
+        return new NFA(alphabet, states, start, finalStates, moves);
     }
 
     static NFA concatenate(NFA first, NFA second) {
         NFA result = first.deepClone();
         result.connectOriginalFinalStatesToOtherStart(second);
-        result.removeOriginalFinalStates();
+        result.removeFinalStates();
         result.copyStates(second);
         result.copyAlphabet(second);
         result.copyMoves(second);
@@ -73,50 +70,36 @@ class NFA extends FSA {
     }
 
     private NFA deepClone() {
-        State start = this.getStart();
-        Alphabet alphabet = new Alphabet(this.getAlphabet());
-        Set<State> states = new TreeSet<>(this.getStates());
-        Set<State> finalStates = new TreeSet<>(this.getFinalStates());
-        Set<Move> moves = new TreeSet<>(this.getMoves());
+        State start = this.start;
+        Alphabet alphabet = new Alphabet(this.alphabet);
+        Set<State> states = new TreeSet<>(this.states);
+        Set<State> finalStates = new TreeSet<>(this.finalStates);
+        Set<Move> moves = new TreeSet<>(this.moves);
 
         return new NFA(alphabet, states, start, finalStates, moves);
     }
 
     private void connectOriginalFinalStatesToOtherStart(NFA other) {
-        Set<State> finalStates = this.getFinalStates();
-        State otherStart = other.getStart();
+        State otherStart = other.start;
         for (State finalState : finalStates) {
-            this.addMove(finalState, EPSILON, otherStart);
+            addMove(finalState, EPSILON, otherStart);
         }
-    }
-
-    private void removeOriginalFinalStates() {
-        this.removeFinalStates();
     }
 
     private void copyStates(NFA other) {
-        for (State state : other.getStates()) {
-            this.addState(state);
-        }
+        states.addAll(other.states);
     }
 
     private void copyAlphabet(NFA other) {
-        for (Character consumed : other.getAlphabet()) {
-            this.addSymbol(consumed);
-        }
+        alphabet.addAll(other.alphabet);
     }
 
     private void copyMoves(NFA other) {
-        Set<Move> otherMoves = other.getMoves();
-        for (Move move : otherMoves) {
-            this.addMove(move);
-        }
+        moves.addAll(other.moves);
     }
 
     private void copyFinalStates(NFA other) {
-        for (State state : other.getFinalStates()) {
-            this.addFinalState(state);
-        }
+        finalStates.addAll(other.finalStates);
     }
 
     static NFA alternate(NFA first, NFA second) {
@@ -132,8 +115,8 @@ class NFA extends FSA {
 
     private void addNewStartForAlternation(NFA other) {
         State newStart = new State();
-        State firstStart = this.getStart();
-        State secondStart = other.getStart();
+        State firstStart = this.start;
+        State secondStart = other.start;
 
         addState(newStart);
         setStart(newStart);
@@ -141,8 +124,11 @@ class NFA extends FSA {
         addMove(newStart, EPSILON, secondStart);
     }
 
+    private void setStart(State state) {
+        start = state;
+    }
+
     private void addNewFinal() {
-        Set<State> finalStates = getFinalStates();
         State newFinal = new State();
         for (State finalState : finalStates) {
             addMove(finalState, EPSILON, newFinal);
@@ -162,30 +148,27 @@ class NFA extends FSA {
     }
 
     private void connectOriginalFinalStatesToOriginalStart() {
-        State oldStart = getStart();
-        Set<State> finalStates = getFinalStates();
         for (State finalState : finalStates) {
-            addMove(finalState, EPSILON, oldStart);
+            addMove(finalState, EPSILON, start);
         }
     }
 
     private void addNewStartForKleeneStar() {
-        State oldStart = getStart();
         State newStart = new State();
         addState(newStart);
-        addMove(newStart, EPSILON, oldStart);
+        addMove(newStart, EPSILON, start);
         setStart(newStart);
     }
 
     private void connectNewStartToNewFinal() {
         // There is only one new final state, but this is more convenient to write.
-        for (State newFinalState : getFinalStates()) {
-            addMove(getStart(), EPSILON, newFinalState);
+        for (State newFinalState : finalStates) {
+            addMove(start, EPSILON, newFinalState);
         }
     }
 
     private void removeEpsilonFromAlphabet() {
-        this.removeSymbol(EPSILON);
+        alphabet.remove(EPSILON);
     }
 }
 

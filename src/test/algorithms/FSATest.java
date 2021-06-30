@@ -1,61 +1,41 @@
 package algorithms;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class FSATest {
     FSA fsa;
 
     @BeforeEach
     void setUp() {
-        Alphabet alphabet = new Alphabet();
-        Set<State> states = new TreeSet<>();
+        Alphabet alphabet = new Alphabet(Collections.singleton('a'));
         State start = new State(0);
-        Set<State> finalStates = new TreeSet<>();
         State finalState = new State(1);
-        Set<Move> moves = new TreeSet<>();
-        Move move = new Move(start, 'a', finalState);
-
-        alphabet.add('a');
-        moves.add(move);
-        states.add(start);
-        states.add(finalState);
-        finalStates.add(finalState);
+        Set<State> states = new TreeSet<>(Arrays.asList(start, finalState));
+        Set<State> finalStates = new TreeSet<>(Collections.singleton(finalState));
+        Set<Move> moves = new TreeSet<>(Collections.singleton(new Move(start, 'a', finalState)));
 
         fsa = new FSA(alphabet, states, start, finalStates, moves);
-    }
-
-    @AfterEach
-    void tearDown() {
-        fsa = null;
-        assertNull(fsa);
-    }
-
-    @Test
-    void addSymbol() {
-        fsa.addSymbol('b');
-        Alphabet actual = fsa.getAlphabet();
-        Alphabet expected = new Alphabet();
-        expected.add('a');
-        expected.add('b');
-        assertEquals(expected, actual);
     }
 
     @Test
     void addState() {
         fsa.addState(new State(2));
         Set<State> actual = fsa.getStates();
-        Set<State> expected = new TreeSet<>();
-        expected.add(new State(0));
-        expected.add(new State(1));
-        expected.add(new State(2));
+        Set<State> expected = new TreeSet<>(
+                Arrays.asList(
+                        new State(0),
+                        new State(1),
+                        new State(2)
+                )
+        );
         assertEquals(expected, actual);
     }
 
@@ -63,9 +43,12 @@ class FSATest {
     void addFinalState() {
         fsa.addFinalState(new State(2));
         Set<State> actual = fsa.getFinalStates();
-        Set<State> expected = new TreeSet<>();
-        expected.add(new State(1));
-        expected.add(new State(2));
+        Set<State> expected = new TreeSet<>(
+                Arrays.asList(
+                        new State(1),
+                        new State(2)
+                )
+        );
         assertEquals(expected, actual);
     }
 
@@ -78,79 +61,19 @@ class FSATest {
     }
 
     @Test
-    void addMoveSingleArgument() {
-        State from = new State(2);
-        Character consumed = 'b';
-        State to = new State(3);
-        Move move = new Move(from, consumed, to);
-        fsa.addMove(move);
-
-        Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>();
-        expected.add(new Move(new State(0), 'a', new State(1)));
-        expected.add(new Move(new State(2), 'b', new State(3)));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void addMoveThreeArgs() {
+    void addMove() {
         State from = new State(2);
         Character consumed = 'b';
         State to = new State(3);
         fsa.addMove(from, consumed, to);
 
         Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>();
-        expected.add(new Move(new State(0), 'a', new State(1)));
-        expected.add(new Move(new State(2), 'b', new State(3)));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void getAlphabet() {
-        Alphabet expected = new Alphabet();
-        expected.add('a');
-        Alphabet actual = fsa.getAlphabet();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void getStates() {
-        Set<State> expected = new TreeSet<>();
-        expected.add(new State(0));
-        expected.add(new State(1));
-        Set<State> actual = fsa.getStates();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void getStart() {
-        State expected = new State(0);
-        State actual = fsa.getStart();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void setStart() {
-        State expected = new State(1);
-        fsa.setStart(new State(1));
-        State actual = fsa.getStart();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void getFinalStates() {
-        Set<State> actual = fsa.getFinalStates();
-        Set<State> expected = new TreeSet<>();
-        expected.add(new State(1));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void getMoves() {
-        Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>();
-        expected.add(new Move(new State(0), 'a', new State(1)));
+        Set<Move> expected = new TreeSet<>(
+                Arrays.asList(
+                        new Move(new State(0), 'a', new State(1)),
+                        new Move(new State(2), 'b', new State(3))
+                )
+        );
         assertEquals(expected, actual);
     }
 }

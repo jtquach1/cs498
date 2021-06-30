@@ -2,6 +2,7 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -12,80 +13,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UtilityTest {
 
     @Test
-    void addSymbols() {
-        Alphabet alphabet = new Alphabet();
-        alphabet.add('a');
-        alphabet.add('b');
-        FSA expected = new FSA(alphabet, null, null, null, null);
-        FSA actual = new FSA(new Alphabet(), null, null, null, null);
-        Utility.addSymbols(actual, 'a', 'b');
+    void makeAlphabet() {
+        Alphabet expected = new Alphabet();
+        expected.add('a');
+        expected.add('b');
+        Alphabet actual = Utility.makeAlphabet('a', 'b');
         assertEquals(expected, actual);
     }
 
     @Test
-    void addStatesToFSAWithIds() {
-        Set<State> states = new TreeSet<>();
-        states.add(new State(0));
-        states.add(new State(1));
-        FSA expected = new FSA(null, states, null, null, null);
-        FSA actual = new FSA(null, new TreeSet<>(), null, null, null);
-        Utility.addStates(actual, 0, 1);
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void addStatesToSetWithIds() {
-        Set<State> expected = new TreeSet<>();
-        expected.add(new State(0));
-        expected.add(new State(1));
-        Set<State> actual = new TreeSet<>();
-        Utility.addStates(actual, 0, 1);
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void addStatesToFSAWithStates() {
-        Set<State> states = new TreeSet<>();
-        states.add(new State(0));
-        states.add(new State(1));
-        FSA expected = new FSA(null, states, null, null, null);
-        FSA actual = new FSA(null, new TreeSet<>(), null, null, null);
-        Utility.addStates(actual, new State(0), new State(1));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void addFinalStates() {
-        Set<State> finalStates = new TreeSet<>();
-        finalStates.add(new State(0));
-        finalStates.add(new State(1));
-        FSA expected = new FSA(null, null, null, finalStates, null);
-        FSA actual = new FSA(null, null, null, new TreeSet<>(), null);
-        Utility.addFinalStates(actual, 0, 1);
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void addMovesToFSA() {
-        Set<Move> moves = new TreeSet<>();
-        moves.add(new Move(new State(0), 'a', new State(0)));
-        moves.add(new Move(new State(0), 'b', new State(0)));
-        FSA expected = new FSA(null, null, null, null, moves);
-        FSA actual = new FSA(null, null, null, null, new TreeSet<>());
-        Utility.addMoves(actual,
-                new Move(new State(0), 'a', new State(0)),
-                new Move(new State(0), 'b', new State(0))
-        );
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void addMovesToSet() {
+    void makeMoves() {
         Set<Move> expected = new TreeSet<>();
         expected.add(new Move(new State(0), 'a', new State(0)));
         expected.add(new Move(new State(0), 'b', new State(0)));
-        Set<Move> actual = new TreeSet<>();
-        Utility.addMoves(actual,
+        Set<Move> actual = Utility.makeMoves(
                 new Move(new State(0), 'a', new State(0)),
                 new Move(new State(0), 'b', new State(0))
         );
@@ -100,30 +41,62 @@ class UtilityTest {
     }
 
     @Test
-    void makeDFAWithoutPhiAndWithIds() {
-        DFA expected = new DFA(new State(0), null);
-        DFA actual = Utility.makeDFA(0);
+    void makeDFAWithoutPhi() {
+        DFA expected = new DFA(
+                new Alphabet(),
+                new TreeSet<>(Collections.singletonList(new State(0))),
+                new State(0),
+                new TreeSet<>(),
+                new TreeSet<>()
+        );
+        DFA actual = Utility.makeDFA(
+                new Alphabet(),
+                new TreeSet<>(Collections.singletonList(new State(0))),
+                new State(0),
+                new TreeSet<>(),
+                new TreeSet<>()
+        );
         assertEquals(expected, actual);
     }
 
     @Test
-    void makeDFAWithPhiAndWithIds() {
-        DFA expected = new DFA(new State(0), new State(1));
-        DFA actual = Utility.makeDFA(0, 1);
+    void makeDFAWithPhi() {
+        DFA expected = new DFA(
+                new Alphabet(),
+                new TreeSet<>(Collections.singletonList(new State(0))),
+                new State(0),
+                new TreeSet<>(),
+                new TreeSet<>(),
+                new State(1)
+        );
+        DFA actual = Utility.makeDFA(
+                new Alphabet(),
+                new TreeSet<>(Collections.singletonList(new State(0))),
+                new State(0),
+                new TreeSet<>(),
+                new TreeSet<>(),
+                new State(1)
+        );
         assertEquals(expected, actual);
     }
 
-    @Test
-    void makeDFAWithPhiAndWithStates() {
-        DFA expected = new DFA(new State(0), new State(1));
-        DFA actual = Utility.makeDFA(new State(0), new State(1));
-        assertEquals(expected, actual);
-    }
 
     @Test
     void makeNFA() {
-        NFA expected = new NFA(new State(0));
-        NFA actual = Utility.makeNFA(0);
+        NFA expected = new NFA(
+                new Alphabet(),
+                new TreeSet<>(Collections.singletonList(new State(0))),
+                new State(0),
+                new TreeSet<>(),
+                new TreeSet<>()
+        );
+        NFA actual = Utility.makeNFA(
+                new Alphabet(),
+                new TreeSet<>(Collections.singletonList(new State(0))),
+                new State(0),
+                new TreeSet<>(),
+                new TreeSet<>()
+        );
         assertEquals(expected, actual);
     }
 
@@ -137,14 +110,13 @@ class UtilityTest {
     }
 
     @Test
-    void addPSets() {
+    void makePartition() {
         Partition expected = new Partition();
         PSet pset = new PSet();
         pset.add(new State(0));
         pset.add(new State(1));
         expected.add(pset);
-        Partition actual = new Partition();
-        Utility.addPSets(actual, pset);
+        Partition actual = Utility.makePartition(pset);
         assertEquals(expected, actual);
     }
 
@@ -159,11 +131,20 @@ class UtilityTest {
     }
 
     @Test
-    void makeStates() {
+    void makeStatesWithoutIds() {
         Set<State> expected = new TreeSet<>();
         expected.add(new State(0));
         expected.add(new State(1));
         Set<State> actual = Utility.makeStates(0, 1);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeStatesWithIds() {
+        Set<State> expected = new TreeSet<>();
+        expected.add(new State(0));
+        expected.add(new State(1));
+        Set<State> actual = Utility.makeStates(new State(0), new State(1));
         assertEquals(expected, actual);
     }
 
