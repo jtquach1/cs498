@@ -10,6 +10,133 @@ import java.util.stream.Collectors;
 
 import static algorithms.Item.MARKER;
 
+class LR1ParseTable {
+    private final ActionTable actionTable;
+    private final GotoTable gotoTable;
+
+    LR1ParseTable(ActionTable actionTable, GotoTable gotoTable) {
+        this.actionTable = actionTable;
+        this.gotoTable = gotoTable;
+    }
+}
+
+class ActionTable extends TreeMap<Integer, ActionEntry> {
+    void set(Integer state, String terminal, Action action) {
+        ActionEntry entry = this.get(state);
+
+        if (entry == null) {
+            entry = new ActionEntry();
+            this.put(state, entry);
+        }
+
+        entry.put(terminal, action);
+    }
+
+    Action get(Integer state, String terminal) {
+        ActionEntry entry = this.get(state);
+        if (entry == null) {
+            return null;
+        }
+
+        Action action = entry.get(terminal);
+        if (terminal == null || action == null) {
+            return null;
+        }
+
+        // In case of conflicts, we just want to return one value
+        return action;
+    }
+}
+
+class ActionEntry extends TreeMap<String, Action> implements Comparable<ActionEntry> {
+    @Override
+    public int compareTo(@NotNull ActionEntry other) {
+        return Comparator
+                .comparing(ActionEntry::toString)
+                .compare(this, other);
+    }
+}
+
+class Action implements Comparable<Action> {
+    private final Execution execution;
+    private final Integer state;
+
+    Action(Execution execution, Integer state) {
+        this.execution = execution;
+        this.state = state;
+    }
+
+    @Override
+    public int compareTo(@NotNull Action other) {
+        return Comparator
+                .comparing(Action::getExecution)
+                .thenComparing(Action::getState)
+                .compare(this, other);
+    }
+
+    public Execution getExecution() {
+        return execution;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(execution, state);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Action other = (Action) o;
+        return execution == other.execution && state.equals(other.state);
+    }
+
+    enum Execution {
+        SHIFT, REDUCE, ACCEPT
+    }
+}
+
+class GotoTable extends TreeMap<Integer, GotoEntry> {
+    void set(Integer from, String nonTerminal, Integer to) {
+        GotoEntry entry = this.get(from);
+
+        if (entry == null) {
+            entry = new GotoEntry();
+            this.put(from, entry);
+        }
+
+        entry.put(nonTerminal, to);
+    }
+
+    Integer get(Integer from, String nonTerminal) {
+        GotoEntry entry = this.get(from);
+        if (entry == null) {
+            return null;
+        }
+
+        Integer to = entry.get(nonTerminal);
+        if (nonTerminal == null || to == null) {
+            return null;
+        }
+
+        // In case of conflicts, we just want to return one value
+        return to;
+    }
+}
+
+class GotoEntry extends TreeMap<String, Integer> implements Comparable<GotoEntry> {
+    @Override
+    public int compareTo(@NotNull GotoEntry other) {
+        return Comparator
+                .comparing(GotoEntry::toString)
+                .compare(this, other);
+    }
+}
+
 class LR1Collection extends ListWithUniques<Items> {
     private final GotoMap gotoMap;
 

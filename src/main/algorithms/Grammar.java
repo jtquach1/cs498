@@ -559,6 +559,23 @@ class Grammar {
         return new Grammar(nonTerminals, terminals, newStart, productions);
     }
 
+    LR1ParseTable generateLR1ParseTable(LR1Collection collection) {
+        ActionTable actionTable = constructActionTable(collection);
+        GotoTable gotoTable = constructGotoTable(collection);
+        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable);
+        return table;
+    }
+
+    private ActionTable constructActionTable(LR1Collection collection) {
+        ActionTable table = new ActionTable();
+        return table;
+    }
+
+    private GotoTable constructGotoTable(LR1Collection collection) {
+        GotoTable table = new GotoTable();
+        return table;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(nonTerminals, terminals, start, productions);

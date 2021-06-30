@@ -672,4 +672,167 @@ class GrammarTest {
         LR1Collection actual = arithmeticExpression.computeLR1Collection();
         assertEquals(expected, actual);
     }
+
+    @Test
+    void generateLR1ParseTable() {
+        ActionTable actionTable = null;
+        GotoTable gotoTable = null;
+        LR1ParseTable expected = new LR1ParseTable(actionTable, gotoTable);
+
+        Items s0 = makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
+                "[E ::= " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s1 = makeItems(
+                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, +]"
+        );
+
+        Items s2 = makeItems(
+                "[E ::= T " + MARKER + ", " + TERMINATOR + "/+]",
+                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s3 = makeItems("[T ::= F " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s4 = makeItems(
+                "[F ::= ( " + MARKER + " E ), " + TERMINATOR + "/+/*]",
+                "[E ::= " + MARKER + " E + T, +/)]",
+                "[E ::= " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s5 = makeItems("[F ::= id " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s6 = makeItems(
+                "[E ::= E + " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s7 = makeItems(
+                "[T ::= T * " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s8 = makeItems(
+                "[F ::= ( E " + MARKER + " ), " + TERMINATOR + "/+/*]",
+                "[E ::= E " + MARKER + " + T, +/)]"
+        );
+
+        Items s9 = makeItems(
+                "[E ::= T " + MARKER + ", +/)]",
+                "[T ::= T " + MARKER + " * F, +/*/)]"
+        );
+
+        Items s10 = makeItems("[T ::= F " + MARKER + ", +/*/)]");
+
+        Items s11 = makeItems(
+                "[F ::= ( " + MARKER + " E ), +/*/)]",
+                "[E ::= " + MARKER + " E + T, +/)]",
+                "[E ::= " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s12 = makeItems("[F ::= id " + MARKER + ", +/*/)]");
+
+        Items s13 = makeItems(
+                "[E ::= E + T " + MARKER + ", " + TERMINATOR + "/+]",
+                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
+        );
+
+        Items s14 = makeItems("[T ::= T * F " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s15 = makeItems("[F ::= ( E ) " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        Items s16 = makeItems(
+                "[E ::= E + " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s17 = makeItems(
+                "[T ::= T * " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        Items s18 = makeItems(
+                "[F ::= ( E " + MARKER + " ), +/*/)]",
+                "[E ::= E " + MARKER + " + T, +/)]"
+        );
+
+        Items s19 = makeItems(
+                "[E ::= E + T " + MARKER + ", +/)]",
+                "[T ::= T " + MARKER + " * F, +/*/)]"
+        );
+
+        Items s20 = makeItems("[T ::= T * F " + MARKER + ", +/*/)]");
+
+        Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
+
+        GotoMap gotoMap = new GotoMap();
+        gotoMap.put(s1, makeGoto(s0, "E"));
+        gotoMap.put(s2, makeGoto(s0, "T"));
+        gotoMap.put(s3, makeGoto(s0, "F"));
+        gotoMap.put(s4, makeGoto(s0, "("));
+        gotoMap.put(s5, makeGoto(s0, "id"));
+
+        gotoMap.put(s6, makeGoto(s1, "+"));
+
+        gotoMap.put(s7, makeGoto(s2, "*"));
+
+        gotoMap.put(s8, makeGoto(s4, "E"));
+        gotoMap.put(s9, makeGoto(s4, "T"));
+        gotoMap.put(s10, makeGoto(s4, "F"));
+        gotoMap.put(s11, makeGoto(s4, "("));
+        gotoMap.put(s12, makeGoto(s4, "id"));
+
+        gotoMap.put(s13, makeGoto(s6, "T"));
+
+        gotoMap.put(s14, makeGoto(s7, "F"));
+
+        gotoMap.put(s15, makeGoto(s8, ")"));
+        gotoMap.put(s16, makeGoto(s8, "+"));
+
+        gotoMap.put(s17, makeGoto(s9, "*"));
+
+        gotoMap.put(s18, makeGoto(s11, "E"));
+
+        gotoMap.put(s19, makeGoto(s16, "T"));
+
+        gotoMap.put(s20, makeGoto(s17, "F"));
+
+        gotoMap.put(s21, makeGoto(s18, ")"));
+
+        LR1Collection collection = new LR1Collection(
+                Arrays.asList(
+                        s0, s1, s2, s3, s4, s5, s6, s7,
+                        s8, s9, s10, s11, s12, s13, s14,
+                        s15, s16, s17, s18, s19, s20, s21
+                ),
+                gotoMap
+        );
+
+        LR1ParseTable actual = augmentedArithmeticExpression.generateLR1ParseTable(collection);
+        assertEquals(expected, actual);
+    }
 }
