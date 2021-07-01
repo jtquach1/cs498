@@ -496,7 +496,7 @@ class Grammar {
         Items startState = augmented.getStartState(firstMap);
         LR1Collection collection = new LR1Collection(
                 Collections.singleton(startState),
-                new GotoMap()
+                new Transitions()
         );
 
         boolean newStatesAreBeingAdded = true;
@@ -568,7 +568,43 @@ class Grammar {
 
     private ActionTable constructActionTable(LR1Collection collection) {
         ActionTable table = new ActionTable();
+        Transitions transitions = getTransitionsOnlyWithTerminals(collection);
+
+        for (Goto transition : transitions) {
+            Items from = transition.getFrom();
+            Items to = transition.getTo();
+
+            Integer fromIndex = collection.indexOf(from);
+            String terminal = transition.getSymbol();
+            Integer toIndex = collection.indexOf(to);
+
+            table.populateWithShift(fromIndex, terminal, toIndex);
+        }
+
+        for (Items from : collection) {
+            Integer fromIndex = collection.indexOf(from);
+
+            table.populateWithReduce(productions, from, fromIndex);
+
+            // An accept state doesn't have a production to reduce to.
+            if (isAcceptState(from)) {
+                table.populateWithAccept(fromIndex);
+            }
+        }
+
         return table;
+    }
+
+    private Transitions getTransitionsOnlyWithTerminals(LR1Collection collection) {
+        return collection
+                .getTransitions()
+                .stream()
+                .filter(transition -> isTerminal(transition.getSymbol()))
+                .collect(Collectors.toCollection(Transitions::new));
+    }
+
+    private boolean isAcceptState(Items from) {
+        return from.contains(new Item(TERMINATOR, start + "'", start, MARKER));
     }
 
     private GotoTable constructGotoTable(LR1Collection collection) {

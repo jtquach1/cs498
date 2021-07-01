@@ -8,7 +8,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static algorithms.Execution.*;
+import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
+
+enum Execution {
+    SHIFT, REDUCE, ACCEPT
+}
 
 class LR1ParseTable {
     private final ActionTable actionTable;
@@ -21,16 +27,7 @@ class LR1ParseTable {
 }
 
 class ActionTable extends TreeMap<Integer, ActionEntry> {
-    void set(Integer state, String terminal, Action action) {
-        ActionEntry entry = this.get(state);
-
-        if (entry == null) {
-            entry = new ActionEntry();
-            this.put(state, entry);
-        }
-
-        entry.put(terminal, action);
-    }
+    static Integer noNextState = -1;
 
     Action get(Integer state, String terminal) {
         ActionEntry entry = this.get(state);
@@ -43,8 +40,57 @@ class ActionTable extends TreeMap<Integer, ActionEntry> {
             return null;
         }
 
-        // In case of conflicts, we just want to return one value
         return action;
+    }
+
+    void populateWithReduce(Productions productions, Items from, Integer fromIndex) {
+        from
+                .stream()
+                .filter(item -> item.getBeta().isEmpty())
+                .forEach(item -> {
+                            String lhs = item.getLhs();
+                            String[] alpha = item.getAlpha().toArray(new String[0]);
+                            String symbol = item.getLookahead();
+
+                            Production production = new Production(lhs, alpha);
+                            Integer productionIndex = productions.indexOf(production);
+                            Action action = new Action(REDUCE, productionIndex);
+
+                            this.set(fromIndex, symbol, action);
+                        }
+                );
+    }
+
+    void set(Integer state, String terminal, Action action) {
+        ActionEntry entry = this.get(state);
+
+        if (entry == null) {
+            entry = new ActionEntry();
+            this.put(state, entry);
+        }
+
+        entry.put(terminal, action);
+    }
+
+    void populateWithAccept(Integer fromIndex) {
+        Action action = new Action(ACCEPT, noNextState);
+        this.set(fromIndex, TERMINATOR, action);
+    }
+
+    void populateWithShift(Integer fromIndex, String terminal, Integer toIndex) {
+        Action action = new Action(SHIFT, toIndex);
+        this.set(fromIndex, terminal, action);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (Integer fromId : this.keySet()) {
+            sb.append("\"" + fromId + "\": " + this.get(fromId) + ",");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }
 
@@ -55,22 +101,35 @@ class ActionEntry extends TreeMap<String, Action> implements Comparable<ActionEn
                 .comparing(ActionEntry::toString)
                 .compare(this, other);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (String terminal : this.keySet()) {
+            sb.append("\"" + terminal + "\": " + this.get(terminal) + ",");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }
 
 class Action implements Comparable<Action> {
     private final Execution execution;
-    private final Integer state;
 
-    Action(Execution execution, Integer state) {
+    // Refers to either a collection state index or a production index.
+    private final Integer index;
+
+    Action(Execution execution, Integer index) {
         this.execution = execution;
-        this.state = state;
+        this.index = index;
     }
 
     @Override
     public int compareTo(@NotNull Action other) {
         return Comparator
                 .comparing(Action::getExecution)
-                .thenComparing(Action::getState)
+                .thenComparing(Action::getIndex)
                 .compare(this, other);
     }
 
@@ -78,13 +137,13 @@ class Action implements Comparable<Action> {
         return execution;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getIndex() {
+        return index;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(execution, state);
+        return Objects.hash(execution, index);
     }
 
     @Override
@@ -92,11 +151,12 @@ class Action implements Comparable<Action> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Action other = (Action) o;
-        return execution == other.execution && state.equals(other.state);
+        return execution == other.execution && index.equals(other.index);
     }
 
-    enum Execution {
-        SHIFT, REDUCE, ACCEPT
+    @Override
+    public String toString() {
+        return "{ \"execution\": \"" + execution + "\", \"index\": \"" + index + "\"}";
     }
 }
 
@@ -138,33 +198,33 @@ class GotoEntry extends TreeMap<String, Integer> implements Comparable<GotoEntry
 }
 
 class LR1Collection extends ListWithUniques<Items> {
-    private final GotoMap gotoMap;
+    private final Transitions transitions;
 
-    LR1Collection(GotoMap gotoMap) {
+    LR1Collection(Transitions transitions) {
         super(Items::compareTo);
-        this.gotoMap = gotoMap;
+        this.transitions = transitions;
     }
 
-    LR1Collection(@NotNull Collection<? extends Items> c, GotoMap gotoMap) {
+    LR1Collection(@NotNull Collection<? extends Items> c, Transitions transitions) {
         super(Items::compareTo);
         this.addAll(c);
-        this.gotoMap = gotoMap;
+        this.transitions = transitions;
     }
 
-    GotoMap getGotoMap() {
-        return gotoMap;
+    Transitions getTransitions() {
+        return transitions;
     }
 
     LR1Collection deepClone() {
-        GotoMap map = this.gotoMap.deepClone();
-        LR1Collection clone = new LR1Collection(map);
+        Transitions transitions = this.transitions.deepClone();
+        LR1Collection clone = new LR1Collection(transitions);
         clone.addAll(this);
         return clone;
     }
 
     void add(Items from, String symbol, Items to) {
         super.add(to);
-        gotoMap.put(to, new Goto(from, symbol));
+        transitions.add(new Goto(from, symbol, to));
     }
 
     @Override
@@ -173,12 +233,12 @@ class LR1Collection extends ListWithUniques<Items> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         LR1Collection items = (LR1Collection) o;
-        return gotoMap.equals(items.gotoMap);
+        return transitions.equals(items.transitions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), gotoMap);
+        return Objects.hash(super.hashCode(), transitions);
     }
 }
 
@@ -216,7 +276,7 @@ class Item extends Production {
 
     @Override
     public int hashCode() {
-        return Objects.hash(lhs, rhs, lookahead);
+        return Objects.hash(super.hashCode(), lookahead);
     }
 
     @Override
@@ -225,7 +285,7 @@ class Item extends Production {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Item other = (Item) o;
-        return lookahead.equals(other.lookahead);
+        return Objects.equals(lookahead, other.lookahead);
     }
 
     @Override
@@ -380,10 +440,12 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
 class Goto implements Comparable<Goto> {
     private final Items from;
     private final String symbol;
+    private final Items to;
 
-    Goto(Items from, String symbol) {
+    Goto(Items from, String symbol, Items to) {
         this.from = from;
         this.symbol = symbol;
+        this.to = to;
     }
 
     @Override
@@ -391,6 +453,7 @@ class Goto implements Comparable<Goto> {
         return Comparator
                 .comparing(Goto::getFrom)
                 .thenComparing(Goto::getSymbol)
+                .thenComparing(Goto::getTo)
                 .compare(this, other);
     }
 
@@ -402,9 +465,13 @@ class Goto implements Comparable<Goto> {
         return symbol;
     }
 
+    Items getTo() {
+        return to;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(from, symbol);
+        return Objects.hash(from, symbol, to);
     }
 
     @Override
@@ -412,14 +479,16 @@ class Goto implements Comparable<Goto> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Goto other = (Goto) o;
-        return from.equals(other.from) && symbol.equals(other.symbol);
+        return Objects.equals(from, other.from) &&
+                Objects.equals(symbol, other.symbol) &&
+                Objects.equals(to, other.to);
     }
 }
 
-class GotoMap extends TreeMap<Items, Goto> {
-    GotoMap deepClone() {
-        GotoMap clone = new GotoMap();
-        clone.putAll(this);
+class Transitions extends TreeSet<Goto> {
+    Transitions deepClone() {
+        Transitions clone = new Transitions();
+        clone.addAll(this);
         return clone;
     }
 }

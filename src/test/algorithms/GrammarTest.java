@@ -627,39 +627,39 @@ class GrammarTest {
 
         Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
 
-        GotoMap gotoMap = new GotoMap();
-        gotoMap.put(s1, makeGoto(s0, "E"));
-        gotoMap.put(s2, makeGoto(s0, "T"));
-        gotoMap.put(s3, makeGoto(s0, "F"));
-        gotoMap.put(s4, makeGoto(s0, "("));
-        gotoMap.put(s5, makeGoto(s0, "id"));
+        Transitions transitions = new Transitions();
+        transitions.add(makeGoto(s0, "E", s1));
+        transitions.add(makeGoto(s0, "T", s2));
+        transitions.add(makeGoto(s0, "F", s3));
+        transitions.add(makeGoto(s0, "(", s4));
+        transitions.add(makeGoto(s0, "id", s5));
 
-        gotoMap.put(s6, makeGoto(s1, "+"));
+        transitions.add(makeGoto(s1, "+", s6));
 
-        gotoMap.put(s7, makeGoto(s2, "*"));
+        transitions.add(makeGoto(s2, "*", s7));
 
-        gotoMap.put(s8, makeGoto(s4, "E"));
-        gotoMap.put(s9, makeGoto(s4, "T"));
-        gotoMap.put(s10, makeGoto(s4, "F"));
-        gotoMap.put(s11, makeGoto(s4, "("));
-        gotoMap.put(s12, makeGoto(s4, "id"));
+        transitions.add(makeGoto(s4, "E", s8));
+        transitions.add(makeGoto(s4, "T", s9));
+        transitions.add(makeGoto(s4, "F", s10));
+        transitions.add(makeGoto(s4, "(", s11));
+        transitions.add(makeGoto(s4, "id", s12));
 
-        gotoMap.put(s13, makeGoto(s6, "T"));
+        transitions.add(makeGoto(s6, "T", s13));
 
-        gotoMap.put(s14, makeGoto(s7, "F"));
+        transitions.add(makeGoto(s7, "F", s14));
 
-        gotoMap.put(s15, makeGoto(s8, ")"));
-        gotoMap.put(s16, makeGoto(s8, "+"));
+        transitions.add(makeGoto(s8, ")", s15));
+        transitions.add(makeGoto(s8, "+", s16));
 
-        gotoMap.put(s17, makeGoto(s9, "*"));
+        transitions.add(makeGoto(s9, "*", s17));
 
-        gotoMap.put(s18, makeGoto(s11, "E"));
+        transitions.add(makeGoto(s11, "E", s18));
 
-        gotoMap.put(s19, makeGoto(s16, "T"));
+        transitions.add(makeGoto(s16, "T", s19));
 
-        gotoMap.put(s20, makeGoto(s17, "F"));
+        transitions.add(makeGoto(s17, "F", s20));
 
-        gotoMap.put(s21, makeGoto(s18, ")"));
+        transitions.add(makeGoto(s18, ")", s21));
 
         LR1Collection expected = new LR1Collection(
                 Arrays.asList(
@@ -667,7 +667,7 @@ class GrammarTest {
                         s8, s9, s10, s11, s12, s13, s14,
                         s15, s16, s17, s18, s19, s20, s21
                 ),
-                gotoMap
+                transitions
         );
         LR1Collection actual = arithmeticExpression.computeLR1Collection();
         assertEquals(expected, actual);
@@ -789,39 +789,39 @@ class GrammarTest {
 
         Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
 
-        GotoMap gotoMap = new GotoMap();
-        gotoMap.put(s1, makeGoto(s0, "E"));
-        gotoMap.put(s2, makeGoto(s0, "T"));
-        gotoMap.put(s3, makeGoto(s0, "F"));
-        gotoMap.put(s4, makeGoto(s0, "("));
-        gotoMap.put(s5, makeGoto(s0, "id"));
+        Transitions transitions = new Transitions();
+        transitions.add(makeGoto(s0, "E", s1));
+        transitions.add(makeGoto(s0, "T", s2));
+        transitions.add(makeGoto(s0, "F", s3));
+        transitions.add(makeGoto(s0, "(", s4));
+        transitions.add(makeGoto(s0, "id", s5));
 
-        gotoMap.put(s6, makeGoto(s1, "+"));
+        transitions.add(makeGoto(s1, "+", s6));
 
-        gotoMap.put(s7, makeGoto(s2, "*"));
+        transitions.add(makeGoto(s2, "*", s7));
 
-        gotoMap.put(s8, makeGoto(s4, "E"));
-        gotoMap.put(s9, makeGoto(s4, "T"));
-        gotoMap.put(s10, makeGoto(s4, "F"));
-        gotoMap.put(s11, makeGoto(s4, "("));
-        gotoMap.put(s12, makeGoto(s4, "id"));
+        transitions.add(makeGoto(s4, "E", s8));
+        transitions.add(makeGoto(s4, "T", s9));
+        transitions.add(makeGoto(s4, "F", s10));
+        transitions.add(makeGoto(s4, "(", s11));
+        transitions.add(makeGoto(s4, "id", s12));
 
-        gotoMap.put(s13, makeGoto(s6, "T"));
+        transitions.add(makeGoto(s6, "T", s13));
 
-        gotoMap.put(s14, makeGoto(s7, "F"));
+        transitions.add(makeGoto(s7, "F", s14));
 
-        gotoMap.put(s15, makeGoto(s8, ")"));
-        gotoMap.put(s16, makeGoto(s8, "+"));
+        transitions.add(makeGoto(s8, ")", s15));
+        transitions.add(makeGoto(s8, "+", s16));
 
-        gotoMap.put(s17, makeGoto(s9, "*"));
+        transitions.add(makeGoto(s9, "*", s17));
 
-        gotoMap.put(s18, makeGoto(s11, "E"));
+        transitions.add(makeGoto(s11, "E", s18));
 
-        gotoMap.put(s19, makeGoto(s16, "T"));
+        transitions.add(makeGoto(s16, "T", s19));
 
-        gotoMap.put(s20, makeGoto(s17, "F"));
+        transitions.add(makeGoto(s17, "F", s20));
 
-        gotoMap.put(s21, makeGoto(s18, ")"));
+        transitions.add(makeGoto(s18, ")", s21));
 
         LR1Collection collection = new LR1Collection(
                 Arrays.asList(
@@ -829,10 +829,10 @@ class GrammarTest {
                         s8, s9, s10, s11, s12, s13, s14,
                         s15, s16, s17, s18, s19, s20, s21
                 ),
-                gotoMap
+                transitions
         );
 
-        LR1ParseTable actual = augmentedArithmeticExpression.generateLR1ParseTable(collection);
+        LR1ParseTable actual = arithmeticExpression.generateLR1ParseTable(collection);
         assertEquals(expected, actual);
     }
 }

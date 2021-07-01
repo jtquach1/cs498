@@ -214,18 +214,6 @@ class UtilityTest {
     }
 
     @Test
-    void makeItems() {
-        Items expected = new Items();
-        expected.add(new Item(TERMINATOR, "E'", MARKER, "E"));
-        expected.add(new Item(TERMINATOR, "E", MARKER, "E", "+", "T"));
-        Items actual = Utility.makeItems(
-                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
-                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]"
-        );
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void getItemsFromLine() {
         String line = "[E' ::= " + MARKER + " E, " + TERMINATOR + "/+]";
         Items actual = Utility.getItemsFromLine(line);
@@ -238,12 +226,36 @@ class UtilityTest {
     @Test
     void makeGoto() {
         Items s0 = Utility.makeItems(
-                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
-                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "/+]"
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
+                "[E ::= " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
         );
-        Goto expected = new Goto(s0, "E");
-        Goto actual = Utility.makeGoto(s0, "E");
 
+        Items s1 = Utility.makeItems(
+                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, +]"
+        );
+
+        Goto expected = new Goto(s0, "E", s1);
+        Goto actual = Utility.makeGoto(s0, "E", s1);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeItems() {
+        Items expected = new Items();
+        expected.add(new Item(TERMINATOR, "E'", MARKER, "E"));
+        expected.add(new Item(TERMINATOR, "E", MARKER, "E", "+", "T"));
+        Items actual = Utility.makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]"
+        );
         assertEquals(expected, actual);
     }
 }

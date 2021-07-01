@@ -8,7 +8,7 @@ import static algorithms.Utility.makeItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
-class GotoMapTest {
+class TransitionsTest {
 
     @Test
     void deepClone() {
@@ -28,10 +28,10 @@ class GotoMapTest {
                 "[E ::= E " + MARKER + " + T, +]"
         );
 
-        GotoMap expected = new GotoMap();
-        expected.put(s1, new Goto(s0, "E"));
+        Transitions expected = new Transitions();
+        expected.add(new Goto(s0, "E", s1));
 
-        GotoMap actual = expected.deepClone();
+        Transitions actual = expected.deepClone();
 
         assertEquals(expected, actual);
         assertNotSame(expected, actual);
