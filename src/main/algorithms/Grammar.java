@@ -519,8 +519,9 @@ class Grammar {
         return from -> {
             symbols.forEach(symbol -> {
                 Items to = from.computeGoto(symbol, firstMap, productions);
-                if (!to.isEmpty() && !collection.contains(to)) {
-                    collection.add(from, symbol, to);
+                Transition transition = new Transition(from, symbol, to);
+                if (!to.isEmpty() && !collection.contains(transition)) {
+                    collection.add(transition);
                 }
             });
         };
@@ -570,7 +571,7 @@ class Grammar {
         ActionTable table = new ActionTable();
         Transitions transitions = getTransitionsOnlyWithTerminals(collection);
 
-        for (Goto transition : transitions) {
+        for (Transition transition : transitions) {
             Items from = transition.getFrom();
             Items to = transition.getTo();
 

@@ -29,7 +29,7 @@ class TransitionsTest {
         );
 
         Transitions expected = new Transitions();
-        expected.add(new Goto(s0, "E", s1));
+        expected.add(new Transition(s0, "E", s1));
 
         Transitions actual = expected.deepClone();
 

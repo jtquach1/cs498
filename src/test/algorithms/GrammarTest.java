@@ -628,38 +628,57 @@ class GrammarTest {
         Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
 
         Transitions transitions = new Transitions();
-        transitions.add(makeGoto(s0, "E", s1));
-        transitions.add(makeGoto(s0, "T", s2));
-        transitions.add(makeGoto(s0, "F", s3));
-        transitions.add(makeGoto(s0, "(", s4));
-        transitions.add(makeGoto(s0, "id", s5));
+        transitions.add(makeTransition(s0, "E", s1));
+        transitions.add(makeTransition(s0, "T", s2));
+        transitions.add(makeTransition(s0, "F", s3));
+        transitions.add(makeTransition(s0, "(", s4));
+        transitions.add(makeTransition(s0, "id", s5));
 
-        transitions.add(makeGoto(s1, "+", s6));
+        transitions.add(makeTransition(s1, "+", s6));
 
-        transitions.add(makeGoto(s2, "*", s7));
+        transitions.add(makeTransition(s2, "*", s7));
 
-        transitions.add(makeGoto(s4, "E", s8));
-        transitions.add(makeGoto(s4, "T", s9));
-        transitions.add(makeGoto(s4, "F", s10));
-        transitions.add(makeGoto(s4, "(", s11));
-        transitions.add(makeGoto(s4, "id", s12));
+        transitions.add(makeTransition(s4, "E", s8));
+        transitions.add(makeTransition(s4, "T", s9));
+        transitions.add(makeTransition(s4, "F", s10));
+        transitions.add(makeTransition(s4, "(", s11));
+        transitions.add(makeTransition(s4, "id", s12));
 
-        transitions.add(makeGoto(s6, "T", s13));
+        transitions.add(makeTransition(s6, "T", s13));
+        transitions.add(makeTransition(s6, "F", s3));
+        transitions.add(makeTransition(s6, "(", s4));
+        transitions.add(makeTransition(s6, "id", s5));
 
-        transitions.add(makeGoto(s7, "F", s14));
+        transitions.add(makeTransition(s7, "F", s14));
+        transitions.add(makeTransition(s7, "(", s4));
+        transitions.add(makeTransition(s7, "id", s5));
 
-        transitions.add(makeGoto(s8, ")", s15));
-        transitions.add(makeGoto(s8, "+", s16));
+        transitions.add(makeTransition(s8, ")", s15));
+        transitions.add(makeTransition(s8, "+", s16));
 
-        transitions.add(makeGoto(s9, "*", s17));
+        transitions.add(makeTransition(s9, "*", s17));
 
-        transitions.add(makeGoto(s11, "E", s18));
+        transitions.add(makeTransition(s11, "E", s18));
+        transitions.add(makeTransition(s11, "T", s9));
+        transitions.add(makeTransition(s11, "F", s10));
+        transitions.add(makeTransition(s11, "(", s11));
+        transitions.add(makeTransition(s11, "id", s12));
 
-        transitions.add(makeGoto(s16, "T", s19));
+        transitions.add(makeTransition(s13, "*", s7));
 
-        transitions.add(makeGoto(s17, "F", s20));
+        transitions.add(makeTransition(s16, "T", s19));
+        transitions.add(makeTransition(s16, "F", s10));
+        transitions.add(makeTransition(s16, "(", s11));
+        transitions.add(makeTransition(s16, "id", s12));
 
-        transitions.add(makeGoto(s18, ")", s21));
+        transitions.add(makeTransition(s17, "F", s20));
+        transitions.add(makeTransition(s17, "(", s11));
+        transitions.add(makeTransition(s17, "id", s12));
+
+        transitions.add(makeTransition(s18, ")", s21));
+        transitions.add(makeTransition(s18, "+", s16));
+
+        transitions.add(makeTransition(s19, "*", s17));
 
         LR1Collection expected = new LR1Collection(
                 Arrays.asList(
@@ -790,38 +809,57 @@ class GrammarTest {
         Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
 
         Transitions transitions = new Transitions();
-        transitions.add(makeGoto(s0, "E", s1));
-        transitions.add(makeGoto(s0, "T", s2));
-        transitions.add(makeGoto(s0, "F", s3));
-        transitions.add(makeGoto(s0, "(", s4));
-        transitions.add(makeGoto(s0, "id", s5));
+        transitions.add(makeTransition(s0, "E", s1));
+        transitions.add(makeTransition(s0, "T", s2));
+        transitions.add(makeTransition(s0, "F", s3));
+        transitions.add(makeTransition(s0, "(", s4));
+        transitions.add(makeTransition(s0, "id", s5));
 
-        transitions.add(makeGoto(s1, "+", s6));
+        transitions.add(makeTransition(s1, "+", s6));
 
-        transitions.add(makeGoto(s2, "*", s7));
+        transitions.add(makeTransition(s2, "*", s7));
 
-        transitions.add(makeGoto(s4, "E", s8));
-        transitions.add(makeGoto(s4, "T", s9));
-        transitions.add(makeGoto(s4, "F", s10));
-        transitions.add(makeGoto(s4, "(", s11));
-        transitions.add(makeGoto(s4, "id", s12));
+        transitions.add(makeTransition(s4, "E", s8));
+        transitions.add(makeTransition(s4, "T", s9));
+        transitions.add(makeTransition(s4, "F", s10));
+        transitions.add(makeTransition(s4, "(", s11));
+        transitions.add(makeTransition(s4, "id", s12));
 
-        transitions.add(makeGoto(s6, "T", s13));
+        transitions.add(makeTransition(s6, "T", s13));
+        transitions.add(makeTransition(s6, "F", s3));
+        transitions.add(makeTransition(s6, "(", s4));
+        transitions.add(makeTransition(s6, "id", s5));
 
-        transitions.add(makeGoto(s7, "F", s14));
+        transitions.add(makeTransition(s7, "F", s14));
+        transitions.add(makeTransition(s7, "(", s4));
+        transitions.add(makeTransition(s7, "id", s5));
 
-        transitions.add(makeGoto(s8, ")", s15));
-        transitions.add(makeGoto(s8, "+", s16));
+        transitions.add(makeTransition(s8, ")", s15));
+        transitions.add(makeTransition(s8, "+", s16));
 
-        transitions.add(makeGoto(s9, "*", s17));
+        transitions.add(makeTransition(s9, "*", s17));
 
-        transitions.add(makeGoto(s11, "E", s18));
+        transitions.add(makeTransition(s11, "E", s18));
+        transitions.add(makeTransition(s11, "T", s9));
+        transitions.add(makeTransition(s11, "F", s10));
+        transitions.add(makeTransition(s11, "(", s11));
+        transitions.add(makeTransition(s11, "id", s12));
 
-        transitions.add(makeGoto(s16, "T", s19));
+        transitions.add(makeTransition(s13, "*", s7));
 
-        transitions.add(makeGoto(s17, "F", s20));
+        transitions.add(makeTransition(s16, "T", s19));
+        transitions.add(makeTransition(s16, "F", s10));
+        transitions.add(makeTransition(s16, "(", s11));
+        transitions.add(makeTransition(s16, "id", s12));
 
-        transitions.add(makeGoto(s18, ")", s21));
+        transitions.add(makeTransition(s17, "F", s20));
+        transitions.add(makeTransition(s17, "(", s11));
+        transitions.add(makeTransition(s17, "id", s12));
+
+        transitions.add(makeTransition(s18, ")", s21));
+        transitions.add(makeTransition(s18, "+", s16));
+
+        transitions.add(makeTransition(s19, "*", s17));
 
         LR1Collection collection = new LR1Collection(
                 Arrays.asList(

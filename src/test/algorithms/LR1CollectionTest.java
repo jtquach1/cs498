@@ -8,8 +8,8 @@ import java.util.Collections;
 
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
-import static algorithms.Utility.makeGoto;
 import static algorithms.Utility.makeItems;
+import static algorithms.Utility.makeTransition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
@@ -49,11 +49,12 @@ class LR1CollectionTest {
     @Test
     void add() {
         Transitions transitions = new Transitions();
-        transitions.add(makeGoto(s0, "E", s1));
+        transitions.add(makeTransition(s0, "E", s1));
         LR1Collection expected = new LR1Collection(Arrays.asList(s0, s1), transitions);
 
         LR1Collection actual = collection;
-        actual.add(s0, "E", s1);
+        Transition transition = new Transition(s0, "E", s1);
+        actual.add(transition);
         assertEquals(expected, actual);
     }
 }

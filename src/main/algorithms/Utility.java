@@ -138,8 +138,8 @@ class Utility {
         return items;
     }
 
-    static Goto makeGoto(Items from, String symbol, Items to) {
-        return new Goto(from, symbol, to);
+    static Transition makeTransition(Items from, String symbol, Items to) {
+        return new Transition(from, symbol, to);
     }
 }
 

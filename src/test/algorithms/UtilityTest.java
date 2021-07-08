@@ -224,7 +224,7 @@ class UtilityTest {
     }
 
     @Test
-    void makeGoto() {
+    void makeTransition() {
         Items s0 = Utility.makeItems(
                 "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
                 "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
@@ -241,8 +241,8 @@ class UtilityTest {
                 "[E ::= E " + MARKER + " + T, +]"
         );
 
-        Goto expected = new Goto(s0, "E", s1);
-        Goto actual = Utility.makeGoto(s0, "E", s1);
+        Transition expected = new Transition(s0, "E", s1);
+        Transition actual = Utility.makeTransition(s0, "E", s1);
 
         assertEquals(expected, actual);
     }

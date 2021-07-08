@@ -222,9 +222,9 @@ class LR1Collection extends ListWithUniques<Items> {
         return clone;
     }
 
-    void add(Items from, String symbol, Items to) {
-        super.add(to);
-        transitions.add(new Goto(from, symbol, to));
+    void add(Transition transition) {
+        super.add(transition.getTo());
+        transitions.add(transition);
     }
 
     @Override
@@ -232,13 +232,17 @@ class LR1Collection extends ListWithUniques<Items> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        LR1Collection items = (LR1Collection) o;
-        return transitions.equals(items.transitions);
+        LR1Collection other = (LR1Collection) o;
+        return transitions.equals(other.transitions);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), transitions);
+    }
+
+    public boolean contains(Transition transition) {
+        return transitions.contains(transition) && super.contains(transition.getTo());
     }
 }
 
@@ -437,23 +441,23 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
     }
 }
 
-class Goto implements Comparable<Goto> {
+class Transition implements Comparable<Transition> {
     private final Items from;
     private final String symbol;
     private final Items to;
 
-    Goto(Items from, String symbol, Items to) {
+    Transition(Items from, String symbol, Items to) {
         this.from = from;
         this.symbol = symbol;
         this.to = to;
     }
 
     @Override
-    public int compareTo(@NotNull Goto other) {
+    public int compareTo(@NotNull Transition other) {
         return Comparator
-                .comparing(Goto::getFrom)
-                .thenComparing(Goto::getSymbol)
-                .thenComparing(Goto::getTo)
+                .comparing(Transition::getFrom)
+                .thenComparing(Transition::getSymbol)
+                .thenComparing(Transition::getTo)
                 .compare(this, other);
     }
 
@@ -478,14 +482,14 @@ class Goto implements Comparable<Goto> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Goto other = (Goto) o;
+        Transition other = (Transition) o;
         return Objects.equals(from, other.from) &&
                 Objects.equals(symbol, other.symbol) &&
                 Objects.equals(to, other.to);
     }
 }
 
-class Transitions extends TreeSet<Goto> {
+class Transitions extends TreeSet<Transition> {
     Transitions deepClone() {
         Transitions clone = new Transitions();
         clone.addAll(this);
