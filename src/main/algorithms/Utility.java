@@ -141,6 +141,10 @@ class Utility {
     static Transition makeTransition(Items from, String symbol, Items to) {
         return new Transition(from, symbol, to);
     }
+
+    static Action makeAction(Execution execution, Integer index) {
+        return new Action(execution, index);
+    }
 }
 
 class Queue<T> extends ArrayList<T> {

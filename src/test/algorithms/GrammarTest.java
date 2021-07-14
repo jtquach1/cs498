@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static algorithms.ActionTable.noNextState;
+import static algorithms.Execution.*;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
@@ -14,6 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class GrammarTest {
     Grammar arithmeticExpression, augmentedArithmeticExpression, arithmeticExpressionRedux,
             firstSampleExamQuestion, leftRecursionExample;
+
+    Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18,
+            s19, s20, s21;
+
+    Transitions transitions;
+    ActionTable actionTable;
+    GotoTable gotoTable;
+    LR1Collection collection;
 
     @BeforeEach
     void setUp() {
@@ -83,13 +93,288 @@ class GrammarTest {
                         "A ::= d"
                 )
         );
+
+        s0 = makeItems(
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
+                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
+                "[E ::= " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        s1 = makeItems(
+                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
+                "[E ::= E " + MARKER + " + T, +]"
+        );
+
+        s2 = makeItems(
+                "[E ::= T " + MARKER + ", " + TERMINATOR + "/+]",
+                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
+        );
+
+        s3 = makeItems("[T ::= F " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        s4 = makeItems(
+                "[F ::= ( " + MARKER + " E ), " + TERMINATOR + "/+/*]",
+                "[E ::= " + MARKER + " E + T, +/)]",
+                "[E ::= " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        s5 = makeItems("[F ::= id " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        s6 = makeItems(
+                "[E ::= E + " + MARKER + " T, " + TERMINATOR + "/+]",
+                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
+                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        s7 = makeItems(
+                "[T ::= T * " + MARKER + " F, " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
+                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
+        );
+
+        s8 = makeItems(
+                "[F ::= ( E " + MARKER + " ), " + TERMINATOR + "/+/*]",
+                "[E ::= E " + MARKER + " + T, +/)]"
+        );
+
+        s9 = makeItems(
+                "[E ::= T " + MARKER + ", +/)]",
+                "[T ::= T " + MARKER + " * F, +/*/)]"
+        );
+
+        s10 = makeItems("[T ::= F " + MARKER + ", +/*/)]");
+
+        s11 = makeItems(
+                "[F ::= ( " + MARKER + " E ), +/*/)]",
+                "[E ::= " + MARKER + " E + T, +/)]",
+                "[E ::= " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        s12 = makeItems("[F ::= id " + MARKER + ", +/*/)]");
+
+        s13 = makeItems(
+                "[E ::= E + T " + MARKER + ", " + TERMINATOR + "/+]",
+                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
+        );
+
+        s14 = makeItems("[T ::= T * F " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        s15 = makeItems("[F ::= ( E ) " + MARKER + ", " + TERMINATOR + "/+/*]");
+
+        s16 = makeItems(
+                "[E ::= E + " + MARKER + " T, +/)]",
+                "[T ::= " + MARKER + " T * F, +/*/)]",
+                "[T ::= " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        s17 = makeItems(
+                "[T ::= T * " + MARKER + " F, +/*/)]",
+                "[F ::= " + MARKER + " ( E ), +/*/)]",
+                "[F ::= " + MARKER + " id, +/*/)]"
+        );
+
+        s18 = makeItems(
+                "[F ::= ( E " + MARKER + " ), +/*/)]",
+                "[E ::= E " + MARKER + " + T, +/)]"
+        );
+
+        s19 = makeItems(
+                "[E ::= E + T " + MARKER + ", +/)]",
+                "[T ::= T " + MARKER + " * F, +/*/)]"
+        );
+
+        s20 = makeItems("[T ::= T * F " + MARKER + ", +/*/)]");
+
+        s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
+
+        transitions = new Transitions();
+        transitions.add(makeTransition(s0, "E", s1));
+        transitions.add(makeTransition(s0, "T", s2));
+        transitions.add(makeTransition(s0, "F", s3));
+        transitions.add(makeTransition(s0, "(", s4));
+        transitions.add(makeTransition(s0, "id", s5));
+
+        transitions.add(makeTransition(s1, "+", s6));
+
+        transitions.add(makeTransition(s2, "*", s7));
+
+        transitions.add(makeTransition(s4, "E", s8));
+        transitions.add(makeTransition(s4, "T", s9));
+        transitions.add(makeTransition(s4, "F", s10));
+        transitions.add(makeTransition(s4, "(", s11));
+        transitions.add(makeTransition(s4, "id", s12));
+
+        transitions.add(makeTransition(s6, "T", s13));
+        transitions.add(makeTransition(s6, "F", s3));
+        transitions.add(makeTransition(s6, "(", s4));
+        transitions.add(makeTransition(s6, "id", s5));
+
+        transitions.add(makeTransition(s7, "F", s14));
+        transitions.add(makeTransition(s7, "(", s4));
+        transitions.add(makeTransition(s7, "id", s5));
+
+        transitions.add(makeTransition(s8, ")", s15));
+        transitions.add(makeTransition(s8, "+", s16));
+
+        transitions.add(makeTransition(s9, "*", s17));
+
+        transitions.add(makeTransition(s11, "E", s18));
+        transitions.add(makeTransition(s11, "T", s9));
+        transitions.add(makeTransition(s11, "F", s10));
+        transitions.add(makeTransition(s11, "(", s11));
+        transitions.add(makeTransition(s11, "id", s12));
+
+        transitions.add(makeTransition(s13, "*", s7));
+
+        transitions.add(makeTransition(s16, "T", s19));
+        transitions.add(makeTransition(s16, "F", s10));
+        transitions.add(makeTransition(s16, "(", s11));
+        transitions.add(makeTransition(s16, "id", s12));
+
+        transitions.add(makeTransition(s17, "F", s20));
+        transitions.add(makeTransition(s17, "(", s11));
+        transitions.add(makeTransition(s17, "id", s12));
+
+        transitions.add(makeTransition(s18, ")", s21));
+        transitions.add(makeTransition(s18, "+", s16));
+
+        transitions.add(makeTransition(s19, "*", s17));
+
+        actionTable = new ActionTable();
+        actionTable.set(9, "(", makeAction(SHIFT, 10));
+        actionTable.set(9, "id", makeAction(SHIFT, 14));
+
+        actionTable.set(4, "+", makeAction(SHIFT, 2));
+        actionTable.set(4, TERMINATOR, makeAction(ACCEPT, noNextState));
+
+        actionTable.set(7, "+", makeAction(REDUCE, 7));
+        actionTable.set(7, "*", makeAction(SHIFT, 16));
+        actionTable.set(7, TERMINATOR, makeAction(REDUCE, 7));
+
+        actionTable.set(18, "+", makeAction(REDUCE, 10));
+        actionTable.set(18, "*", makeAction(REDUCE, 10));
+        actionTable.set(18, TERMINATOR, makeAction(REDUCE, 10));
+
+        actionTable.set(10, "(", makeAction(SHIFT, 11));
+        actionTable.set(10, "id", makeAction(SHIFT, 15));
+
+        actionTable.set(14, "+", makeAction(REDUCE, 2));
+        actionTable.set(14, "*", makeAction(REDUCE, 2));
+        actionTable.set(14, TERMINATOR, makeAction(REDUCE, 2));
+
+        actionTable.set(2, "(", makeAction(SHIFT, 10));
+        actionTable.set(2, "id", makeAction(SHIFT, 14));
+
+        actionTable.set(16, "(", makeAction(SHIFT, 10));
+        actionTable.set(16, "id", makeAction(SHIFT, 14));
+
+        actionTable.set(5, "+", makeAction(SHIFT, 3));
+        actionTable.set(5, ")", makeAction(SHIFT, 12));
+
+        actionTable.set(8, "+", makeAction(REDUCE, 7));
+        actionTable.set(8, "*", makeAction(SHIFT, 17));
+        actionTable.set(8, ")", makeAction(REDUCE, 7));
+
+        actionTable.set(19, "+", makeAction(REDUCE, 10));
+        actionTable.set(19, "*", makeAction(REDUCE, 10));
+        actionTable.set(19, ")", makeAction(REDUCE, 10));
+
+        actionTable.set(11, "(", makeAction(SHIFT, 11));
+        actionTable.set(11, "id", makeAction(SHIFT, 15));
+
+        actionTable.set(15, "+", makeAction(REDUCE, 2));
+        actionTable.set(15, "*", makeAction(REDUCE, 2));
+        actionTable.set(15, ")", makeAction(REDUCE, 2));
+
+        actionTable.set(0, "+", makeAction(REDUCE, 4));
+        actionTable.set(0, "*", makeAction(SHIFT, 16));
+        actionTable.set(0, TERMINATOR, makeAction(REDUCE, 4));
+
+        actionTable.set(20, "+", makeAction(REDUCE, 18));
+        actionTable.set(20, "*", makeAction(REDUCE, 18));
+        actionTable.set(20, TERMINATOR, makeAction(REDUCE, 18));
+
+        actionTable.set(12, "+", makeAction(REDUCE, 14));
+        actionTable.set(12, "*", makeAction(REDUCE, 14));
+        actionTable.set(12, TERMINATOR, makeAction(REDUCE, 14));
+
+        actionTable.set(3, "(", makeAction(SHIFT, 11));
+        actionTable.set(3, "id", makeAction(SHIFT, 15));
+
+        actionTable.set(17, "(", makeAction(SHIFT, 11));
+        actionTable.set(17, "id", makeAction(SHIFT, 15));
+
+        actionTable.set(6, "+", makeAction(SHIFT, 3));
+        actionTable.set(6, ")", makeAction(SHIFT, 13));
+
+        actionTable.set(1, "+", makeAction(REDUCE, 4));
+        actionTable.set(1, "*", makeAction(SHIFT, 17));
+        actionTable.set(1, ")", makeAction(REDUCE, 4));
+
+        actionTable.set(21, "+", makeAction(REDUCE, 18));
+        actionTable.set(21, "*", makeAction(REDUCE, 18));
+        actionTable.set(21, ")", makeAction(REDUCE, 18));
+
+        actionTable.set(13, "+", makeAction(REDUCE, 14));
+        actionTable.set(13, "*", makeAction(REDUCE, 14));
+        actionTable.set(13, ")", makeAction(REDUCE, 14));
+
+        gotoTable = new GotoTable();
+        gotoTable.set(9, "E", 4);
+        gotoTable.set(9, "T", 7);
+        gotoTable.set(9, "F", 18);
+
+        gotoTable.set(10, "E", 5);
+        gotoTable.set(10, "T", 8);
+        gotoTable.set(10, "F", 19);
+
+        gotoTable.set(2, "T", 0);
+        gotoTable.set(2, "F", 18);
+
+        gotoTable.set(16, "F", 20);
+
+        gotoTable.set(11, "E", 6);
+        gotoTable.set(11, "T", 8);
+        gotoTable.set(11, "F", 19);
+
+        gotoTable.set(3, "T", 1);
+        gotoTable.set(3, "F", 19);
+
+        gotoTable.set(17, "F", 21);
+
+        collection = new LR1Collection(
+                Arrays.asList(
+                        s0, s1, s2, s3, s4, s5, s6, s7,
+                        s8, s9, s10, s11, s12, s13, s14,
+                        s15, s16, s17, s18, s19, s20, s21
+                ),
+                transitions,
+                s0
+        );
+
     }
 
     @Test
     void first() {
         // From sample exam 1
-        Grammar cfg = firstSampleExamQuestion;
-        FirstMap actual = cfg.first();
+        FirstMap actual = firstSampleExamQuestion.first();
         FirstMap expected = new FirstMap();
         expected.put("a", new First("a"));
         expected.put("b", new First("b"));
@@ -101,8 +386,7 @@ class GrammarTest {
         assertEquals(expected, actual);
 
         // From lecture slides, LL(1) grammar
-        cfg = arithmeticExpressionRedux;
-        actual = cfg.first();
+        actual = arithmeticExpressionRedux.first();
         expected = new FirstMap();
         expected.put("(", new First("("));
         expected.put(")", new First(")"));
@@ -118,8 +402,7 @@ class GrammarTest {
         assertEquals(expected, actual);
 
         // From lecture slides, non LL(1) grammar
-        cfg = arithmeticExpression;
-        actual = cfg.first();
+        actual = arithmeticExpression.first();
 
         expected = new FirstMap();
         expected.put("(", new First("("));
@@ -141,8 +424,6 @@ class GrammarTest {
         expected.put("A", new Follow("a"));
         expected.put("B", new Follow("a"));
 
-        Grammar cfg = firstSampleExamQuestion;
-
         FirstMap firstMap = new FirstMap();
         firstMap.put("a", new First("a"));
         firstMap.put("b", new First("b"));
@@ -152,7 +433,7 @@ class GrammarTest {
         firstMap.put("A", new First("c", "b"));
         firstMap.put("B", new First("c", EPSILON));
 
-        FollowMap actual = cfg.follow(firstMap);
+        FollowMap actual = firstSampleExamQuestion.follow(firstMap);
         assertEquals(expected, actual);
 
         // From lecture slides, LL(1) grammar
@@ -162,8 +443,6 @@ class GrammarTest {
         expected.put("F", new Follow("+", "*", ")", TERMINATOR));
         expected.put("T", new Follow("+", ")", TERMINATOR));
         expected.put("T'", new Follow("+", ")", TERMINATOR));
-
-        cfg = arithmeticExpressionRedux;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -178,7 +457,7 @@ class GrammarTest {
         firstMap.put("id", new First("id"));
         firstMap.put(EPSILON, new First(EPSILON));
 
-        actual = cfg.follow(firstMap);
+        actual = arithmeticExpressionRedux.follow(firstMap);
         assertEquals(expected, actual);
 
         // From lecture slides, non LL(1) grammar
@@ -186,8 +465,6 @@ class GrammarTest {
         expected.put("E", new Follow("+", ")", TERMINATOR));
         expected.put("F", new Follow("+", "*", ")", TERMINATOR));
         expected.put("T", new Follow("+", "*", ")", TERMINATOR));
-
-        cfg = arithmeticExpression;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -199,7 +476,7 @@ class GrammarTest {
         firstMap.put("T", new First("(", "id"));
         firstMap.put("id", new First("id"));
 
-        actual = cfg.follow(firstMap);
+        actual = arithmeticExpression.follow(firstMap);
         assertEquals(expected, actual);
     }
 
@@ -215,8 +492,6 @@ class GrammarTest {
         expected.set("B", "a", 3);
         expected.set("B", "c", 2);
 
-        Grammar cfg = firstSampleExamQuestion;
-
         FirstMap firstMap = new FirstMap();
         firstMap.put("a", new First("a"));
         firstMap.put("b", new First("b"));
@@ -231,7 +506,7 @@ class GrammarTest {
         followMap.put("A", new Follow("a"));
         followMap.put("B", new Follow("a"));
 
-        LL1ParseTable actual = cfg.generateLL1ParseTable(firstMap, followMap);
+        LL1ParseTable actual = firstSampleExamQuestion.generateLL1ParseTable(firstMap, followMap);
         assertEquals(expected, actual);
 
         // From lecture slides, LL(1) grammar
@@ -249,8 +524,6 @@ class GrammarTest {
         expected.set("T'", TERMINATOR, 7);
         expected.set("F", "(", 3);
         expected.set("F", "id", 4);
-
-        cfg = arithmeticExpressionRedux;
 
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
@@ -272,7 +545,7 @@ class GrammarTest {
         followMap.put("T", new Follow("+", ")", TERMINATOR));
         followMap.put("T'", new Follow("+", ")", TERMINATOR));
 
-        actual = cfg.generateLL1ParseTable(firstMap, followMap);
+        actual = arithmeticExpressionRedux.generateLL1ParseTable(firstMap, followMap);
 
         assertEquals(expected, actual);
 
@@ -289,8 +562,6 @@ class GrammarTest {
         expected.set("F", "(", 2);
         expected.set("F", "id", 3);
 
-        cfg = arithmeticExpression;
-
         firstMap = new FirstMap();
         firstMap.put("(", new First("("));
         firstMap.put(")", new First(")"));
@@ -306,13 +577,13 @@ class GrammarTest {
         followMap.put("F", new Follow("+", "*", ")", TERMINATOR));
         followMap.put("T", new Follow("+", "*", ")", TERMINATOR));
 
-        actual = cfg.generateLL1ParseTable(firstMap, followMap);
+        actual = arithmeticExpression.generateLL1ParseTable(firstMap, followMap);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void parseSentence() throws Exception {
+    void parseSentenceLL1() throws Exception {
         /* In contrast to the table from the lecture slides, this test checks for entries
         where EPSILON is on the stack */
         LL1ParseOutput expected = new LL1ParseOutput();
@@ -414,16 +685,14 @@ class GrammarTest {
         table.set("F", "(", 3);
         table.set("F", "id", 4);
 
-        Grammar cfg = arithmeticExpressionRedux;
         String w = "id + id * id " + TERMINATOR;
-        LL1ParseOutput actual = cfg.parseSentence(table, w);
+        LL1ParseOutput actual = arithmeticExpressionRedux.parseSentence(table, w);
         assertEquals(expected, actual);
     }
 
     @Test
     void isLL1() {
         // Non LL(1) grammar with left recursion
-        Grammar cfg = arithmeticExpression;
         LL1ParseTable table = new LL1ParseTable();
         table.set("E", "(", 0);
         table.set("E", "(", 1);
@@ -436,10 +705,9 @@ class GrammarTest {
         table.set("F", "(", 4);
         table.set("F", "id", 5);
 
-        assertFalse(cfg.isLL1(table));
+        assertFalse(arithmeticExpression.isLL1(table));
 
         // Equivalent LL(1) grammar
-        cfg = arithmeticExpressionRedux;
         table = new LL1ParseTable();
         table.set("E", "(", 0);
         table.set("E", "id", 0);
@@ -455,7 +723,7 @@ class GrammarTest {
         table.set("F", "(", 6);
         table.set("F", "id", 7);
 
-        assertTrue(cfg.isLL1(table));
+        assertTrue(arithmeticExpressionRedux.isLL1(table));
     }
 
     @Test
@@ -474,8 +742,7 @@ class GrammarTest {
                         "A' ::= " + EPSILON
                 )
         );
-        Grammar cfg = leftRecursionExample;
-        Grammar actual = cfg.removeLeftRecursion();
+        Grammar actual = leftRecursionExample.removeLeftRecursion();
         assertEquals(expected, actual);
 
         // From lecture slides, non LL(1) grammar with left recursion removed
@@ -495,8 +762,7 @@ class GrammarTest {
                         "F ::= id"
                 )
         );
-        cfg = arithmeticExpression;
-        actual = cfg.removeLeftRecursion();
+        actual = arithmeticExpression.removeLeftRecursion();
         assertEquals(expected, actual);
     }
 
@@ -510,367 +776,39 @@ class GrammarTest {
 
     @Test
     void augment() {
-        Grammar expected = augmentedArithmeticExpression;
-        Grammar actual = arithmeticExpression.augment();
-        assertEquals(expected, actual);
+        assertEquals(augmentedArithmeticExpression, arithmeticExpression.augment());
     }
 
     @Test
     void computeLR1Collection() {
-        Items s0 = makeItems(
-                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
-                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
-                "[E ::= " + MARKER + " T, " + TERMINATOR + "/+]",
-                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
-                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s1 = makeItems(
-                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
-                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
-                "[E ::= E " + MARKER + " + T, +]"
-        );
-
-        Items s2 = makeItems(
-                "[E ::= T " + MARKER + ", " + TERMINATOR + "/+]",
-                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s3 = makeItems("[T ::= F " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s4 = makeItems(
-                "[F ::= ( " + MARKER + " E ), " + TERMINATOR + "/+/*]",
-                "[E ::= " + MARKER + " E + T, +/)]",
-                "[E ::= " + MARKER + " T, +/)]",
-                "[T ::= " + MARKER + " T * F, +/*/)]",
-                "[T ::= " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s5 = makeItems("[F ::= id " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s6 = makeItems(
-                "[E ::= E + " + MARKER + " T, " + TERMINATOR + "/+]",
-                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
-                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s7 = makeItems(
-                "[T ::= T * " + MARKER + " F, " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s8 = makeItems(
-                "[F ::= ( E " + MARKER + " ), " + TERMINATOR + "/+/*]",
-                "[E ::= E " + MARKER + " + T, +/)]"
-        );
-
-        Items s9 = makeItems(
-                "[E ::= T " + MARKER + ", +/)]",
-                "[T ::= T " + MARKER + " * F, +/*/)]"
-        );
-
-        Items s10 = makeItems("[T ::= F " + MARKER + ", +/*/)]");
-
-        Items s11 = makeItems(
-                "[F ::= ( " + MARKER + " E ), +/*/)]",
-                "[E ::= " + MARKER + " E + T, +/)]",
-                "[E ::= " + MARKER + " T, +/)]",
-                "[T ::= " + MARKER + " T * F, +/*/)]",
-                "[T ::= " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s12 = makeItems("[F ::= id " + MARKER + ", +/*/)]");
-
-        Items s13 = makeItems(
-                "[E ::= E + T " + MARKER + ", " + TERMINATOR + "/+]",
-                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s14 = makeItems("[T ::= T * F " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s15 = makeItems("[F ::= ( E ) " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s16 = makeItems(
-                "[E ::= E + " + MARKER + " T, +/)]",
-                "[T ::= " + MARKER + " T * F, +/*/)]",
-                "[T ::= " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s17 = makeItems(
-                "[T ::= T * " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s18 = makeItems(
-                "[F ::= ( E " + MARKER + " ), +/*/)]",
-                "[E ::= E " + MARKER + " + T, +/)]"
-        );
-
-        Items s19 = makeItems(
-                "[E ::= E + T " + MARKER + ", +/)]",
-                "[T ::= T " + MARKER + " * F, +/*/)]"
-        );
-
-        Items s20 = makeItems("[T ::= T * F " + MARKER + ", +/*/)]");
-
-        Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
-
-        Transitions transitions = new Transitions();
-        transitions.add(makeTransition(s0, "E", s1));
-        transitions.add(makeTransition(s0, "T", s2));
-        transitions.add(makeTransition(s0, "F", s3));
-        transitions.add(makeTransition(s0, "(", s4));
-        transitions.add(makeTransition(s0, "id", s5));
-
-        transitions.add(makeTransition(s1, "+", s6));
-
-        transitions.add(makeTransition(s2, "*", s7));
-
-        transitions.add(makeTransition(s4, "E", s8));
-        transitions.add(makeTransition(s4, "T", s9));
-        transitions.add(makeTransition(s4, "F", s10));
-        transitions.add(makeTransition(s4, "(", s11));
-        transitions.add(makeTransition(s4, "id", s12));
-
-        transitions.add(makeTransition(s6, "T", s13));
-        transitions.add(makeTransition(s6, "F", s3));
-        transitions.add(makeTransition(s6, "(", s4));
-        transitions.add(makeTransition(s6, "id", s5));
-
-        transitions.add(makeTransition(s7, "F", s14));
-        transitions.add(makeTransition(s7, "(", s4));
-        transitions.add(makeTransition(s7, "id", s5));
-
-        transitions.add(makeTransition(s8, ")", s15));
-        transitions.add(makeTransition(s8, "+", s16));
-
-        transitions.add(makeTransition(s9, "*", s17));
-
-        transitions.add(makeTransition(s11, "E", s18));
-        transitions.add(makeTransition(s11, "T", s9));
-        transitions.add(makeTransition(s11, "F", s10));
-        transitions.add(makeTransition(s11, "(", s11));
-        transitions.add(makeTransition(s11, "id", s12));
-
-        transitions.add(makeTransition(s13, "*", s7));
-
-        transitions.add(makeTransition(s16, "T", s19));
-        transitions.add(makeTransition(s16, "F", s10));
-        transitions.add(makeTransition(s16, "(", s11));
-        transitions.add(makeTransition(s16, "id", s12));
-
-        transitions.add(makeTransition(s17, "F", s20));
-        transitions.add(makeTransition(s17, "(", s11));
-        transitions.add(makeTransition(s17, "id", s12));
-
-        transitions.add(makeTransition(s18, ")", s21));
-        transitions.add(makeTransition(s18, "+", s16));
-
-        transitions.add(makeTransition(s19, "*", s17));
-
-        LR1Collection expected = new LR1Collection(
-                Arrays.asList(
-                        s0, s1, s2, s3, s4, s5, s6, s7,
-                        s8, s9, s10, s11, s12, s13, s14,
-                        s15, s16, s17, s18, s19, s20, s21
-                ),
-                transitions
-        );
-        LR1Collection actual = arithmeticExpression.computeLR1Collection();
-        assertEquals(expected, actual);
+        assertEquals(collection, arithmeticExpression.computeLR1Collection());
     }
 
     @Test
     void generateLR1ParseTable() {
-        ActionTable actionTable = null;
-        GotoTable gotoTable = null;
         LR1ParseTable expected = new LR1ParseTable(actionTable, gotoTable);
-
-        Items s0 = makeItems(
-                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
-                "[E ::= " + MARKER + " E + T, " + TERMINATOR + "/+]",
-                "[E ::= " + MARKER + " T, " + TERMINATOR + "/+]",
-                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
-                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s1 = makeItems(
-                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]",
-                "[E ::= E " + MARKER + " + T, " + TERMINATOR + "]",
-                "[E ::= E " + MARKER + " + T, +]"
-        );
-
-        Items s2 = makeItems(
-                "[E ::= T " + MARKER + ", " + TERMINATOR + "/+]",
-                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s3 = makeItems("[T ::= F " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s4 = makeItems(
-                "[F ::= ( " + MARKER + " E ), " + TERMINATOR + "/+/*]",
-                "[E ::= " + MARKER + " E + T, +/)]",
-                "[E ::= " + MARKER + " T, +/)]",
-                "[T ::= " + MARKER + " T * F, +/*/)]",
-                "[T ::= " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s5 = makeItems("[F ::= id " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s6 = makeItems(
-                "[E ::= E + " + MARKER + " T, " + TERMINATOR + "/+]",
-                "[T ::= " + MARKER + " T * F, " + TERMINATOR + "/+/*]",
-                "[T ::= " + MARKER + " F, " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s7 = makeItems(
-                "[T ::= T * " + MARKER + " F, " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " ( E ), " + TERMINATOR + "/+/*]",
-                "[F ::= " + MARKER + " id, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s8 = makeItems(
-                "[F ::= ( E " + MARKER + " ), " + TERMINATOR + "/+/*]",
-                "[E ::= E " + MARKER + " + T, +/)]"
-        );
-
-        Items s9 = makeItems(
-                "[E ::= T " + MARKER + ", +/)]",
-                "[T ::= T " + MARKER + " * F, +/*/)]"
-        );
-
-        Items s10 = makeItems("[T ::= F " + MARKER + ", +/*/)]");
-
-        Items s11 = makeItems(
-                "[F ::= ( " + MARKER + " E ), +/*/)]",
-                "[E ::= " + MARKER + " E + T, +/)]",
-                "[E ::= " + MARKER + " T, +/)]",
-                "[T ::= " + MARKER + " T * F, +/*/)]",
-                "[T ::= " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s12 = makeItems("[F ::= id " + MARKER + ", +/*/)]");
-
-        Items s13 = makeItems(
-                "[E ::= E + T " + MARKER + ", " + TERMINATOR + "/+]",
-                "[T ::= T " + MARKER + " * F, " + TERMINATOR + "/+/*]"
-        );
-
-        Items s14 = makeItems("[T ::= T * F " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s15 = makeItems("[F ::= ( E ) " + MARKER + ", " + TERMINATOR + "/+/*]");
-
-        Items s16 = makeItems(
-                "[E ::= E + " + MARKER + " T, +/)]",
-                "[T ::= " + MARKER + " T * F, +/*/)]",
-                "[T ::= " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s17 = makeItems(
-                "[T ::= T * " + MARKER + " F, +/*/)]",
-                "[F ::= " + MARKER + " ( E ), +/*/)]",
-                "[F ::= " + MARKER + " id, +/*/)]"
-        );
-
-        Items s18 = makeItems(
-                "[F ::= ( E " + MARKER + " ), +/*/)]",
-                "[E ::= E " + MARKER + " + T, +/)]"
-        );
-
-        Items s19 = makeItems(
-                "[E ::= E + T " + MARKER + ", +/)]",
-                "[T ::= T " + MARKER + " * F, +/*/)]"
-        );
-
-        Items s20 = makeItems("[T ::= T * F " + MARKER + ", +/*/)]");
-
-        Items s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
-
-        Transitions transitions = new Transitions();
-        transitions.add(makeTransition(s0, "E", s1));
-        transitions.add(makeTransition(s0, "T", s2));
-        transitions.add(makeTransition(s0, "F", s3));
-        transitions.add(makeTransition(s0, "(", s4));
-        transitions.add(makeTransition(s0, "id", s5));
-
-        transitions.add(makeTransition(s1, "+", s6));
-
-        transitions.add(makeTransition(s2, "*", s7));
-
-        transitions.add(makeTransition(s4, "E", s8));
-        transitions.add(makeTransition(s4, "T", s9));
-        transitions.add(makeTransition(s4, "F", s10));
-        transitions.add(makeTransition(s4, "(", s11));
-        transitions.add(makeTransition(s4, "id", s12));
-
-        transitions.add(makeTransition(s6, "T", s13));
-        transitions.add(makeTransition(s6, "F", s3));
-        transitions.add(makeTransition(s6, "(", s4));
-        transitions.add(makeTransition(s6, "id", s5));
-
-        transitions.add(makeTransition(s7, "F", s14));
-        transitions.add(makeTransition(s7, "(", s4));
-        transitions.add(makeTransition(s7, "id", s5));
-
-        transitions.add(makeTransition(s8, ")", s15));
-        transitions.add(makeTransition(s8, "+", s16));
-
-        transitions.add(makeTransition(s9, "*", s17));
-
-        transitions.add(makeTransition(s11, "E", s18));
-        transitions.add(makeTransition(s11, "T", s9));
-        transitions.add(makeTransition(s11, "F", s10));
-        transitions.add(makeTransition(s11, "(", s11));
-        transitions.add(makeTransition(s11, "id", s12));
-
-        transitions.add(makeTransition(s13, "*", s7));
-
-        transitions.add(makeTransition(s16, "T", s19));
-        transitions.add(makeTransition(s16, "F", s10));
-        transitions.add(makeTransition(s16, "(", s11));
-        transitions.add(makeTransition(s16, "id", s12));
-
-        transitions.add(makeTransition(s17, "F", s20));
-        transitions.add(makeTransition(s17, "(", s11));
-        transitions.add(makeTransition(s17, "id", s12));
-
-        transitions.add(makeTransition(s18, ")", s21));
-        transitions.add(makeTransition(s18, "+", s16));
-
-        transitions.add(makeTransition(s19, "*", s17));
-
-        LR1Collection collection = new LR1Collection(
-                Arrays.asList(
-                        s0, s1, s2, s3, s4, s5, s6, s7,
-                        s8, s9, s10, s11, s12, s13, s14,
-                        s15, s16, s17, s18, s19, s20, s21
-                ),
-                transitions
-        );
-
         LR1ParseTable actual = arithmeticExpression.generateLR1ParseTable(collection);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void constructActionTable() {
+        assertEquals(actionTable, arithmeticExpression.constructActionTable(collection));
+    }
+
+    @Test
+    void constructGotoTable() {
+        assertEquals(gotoTable, arithmeticExpression.constructGotoTable(collection));
+    }
+
+    @Test
+    void parseSentenceLR1() throws Exception {
+        LR1ParseOutput expected = new LR1ParseOutput();
+
+        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable);
+        String w = "id + id * id " + TERMINATOR;
+        LR1ParseOutput actual = arithmeticExpression.parseSentence(table, w, collection);
+
         assertEquals(expected, actual);
     }
 }

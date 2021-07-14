@@ -35,7 +35,7 @@ class LR1CollectionTest {
                 "[E ::= E " + MARKER + " + T, +]"
         );
 
-        collection = new LR1Collection(Collections.singletonList(s0), new Transitions());
+        collection = new LR1Collection(Collections.singletonList(s0), new Transitions(), s0);
     }
 
     @Test
@@ -50,7 +50,7 @@ class LR1CollectionTest {
     void add() {
         Transitions transitions = new Transitions();
         transitions.add(makeTransition(s0, "E", s1));
-        LR1Collection expected = new LR1Collection(Arrays.asList(s0, s1), transitions);
+        LR1Collection expected = new LR1Collection(Arrays.asList(s0, s1), transitions, s0);
 
         LR1Collection actual = collection;
         Transition transition = new Transition(s0, "E", s1);

@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static algorithms.Execution.*;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Item.MARKER;
 import static algorithms.Utility.getProductionFromLine;
@@ -216,9 +217,9 @@ class Grammar {
 
     LL1ParseOutput parseSentence(LL1ParseTable table, String delimitedBySpaces) throws Exception {
         Queue<String> sentence = initializeSentence(delimitedBySpaces);
-        Stack<String> stack = initializeStack();
+        Stack<String> stack = initializeStackForLL1Parsing();
         String symbol = sentence.dequeue();
-        LL1ParseOutput output = initializeOutput(sentence, stack, symbol);
+        LL1ParseOutput output = initializeLL1ParseOutput(sentence, stack, symbol);
 
         while (true) {
             String top = stack.pop();
@@ -271,8 +272,8 @@ class Grammar {
     }
 
     @NotNull
-    private static LL1ParseOutput initializeOutput(Queue<String> sentence, Stack<String> stack,
-                                                   String symbol) {
+    private static LL1ParseOutput initializeLL1ParseOutput(Queue<String> sentence,
+                                                           Stack<String> stack, String symbol) {
         LL1ParseOutput output = new LL1ParseOutput();
         output.add(new LL1ParseOutputEntry(stack, sentence, null, symbol));
         return output;
@@ -296,7 +297,7 @@ class Grammar {
     }
 
     @NotNull
-    private Stack<String> initializeStack() {
+    private Stack<String> initializeStackForLL1Parsing() {
         Stack<String> stack = new Stack<>();
         stack.push(TERMINATOR);
         stack.push(start);
@@ -496,7 +497,8 @@ class Grammar {
         Items startState = augmented.getStartState(firstMap);
         LR1Collection collection = new LR1Collection(
                 Collections.singleton(startState),
-                new Transitions()
+                new Transitions(),
+                startState
         );
 
         boolean newStatesAreBeingAdded = true;
@@ -567,7 +569,7 @@ class Grammar {
         return table;
     }
 
-    private ActionTable constructActionTable(LR1Collection collection) {
+    ActionTable constructActionTable(LR1Collection collection) {
         ActionTable table = new ActionTable();
         Transitions transitions = getTransitionsOnlyWithTerminals(collection);
 
@@ -608,10 +610,89 @@ class Grammar {
         return from.contains(new Item(TERMINATOR, start + "'", start, MARKER));
     }
 
-    private GotoTable constructGotoTable(LR1Collection collection) {
+    GotoTable constructGotoTable(LR1Collection collection) {
         GotoTable table = new GotoTable();
+        Transitions transitions = getTransitionsOnlyWithNonTerminals(collection);
+        for (Transition transition : transitions) {
+            Items from = transition.getFrom();
+            String symbol = transition.getSymbol();
+            Items to = transition.getTo();
+
+            Integer fromId = collection.indexOf(from);
+            Integer toId = collection.indexOf(to);
+
+            table.set(fromId, symbol, toId);
+        }
         return table;
     }
+
+    private Transitions getTransitionsOnlyWithNonTerminals(LR1Collection collection) {
+        return collection
+                .getTransitions()
+                .stream()
+                .filter(transition -> isNonTerminal(transition.getSymbol()))
+                .collect(Collectors.toCollection(Transitions::new));
+    }
+
+    LR1ParseOutput parseSentence(LR1ParseTable table, String delimitedBySpaces,
+                                 LR1Collection collection) throws Exception {
+        Queue<String> sentence = initializeSentence(delimitedBySpaces);
+        Stack<Object> stack = initializeStackForLR1Parsing(collection);
+        String symbol = sentence.dequeue();
+        LR1ParseOutput output = initializeLR1ParseOutput(sentence, stack, symbol);
+
+        while (true) {
+            Integer state = (Integer) stack.pop();
+            Action action = table.getActionTable().get(state, symbol);
+
+            if (isShift(action)) {
+                Integer collectionStateIndex = action.getIndex();
+                symbol = sentence.dequeue();
+
+            } else if (isReduce(action)) {
+                Integer ruleIndex = action.getIndex();
+                symbol = sentence.dequeue();
+
+            } else if (isAccept(action)) {
+                break;
+            } else {
+                throw new Exception("No such Action at state " + state + " and symbol " + symbol);
+            }
+            output.add(new LR1ParseOutputEntry(stack, sentence, action, symbol));
+        }
+
+        return output;
+    }
+
+    private boolean isAccept(Action action) {
+        return action.getExecution().equals(ACCEPT);
+    }
+
+    private boolean isReduce(Action action) {
+        return action.getExecution().equals(REDUCE);
+    }
+
+    private boolean isShift(Action action) {
+        return action.getExecution().equals(SHIFT);
+    }
+
+    @NotNull
+    private Stack<Object> initializeStackForLR1Parsing(LR1Collection collection) {
+        Stack<Object> stack = new Stack<>();
+        Items start = collection.getStart();
+        Integer index = collection.indexOf(start);
+        stack.push(index);
+        return stack;
+    }
+
+    @NotNull
+    private static LR1ParseOutput initializeLR1ParseOutput(Queue<String> sentence,
+                                                           Stack<Object> stack, String symbol) {
+        LR1ParseOutput output = new LR1ParseOutput();
+        output.add(new LR1ParseOutputEntry(stack, sentence, null, symbol));
+        return output;
+    }
+
 
     @Override
     public int hashCode() {

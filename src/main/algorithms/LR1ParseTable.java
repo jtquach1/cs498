@@ -24,6 +24,72 @@ class LR1ParseTable {
         this.actionTable = actionTable;
         this.gotoTable = gotoTable;
     }
+
+    public ActionTable getActionTable() {
+        return actionTable;
+    }
+
+    public GotoTable getGotoTable() {
+        return gotoTable;
+    }
+}
+
+class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
+}
+
+class LR1ParseOutputEntry {
+    // Contains states represented as Integers and non-terminals represented as Strings.
+    Stack<Object> stack;
+    Queue<String> input;
+    Action action;
+
+    LR1ParseOutputEntry(Stack<Object> stack, Queue<String> input, Action action, String cursor) {
+        /* We need to deep clone the parameters because their references are
+        constantly changing in the LR1 parsing algorithm. */
+
+        this.stack = new Stack<>();
+        this.stack.addAll(stack);
+
+        // Lecture slides show the cursor as part of the input
+        this.input = new Queue<>();
+        this.input.addAll(input);
+        this.input.queue(cursor);
+
+        this.action = action;
+    }
+
+    // For unit tests
+    LR1ParseOutputEntry(Stack<Object> stack, Queue<String> input, Action action) {
+        this.stack = new Stack<>();
+        this.stack.addAll(stack);
+
+        this.input = new Queue<>();
+        this.input.addAll(input);
+
+        this.action = action;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stack, input, action);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LR1ParseOutputEntry other = (LR1ParseOutputEntry) o;
+        return Objects.equals(stack, other.stack) &&
+                Objects.equals(input, other.input) &&
+                Objects.equals(action, other.action);
+    }
+
+    @Override
+    public String toString() {
+        return "{\"stack\":\"" + stack + "\"," +
+                "\"input\":\"" + input + "\"," +
+                "\"output\":\"" + action + "\"}\n";
+    }
 }
 
 class ActionTable extends TreeMap<Integer, ActionEntry> {
@@ -199,16 +265,13 @@ class GotoEntry extends TreeMap<String, Integer> implements Comparable<GotoEntry
 
 class LR1Collection extends ListWithUniques<Items> {
     private final Transitions transitions;
+    private final Items start;
 
-    LR1Collection(Transitions transitions) {
-        super(Items::compareTo);
-        this.transitions = transitions;
-    }
-
-    LR1Collection(@NotNull Collection<? extends Items> c, Transitions transitions) {
+    LR1Collection(@NotNull Collection<? extends Items> c, Transitions transitions, Items start) {
         super(Items::compareTo);
         this.addAll(c);
         this.transitions = transitions;
+        this.start = start;
     }
 
     Transitions getTransitions() {
@@ -217,9 +280,7 @@ class LR1Collection extends ListWithUniques<Items> {
 
     LR1Collection deepClone() {
         Transitions transitions = this.transitions.deepClone();
-        LR1Collection clone = new LR1Collection(transitions);
-        clone.addAll(this);
-        return clone;
+        return new LR1Collection(this, transitions, start);
     }
 
     void add(Transition transition) {
@@ -233,7 +294,7 @@ class LR1Collection extends ListWithUniques<Items> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         LR1Collection other = (LR1Collection) o;
-        return transitions.equals(other.transitions);
+        return transitions.equals(other.transitions) && start.equals(other.start);
     }
 
     @Override
@@ -243,6 +304,10 @@ class LR1Collection extends ListWithUniques<Items> {
 
     public boolean contains(Transition transition) {
         return transitions.contains(transition) && super.contains(transition.getTo());
+    }
+
+    Items getStart() {
+        return start;
     }
 }
 
