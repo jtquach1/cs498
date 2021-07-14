@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import static algorithms.Execution.*;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Item.MARKER;
+import static algorithms.Pair.noSuchSymbol;
 import static algorithms.Utility.getProductionFromLine;
 
 class Grammar {
@@ -495,11 +496,7 @@ class Grammar {
         Grammar augmented = this.augment();
         FirstMap firstMap = augmented.first();
         Items startState = augmented.getStartState(firstMap);
-        LR1Collection collection = new LR1Collection(
-                Collections.singleton(startState),
-                new Transitions(),
-                startState
-        );
+        LR1Collection collection = new LR1Collection(startState, new Transitions());
 
         boolean newStatesAreBeingAdded = true;
         LR1Collection previous;
@@ -565,7 +562,8 @@ class Grammar {
     LR1ParseTable generateLR1ParseTable(LR1Collection collection) {
         ActionTable actionTable = constructActionTable(collection);
         GotoTable gotoTable = constructGotoTable(collection);
-        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable);
+        Integer startIndex = collection.indexOf(collection.getStart());
+        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable, startIndex);
         return table;
     }
 
@@ -634,34 +632,72 @@ class Grammar {
                 .collect(Collectors.toCollection(Transitions::new));
     }
 
-    LR1ParseOutput parseSentence(LR1ParseTable table, String delimitedBySpaces,
-                                 LR1Collection collection) throws Exception {
+    LR1ParseOutput parseSentence(LR1ParseTable table, String delimitedBySpaces) throws Exception {
         Queue<String> sentence = initializeSentence(delimitedBySpaces);
-        Stack<Object> stack = initializeStackForLR1Parsing(collection);
-        String symbol = sentence.dequeue();
-        LR1ParseOutput output = initializeLR1ParseOutput(sentence, stack, symbol);
+        Stack<Pair> stack = initializeStackForLR1Parsing(table);
+        String terminal = sentence.dequeue();
+        LR1ParseOutput output = initializeLR1ParseOutput(sentence, stack, terminal);
 
         while (true) {
-            Integer state = (Integer) stack.pop();
-            Action action = table.getActionTable().get(state, symbol);
+            Pair pair = stack.peek();
+            Integer topState = pair.getStateIndex();
+            Action action = table.getActionTable().get(topState, terminal);
 
             if (isShift(action)) {
-                Integer collectionStateIndex = action.getIndex();
-                symbol = sentence.dequeue();
-
+                Integer state = action.getIndex();
+                stack.push(new Pair(state, noSuchSymbol));
             } else if (isReduce(action)) {
-                Integer ruleIndex = action.getIndex();
-                symbol = sentence.dequeue();
+                Production rule = productions.get(action.getIndex());
 
+                // Replace symbols+states with the lhs of the production and the Goto index
+                replaceRhsWithLhsAndGotoState(stack, rule);
+
+                pair = stack.peek();
+                topState = pair.getStateIndex();
+
+                String lhs = rule.getLhs();
+                Integer state = table.getGotoTable().get(topState, lhs);
+
+                stack.push(new Pair(state, lhs));
             } else if (isAccept(action)) {
                 break;
             } else {
-                throw new Exception("No such Action at state " + state + " and symbol " + symbol);
+                throw new Exception("No such Action at state " + topState + " and symbol " + terminal);
             }
-            output.add(new LR1ParseOutputEntry(stack, sentence, action, symbol));
+            output.add(new LR1ParseOutputEntry(stack, sentence, action, terminal));
+            terminal = sentence.dequeue();
+
         }
 
         return output;
+    }
+
+    private void replaceRhsWithLhsAndGotoState(Stack<Pair> stack, Production rule) {
+        Stack<String> reverse = getReversedRhs(rule);
+
+        while (!reverse.isEmpty()) {
+            String fromTracker = reverse.pop();
+            Pair currentPair = stack.pop();
+            String fromOutputStack = currentPair.getSymbol();
+            assert fromTracker.equals(fromOutputStack);
+        }
+    }
+
+    private Stack<String> getReversedRhs(Production rule) {
+        List<String> rhs = rule.getRhs();
+
+        Stack<String> initial = new Stack<>();
+        Stack<String> reverse = new Stack<>();
+
+        for (String symbol : rhs) {
+            initial.push(symbol);
+        }
+
+        while (!initial.isEmpty()) {
+            reverse.push(initial.pop());
+        }
+
+        return reverse;
     }
 
     private boolean isAccept(Action action) {
@@ -677,17 +713,16 @@ class Grammar {
     }
 
     @NotNull
-    private Stack<Object> initializeStackForLR1Parsing(LR1Collection collection) {
-        Stack<Object> stack = new Stack<>();
-        Items start = collection.getStart();
-        Integer index = collection.indexOf(start);
-        stack.push(index);
+    private Stack<Pair> initializeStackForLR1Parsing(LR1ParseTable table) {
+        Stack<Pair> stack = new Stack<>();
+        Integer index = table.getStartIndex();
+        stack.push(new Pair(index, null));
         return stack;
     }
 
     @NotNull
     private static LR1ParseOutput initializeLR1ParseOutput(Queue<String> sentence,
-                                                           Stack<Object> stack, String symbol) {
+                                                           Stack<Pair> stack, String symbol) {
         LR1ParseOutput output = new LR1ParseOutput();
         output.add(new LR1ParseOutputEntry(stack, sentence, null, symbol));
         return output;

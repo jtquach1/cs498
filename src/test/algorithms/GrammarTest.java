@@ -786,7 +786,7 @@ class GrammarTest {
 
     @Test
     void generateLR1ParseTable() {
-        LR1ParseTable expected = new LR1ParseTable(actionTable, gotoTable);
+        LR1ParseTable expected = new LR1ParseTable(actionTable, gotoTable, 9);
         LR1ParseTable actual = arithmeticExpression.generateLR1ParseTable(collection);
         assertEquals(expected, actual);
     }
@@ -805,9 +805,9 @@ class GrammarTest {
     void parseSentenceLR1() throws Exception {
         LR1ParseOutput expected = new LR1ParseOutput();
 
-        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable);
+        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable, 9);
         String w = "id + id * id " + TERMINATOR;
-        LR1ParseOutput actual = arithmeticExpression.parseSentence(table, w, collection);
+        LR1ParseOutput actual = arithmeticExpression.parseSentence(table, w);
 
         assertEquals(expected, actual);
     }

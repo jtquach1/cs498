@@ -19,10 +19,16 @@ enum Execution {
 class LR1ParseTable {
     private final ActionTable actionTable;
     private final GotoTable gotoTable;
+    private final Integer startIndex;
 
-    LR1ParseTable(ActionTable actionTable, GotoTable gotoTable) {
+    LR1ParseTable(ActionTable actionTable, GotoTable gotoTable, Integer startIndex) {
         this.actionTable = actionTable;
         this.gotoTable = gotoTable;
+        this.startIndex = startIndex;
+    }
+
+    public Integer getStartIndex() {
+        return startIndex;
     }
 
     public ActionTable getActionTable() {
@@ -39,11 +45,11 @@ class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
 
 class LR1ParseOutputEntry {
     // Contains states represented as Integers and non-terminals represented as Strings.
-    Stack<Object> stack;
+    Stack<Pair> stack;
     Queue<String> input;
     Action action;
 
-    LR1ParseOutputEntry(Stack<Object> stack, Queue<String> input, Action action, String cursor) {
+    LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action action, String cursor) {
         /* We need to deep clone the parameters because their references are
         constantly changing in the LR1 parsing algorithm. */
 
@@ -59,7 +65,7 @@ class LR1ParseOutputEntry {
     }
 
     // For unit tests
-    LR1ParseOutputEntry(Stack<Object> stack, Queue<String> input, Action action) {
+    LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action action) {
         this.stack = new Stack<>();
         this.stack.addAll(stack);
 
@@ -89,6 +95,54 @@ class LR1ParseOutputEntry {
         return "{\"stack\":\"" + stack + "\"," +
                 "\"input\":\"" + input + "\"," +
                 "\"output\":\"" + action + "\"}\n";
+    }
+}
+
+class Pair implements Comparable<Pair> {
+    static String noSuchSymbol = "";
+
+    private final Integer stateIndex;
+    // Can either be terminal or non-terminal
+    private final String symbol;
+
+    Pair(Integer stateIndex, String symbol) {
+        this.stateIndex = stateIndex;
+        this.symbol = symbol;
+    }
+
+    @Override
+    public int compareTo(@NotNull Pair other) {
+        return Comparator
+                .comparing(Pair::getStateIndex)
+                .thenComparing(Pair::getSymbol)
+                .compare(this, other);
+    }
+
+    Integer getStateIndex() {
+        return stateIndex;
+    }
+
+    String getSymbol() {
+        return symbol;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stateIndex, symbol);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pair other = (Pair) o;
+        return Objects.equals(stateIndex, other.stateIndex) && Objects.equals(symbol, other.symbol);
+    }
+
+    @Override
+    public String toString() {
+        String s = symbol.equals(noSuchSymbol) ? "" : symbol + " ";
+        return s + stateIndex;
     }
 }
 
@@ -199,11 +253,11 @@ class Action implements Comparable<Action> {
                 .compare(this, other);
     }
 
-    public Execution getExecution() {
+    Execution getExecution() {
         return execution;
     }
 
-    public Integer getIndex() {
+    Integer getIndex() {
         return index;
     }
 
@@ -267,9 +321,17 @@ class LR1Collection extends ListWithUniques<Items> {
     private final Transitions transitions;
     private final Items start;
 
+    LR1Collection(Items start, Transitions transitions) {
+        super(Items::compareTo);
+        this.add(start);
+        this.transitions = transitions;
+        this.start = start;
+    }
+
     LR1Collection(@NotNull Collection<? extends Items> c, Transitions transitions, Items start) {
         super(Items::compareTo);
         this.addAll(c);
+        this.add(start);
         this.transitions = transitions;
         this.start = start;
     }

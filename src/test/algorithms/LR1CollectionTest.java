@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
@@ -35,7 +34,7 @@ class LR1CollectionTest {
                 "[E ::= E " + MARKER + " + T, +]"
         );
 
-        collection = new LR1Collection(Collections.singletonList(s0), new Transitions(), s0);
+        collection = new LR1Collection(s0, new Transitions());
     }
 
     @Test
@@ -56,5 +55,10 @@ class LR1CollectionTest {
         Transition transition = new Transition(s0, "E", s1);
         actual.add(transition);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void getStart() {
+        assertEquals(s0, collection.getStart());
     }
 }
