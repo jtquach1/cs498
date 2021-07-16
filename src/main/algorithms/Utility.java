@@ -200,8 +200,7 @@ class Stack<T> extends ArrayList<T> {
 
     T pop() {
         int last = this.size() - 1;
-        T item = this.remove(last);
-        return item;
+        return this.remove(last);
     }
 
     void push(T item) {

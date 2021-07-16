@@ -36,7 +36,7 @@ class LL1ParseTable extends TreeMap<String, LL1ParseTableEntry> {
             return null;
         }
 
-        // In case of conflicts, we just want to return one value
+        // In case of conflicts, we just want to return one value.
         return indices.get(0);
     }
 }
@@ -70,7 +70,7 @@ class LL1ParseOutputEntry {
 
         this.stack = new Stack<>(stack);
 
-        // Lecture slides show the cursor as part of the input
+        // Lecture slides show the cursor as part of the input.
         this.input = new Queue<>(input);
 
         if (cursor != null) {

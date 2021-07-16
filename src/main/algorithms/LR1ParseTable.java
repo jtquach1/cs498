@@ -106,10 +106,11 @@ class LR1ParseOutputEntry {
 }
 
 class Pair implements Comparable<Pair> {
-    // When initializing the LR1 parse stack, s0 has not transitioned from any symbol
+    /* When initializing the LR1 parse stack, the first state has not transitioned from any
+    symbol, hence there is no such symbol we push onto the stack */
     static final String noSuchSymbol = "";
 
-    // Can either be terminal or non-terminal
+    // Can either be terminal or non-terminal.
     private final String symbol;
     private final Integer stateIndex;
 
@@ -155,7 +156,7 @@ class Pair implements Comparable<Pair> {
 }
 
 class ActionTable extends TreeMap<Integer, ActionEntry> {
-    // Used for the Accept action- don't transition out of an Accept state in the DFA
+    // We don't transition out of an Accept state in the DFA generated from an LR1 collection.
     static final Integer noSuchState = -1;
 
     Action get(Integer state, String terminal) {
@@ -182,8 +183,8 @@ class ActionTable extends TreeMap<Integer, ActionEntry> {
                             String symbol = item.getLookahead();
 
                             Production production = new Production(lhs, alpha);
-                            Integer productionIndex = productions.indexOf(production);
-                            Action action = new Action(REDUCE, productionIndex);
+                            Integer index = productions.indexOf(production);
+                            Action action = new Action(REDUCE, index);
 
                             this.set(fromIndex, symbol, action);
                         }
@@ -246,7 +247,7 @@ class ActionEntry extends TreeMap<String, Action> implements Comparable<ActionEn
 class Action implements Comparable<Action> {
     private final Execution execution;
 
-    // Refers to either a collection state index when shifting OR a production index when reducing.
+    // Refers to an LR1 collection state index when shifting OR a production index when reducing.
     private final Integer index;
 
     Action(Execution execution, Integer index) {

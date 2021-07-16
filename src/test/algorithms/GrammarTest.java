@@ -34,31 +34,31 @@ class GrammarTest {
     // Textbook example with direct and indirect left recursion
     leftRecursionExample;
 
-    FirstMap sampleExamProblem3FirstMap;
-    FirstMap arithmeticExpressionReduxFirstMap;
-    FirstMap arithmeticExpressionFirstMap;
+    static FirstMap sampleExamProblem3FirstMap;
+    static FirstMap arithmeticExpressionReduxFirstMap;
+    static FirstMap arithmeticExpressionFirstMap;
 
-    FollowMap sampleExamProblem3FollowMap;
-    FollowMap arithmeticExpressionReduxFollowMap;
-    FollowMap arithmeticExpressionFollowMap;
+    static FollowMap sampleExamProblem3FollowMap;
+    static FollowMap arithmeticExpressionReduxFollowMap;
+    static FollowMap arithmeticExpressionFollowMap;
 
-    LL1ParseTable sampleExamProblem3LL1ParseTable;
-    LL1ParseTable arithmeticExpressionReduxLL1ParseTable;
-    LL1ParseTable arithmeticExpressionLL1ParseTable;
+    static LL1ParseTable sampleExamProblem3LL1ParseTable;
+    static LL1ParseTable arithmeticExpressionReduxLL1ParseTable;
+    static LL1ParseTable arithmeticExpressionLL1ParseTable;
 
     // Item sets computed for arithmetic expression grammar
-    Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18,
+    static Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18,
             s19, s20, s21;
 
-    Transitions arithmeticExpressionTransitions;
-    ActionTable arithmeticExpressionActionTable;
-    GotoTable arithmeticExpressionGotoTable;
-    LR1Collection arithmeticExpressionCollection;
-    LR1ParseTable arithmeticExpressionLR1ParseTable;
+    static Transitions arithmeticExpressionTransitions;
+    static ActionTable arithmeticExpressionActionTable;
+    static GotoTable arithmeticExpressionGotoTable;
+    static LR1Collection arithmeticExpressionCollection;
+    static LR1ParseTable arithmeticExpressionLR1ParseTable;
 
-    ActionTable sampleExamProblem4ActionTable;
-    GotoTable sampleExamProblem4GotoTable;
-    LR1ParseTable sampleExamProblem4LR1ParseTable;
+    static ActionTable sampleExamProblem4ActionTable;
+    static GotoTable sampleExamProblem4GotoTable;
+    static LR1ParseTable sampleExamProblem4LR1ParseTable;
 
     @BeforeEach
     void setUp() {

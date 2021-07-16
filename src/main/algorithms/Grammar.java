@@ -55,8 +55,7 @@ class Grammar {
         FollowMap followMap = grammar.follow(firstMap);
         LL1ParseTable ll1ParseTable = grammar.generateLL1ParseTable(firstMap, followMap);
 
-        // Later: specify the grammar as stdin, sentence as CLI
-        // OR have both be files- one for sentence, one for grammar
+        // TODO: take in a grammar and sentence from a text file
         String w = "id + id * id";
 
         if (!grammar.isLL1(ll1ParseTable)) {
@@ -187,9 +186,9 @@ class Grammar {
         for (String nonTerminal : nonTerminals) {
             Productions subset = getSubsetOfProductions(nonTerminal);
 
-            for (Production p : subset) {
-                int productionIndex = productions.indexOf(p);
-                First firstOfRhs = firstMap.first(p.getRhs());
+            for (Production production : subset) {
+                int productionIndex = productions.indexOf(production);
+                First firstOfRhs = firstMap.first(production.getRhs());
 
                 for (String firstTerminal : firstOfRhs) {
                     if (!firstTerminal.equals(EPSILON)) {
@@ -562,6 +561,9 @@ class Grammar {
     LR1ParseTable generateLR1ParseTable(LR1Collection collection) {
         ActionTable actionTable = constructActionTable(collection);
         GotoTable gotoTable = constructGotoTable(collection);
+
+        /* During LR1 collection creation, any arbitrary state would have its
+        index shifted due to automatic sorting, hence why we look it up now. */
         Integer startIndex = collection.indexOf(collection.getStart());
         return new LR1ParseTable(actionTable, gotoTable, startIndex);
     }
@@ -650,9 +652,10 @@ class Grammar {
                 stack.push(new Pair(terminal, state));
                 terminal = sentence.dequeue();
             } else if (isReduce(action)) {
-                Production rule = productions.get(action.getIndex());
-                removeRhsOfProductionFromStack(stack, rule);
-                pushLhsAndGotoEntryOntoStack(table, stack, rule);
+                Integer rule = action.getIndex();
+                Production production = productions.get(rule);
+                removeRhsOfProductionFromStack(stack, production);
+                pushLhsAndGotoEntryOntoStack(table, stack, production);
             } else if (isAccept(action)) {
                 break;
             } else {
