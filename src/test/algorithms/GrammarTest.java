@@ -5,11 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static algorithms.ActionTable.noNextState;
+import static algorithms.ActionTable.noSuchState;
 import static algorithms.Execution.*;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
+import static algorithms.Pair.noSuchSymbol;
 import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +25,7 @@ class GrammarTest {
     ActionTable actionTable;
     GotoTable gotoTable;
     LR1Collection collection;
+    LR1ParseTable table;
 
     @BeforeEach
     void setUp() {
@@ -262,22 +264,22 @@ class GrammarTest {
         actionTable.set(9, "id", makeAction(SHIFT, 14));
 
         actionTable.set(4, "+", makeAction(SHIFT, 2));
-        actionTable.set(4, TERMINATOR, makeAction(ACCEPT, noNextState));
+        actionTable.set(4, TERMINATOR, makeAction(ACCEPT, noSuchState));
 
-        actionTable.set(7, "+", makeAction(REDUCE, 7));
+        actionTable.set(7, "+", makeAction(REDUCE, 1));
         actionTable.set(7, "*", makeAction(SHIFT, 16));
-        actionTable.set(7, TERMINATOR, makeAction(REDUCE, 7));
+        actionTable.set(7, TERMINATOR, makeAction(REDUCE, 1));
 
-        actionTable.set(18, "+", makeAction(REDUCE, 10));
-        actionTable.set(18, "*", makeAction(REDUCE, 10));
-        actionTable.set(18, TERMINATOR, makeAction(REDUCE, 10));
+        actionTable.set(18, "+", makeAction(REDUCE, 4));
+        actionTable.set(18, "*", makeAction(REDUCE, 4));
+        actionTable.set(18, TERMINATOR, makeAction(REDUCE, 4));
 
         actionTable.set(10, "(", makeAction(SHIFT, 11));
         actionTable.set(10, "id", makeAction(SHIFT, 15));
 
-        actionTable.set(14, "+", makeAction(REDUCE, 2));
-        actionTable.set(14, "*", makeAction(REDUCE, 2));
-        actionTable.set(14, TERMINATOR, makeAction(REDUCE, 2));
+        actionTable.set(14, "+", makeAction(REDUCE, 3));
+        actionTable.set(14, "*", makeAction(REDUCE, 3));
+        actionTable.set(14, TERMINATOR, makeAction(REDUCE, 3));
 
         actionTable.set(2, "(", makeAction(SHIFT, 10));
         actionTable.set(2, "id", makeAction(SHIFT, 14));
@@ -288,32 +290,32 @@ class GrammarTest {
         actionTable.set(5, "+", makeAction(SHIFT, 3));
         actionTable.set(5, ")", makeAction(SHIFT, 12));
 
-        actionTable.set(8, "+", makeAction(REDUCE, 7));
+        actionTable.set(8, "+", makeAction(REDUCE, 1));
         actionTable.set(8, "*", makeAction(SHIFT, 17));
-        actionTable.set(8, ")", makeAction(REDUCE, 7));
+        actionTable.set(8, ")", makeAction(REDUCE, 1));
 
-        actionTable.set(19, "+", makeAction(REDUCE, 10));
-        actionTable.set(19, "*", makeAction(REDUCE, 10));
-        actionTable.set(19, ")", makeAction(REDUCE, 10));
+        actionTable.set(19, "+", makeAction(REDUCE, 4));
+        actionTable.set(19, "*", makeAction(REDUCE, 4));
+        actionTable.set(19, ")", makeAction(REDUCE, 4));
 
         actionTable.set(11, "(", makeAction(SHIFT, 11));
         actionTable.set(11, "id", makeAction(SHIFT, 15));
 
-        actionTable.set(15, "+", makeAction(REDUCE, 2));
-        actionTable.set(15, "*", makeAction(REDUCE, 2));
-        actionTable.set(15, ")", makeAction(REDUCE, 2));
+        actionTable.set(15, "+", makeAction(REDUCE, 3));
+        actionTable.set(15, "*", makeAction(REDUCE, 3));
+        actionTable.set(15, ")", makeAction(REDUCE, 3));
 
-        actionTable.set(0, "+", makeAction(REDUCE, 4));
+        actionTable.set(0, "+", makeAction(REDUCE, 0));
         actionTable.set(0, "*", makeAction(SHIFT, 16));
-        actionTable.set(0, TERMINATOR, makeAction(REDUCE, 4));
+        actionTable.set(0, TERMINATOR, makeAction(REDUCE, 0));
 
-        actionTable.set(20, "+", makeAction(REDUCE, 18));
-        actionTable.set(20, "*", makeAction(REDUCE, 18));
-        actionTable.set(20, TERMINATOR, makeAction(REDUCE, 18));
+        actionTable.set(20, "+", makeAction(REDUCE, 5));
+        actionTable.set(20, "*", makeAction(REDUCE, 5));
+        actionTable.set(20, TERMINATOR, makeAction(REDUCE, 5));
 
-        actionTable.set(12, "+", makeAction(REDUCE, 14));
-        actionTable.set(12, "*", makeAction(REDUCE, 14));
-        actionTable.set(12, TERMINATOR, makeAction(REDUCE, 14));
+        actionTable.set(12, "+", makeAction(REDUCE, 2));
+        actionTable.set(12, "*", makeAction(REDUCE, 2));
+        actionTable.set(12, TERMINATOR, makeAction(REDUCE, 2));
 
         actionTable.set(3, "(", makeAction(SHIFT, 11));
         actionTable.set(3, "id", makeAction(SHIFT, 15));
@@ -324,17 +326,17 @@ class GrammarTest {
         actionTable.set(6, "+", makeAction(SHIFT, 3));
         actionTable.set(6, ")", makeAction(SHIFT, 13));
 
-        actionTable.set(1, "+", makeAction(REDUCE, 4));
+        actionTable.set(1, "+", makeAction(REDUCE, 0));
         actionTable.set(1, "*", makeAction(SHIFT, 17));
-        actionTable.set(1, ")", makeAction(REDUCE, 4));
+        actionTable.set(1, ")", makeAction(REDUCE, 0));
 
-        actionTable.set(21, "+", makeAction(REDUCE, 18));
-        actionTable.set(21, "*", makeAction(REDUCE, 18));
-        actionTable.set(21, ")", makeAction(REDUCE, 18));
+        actionTable.set(21, "+", makeAction(REDUCE, 5));
+        actionTable.set(21, "*", makeAction(REDUCE, 5));
+        actionTable.set(21, ")", makeAction(REDUCE, 5));
 
-        actionTable.set(13, "+", makeAction(REDUCE, 14));
-        actionTable.set(13, "*", makeAction(REDUCE, 14));
-        actionTable.set(13, ")", makeAction(REDUCE, 14));
+        actionTable.set(13, "+", makeAction(REDUCE, 2));
+        actionTable.set(13, "*", makeAction(REDUCE, 2));
+        actionTable.set(13, ")", makeAction(REDUCE, 2));
 
         gotoTable = new GotoTable();
         gotoTable.set(9, "E", 4);
@@ -369,6 +371,7 @@ class GrammarTest {
                 s0
         );
 
+        table = new LR1ParseTable(actionTable, gotoTable, 9);
     }
 
     @Test
@@ -588,83 +591,83 @@ class GrammarTest {
         where EPSILON is on the stack */
         LL1ParseOutput expected = new LL1ParseOutput();
         expected.addAll(Arrays.asList(
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E"),
                         makeQueue("id", "+", "id", "*", "id", TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T"),
                         makeQueue("id", "+", "id", "*", "id", TERMINATOR),
                         0),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F"),
                         makeQueue("id", "+", "id", "*", "id", TERMINATOR),
                         5),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "id"),
                         makeQueue("id", "+", "id", "*", "id", TERMINATOR),
                         4),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'"),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", EPSILON),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
                         7),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'"),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T", "+"),
                         makeQueue("+", "id", "*", "id", TERMINATOR),
                         1),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T"),
                         makeQueue("id", "*", "id", TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F"),
                         makeQueue("id", "*", "id", TERMINATOR),
                         5),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "id"),
                         makeQueue("id", "*", "id", TERMINATOR),
                         4),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'"),
                         makeQueue("*", "id", TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F", "*"),
                         makeQueue("*", "id", TERMINATOR),
                         6),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "F"),
                         makeQueue("id", TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'", "id"),
                         makeQueue("id", TERMINATOR),
                         4),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", "T'"),
                         makeQueue(TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'", EPSILON),
                         makeQueue(TERMINATOR),
                         7),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, "E'"),
                         makeQueue(TERMINATOR),
                         null),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR, EPSILON),
                         makeQueue(TERMINATOR),
                         2),
-                makeEntry(
+                makeLL1ParseOutputEntry(
                         makeStack(TERMINATOR),
                         makeQueue(TERMINATOR),
                         null)
@@ -786,9 +789,7 @@ class GrammarTest {
 
     @Test
     void generateLR1ParseTable() {
-        LR1ParseTable expected = new LR1ParseTable(actionTable, gotoTable, 9);
-        LR1ParseTable actual = arithmeticExpression.generateLR1ParseTable(collection);
-        assertEquals(expected, actual);
+        assertEquals(table, arithmeticExpression.generateLR1ParseTable(collection));
     }
 
     @Test
@@ -804,6 +805,111 @@ class GrammarTest {
     @Test
     void parseSentenceLR1() throws Exception {
         LR1ParseOutput expected = new LR1ParseOutput();
+        expected.addAll(Arrays.asList(
+                makeLR1ParseOutputEntry(
+                        makeStack(makePair(noSuchSymbol, 9)),
+                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                        makeAction(SHIFT, 14)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("id", 14)),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        makeAction(REDUCE, 3)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("F", 18)),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        makeAction(REDUCE, 4)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("T", 7)),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        makeAction(REDUCE, 1)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4)),
+                        makeQueue("+", "id", "*", "id", TERMINATOR),
+                        makeAction(SHIFT, 2)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2)),
+                        makeQueue("id", "*", "id", TERMINATOR),
+                        makeAction(SHIFT, 14)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("id", 14)),
+                        makeQueue("*", "id", TERMINATOR),
+                        makeAction(REDUCE, 3)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("F", 18)),
+                        makeQueue("*", "id", TERMINATOR),
+                        makeAction(REDUCE, 4)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("T", 0)),
+                        makeQueue("*", "id", TERMINATOR),
+                        makeAction(SHIFT, 16)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("T", 0),
+                                makePair("*", 16)),
+                        makeQueue("id", TERMINATOR),
+                        makeAction(SHIFT, 14)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("T", 0),
+                                makePair("*", 16),
+                                makePair("id", 14)),
+                        makeQueue(TERMINATOR),
+                        makeAction(REDUCE, 3)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("T", 0),
+                                makePair("*", 16),
+                                makePair("F", 20)),
+                        makeQueue(TERMINATOR),
+                        makeAction(REDUCE, 5)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4),
+                                makePair("+", 2),
+                                makePair("T", 0)),
+                        makeQueue(TERMINATOR),
+                        makeAction(REDUCE, 0)),
+                makeLR1ParseOutputEntry(
+                        makeStack(
+                                makePair(noSuchSymbol, 9),
+                                makePair("E", 4)),
+                        makeQueue(TERMINATOR),
+                        makeAction(ACCEPT, noSuchState))
+                )
+        );
 
         LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable, 9);
         String w = "id + id * id " + TERMINATOR;

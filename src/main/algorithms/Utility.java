@@ -67,13 +67,23 @@ class Utility {
         return new TreeSet<>(Arrays.asList(states));
     }
 
-    static LL1ParseOutputEntry makeEntry(Stack<String> stack, Queue<String> input, Integer output) {
+    static LL1ParseOutputEntry makeLL1ParseOutputEntry(Stack<String> stack, Queue<String> input,
+                                                       Integer output) {
         return new LL1ParseOutputEntry(stack, input, output);
     }
 
-    static Stack<String> makeStack(String... symbols) {
-        Stack<String> stack = new Stack<>();
-        stack.addAll(Arrays.asList(symbols));
+    static LR1ParseOutputEntry makeLR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input,
+                                                       Action action) {
+        return new LR1ParseOutputEntry(stack, input, action);
+    }
+
+    static Pair makePair(String symbol, Integer stateIndex) {
+        return new Pair(symbol, stateIndex);
+    }
+
+    static <T> Stack<T> makeStack(T... items) {
+        Stack<T> stack = new Stack<>();
+        stack.addAll(Arrays.asList(items));
         return stack;
     }
 

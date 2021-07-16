@@ -563,8 +563,7 @@ class Grammar {
         ActionTable actionTable = constructActionTable(collection);
         GotoTable gotoTable = constructGotoTable(collection);
         Integer startIndex = collection.indexOf(collection.getStart());
-        LR1ParseTable table = new LR1ParseTable(actionTable, gotoTable, startIndex);
-        return table;
+        return new LR1ParseTable(actionTable, gotoTable, startIndex);
     }
 
     ActionTable constructActionTable(LR1Collection collection) {
@@ -636,43 +635,33 @@ class Grammar {
         Queue<String> sentence = initializeSentence(delimitedBySpaces);
         Stack<Pair> stack = initializeStackForLR1Parsing(table);
         String terminal = sentence.dequeue();
-        LR1ParseOutput output = initializeLR1ParseOutput(sentence, stack, terminal);
+        LR1ParseOutput output = new LR1ParseOutput();
 
         while (true) {
             Pair pair = stack.peek();
             Integer topState = pair.getStateIndex();
             Action action = table.getActionTable().get(topState, terminal);
+            output.add(new LR1ParseOutputEntry(stack, sentence, action, terminal));
 
             if (isShift(action)) {
                 Integer state = action.getIndex();
-                stack.push(new Pair(state, noSuchSymbol));
+                stack.push(new Pair(terminal, state));
+                terminal = sentence.dequeue();
             } else if (isReduce(action)) {
                 Production rule = productions.get(action.getIndex());
-
-                // Replace symbols+states with the lhs of the production and the Goto index
-                replaceRhsWithLhsAndGotoState(stack, rule);
-
-                pair = stack.peek();
-                topState = pair.getStateIndex();
-
-                String lhs = rule.getLhs();
-                Integer state = table.getGotoTable().get(topState, lhs);
-
-                stack.push(new Pair(state, lhs));
+                removeRhsOfProductionFromStack(stack, rule);
+                pushLhsAndGotoEntryOntoStack(table, stack, rule);
             } else if (isAccept(action)) {
                 break;
             } else {
                 throw new Exception("No such Action at state " + topState + " and symbol " + terminal);
             }
-            output.add(new LR1ParseOutputEntry(stack, sentence, action, terminal));
-            terminal = sentence.dequeue();
-
         }
 
         return output;
     }
 
-    private void replaceRhsWithLhsAndGotoState(Stack<Pair> stack, Production rule) {
+    private void removeRhsOfProductionFromStack(Stack<Pair> stack, Production rule) {
         Stack<String> reverse = getReversedRhs(rule);
 
         while (!reverse.isEmpty()) {
@@ -693,11 +682,23 @@ class Grammar {
             initial.push(symbol);
         }
 
-        while (!initial.isEmpty()) {
-            reverse.push(initial.pop());
-        }
+//        while (!initial.isEmpty()) {
+//            reverse.push(initial.pop());
+//        }
 
-        return reverse;
+//        return reverse;
+        return initial;
+    }
+
+    private void pushLhsAndGotoEntryOntoStack(LR1ParseTable table, Stack<Pair> stack,
+                                              Production rule) {
+        Pair pair = stack.peek();
+        Integer topState = pair.getStateIndex();
+
+        String lhs = rule.getLhs();
+        Integer state = table.getGotoTable().get(topState, lhs);
+
+        stack.push(new Pair(lhs, state));
     }
 
     private boolean isAccept(Action action) {
@@ -716,18 +717,9 @@ class Grammar {
     private Stack<Pair> initializeStackForLR1Parsing(LR1ParseTable table) {
         Stack<Pair> stack = new Stack<>();
         Integer index = table.getStartIndex();
-        stack.push(new Pair(index, null));
+        stack.push(new Pair(noSuchSymbol, index));
         return stack;
     }
-
-    @NotNull
-    private static LR1ParseOutput initializeLR1ParseOutput(Queue<String> sentence,
-                                                           Stack<Pair> stack, String symbol) {
-        LR1ParseOutput output = new LR1ParseOutput();
-        output.add(new LR1ParseOutputEntry(stack, sentence, null, symbol));
-        return output;
-    }
-
 
     @Override
     public int hashCode() {

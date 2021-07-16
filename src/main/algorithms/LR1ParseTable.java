@@ -38,6 +38,21 @@ class LR1ParseTable {
     public GotoTable getGotoTable() {
         return gotoTable;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(actionTable, gotoTable, startIndex);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LR1ParseTable other = (LR1ParseTable) o;
+        return actionTable.equals(other.actionTable) &&
+                gotoTable.equals(other.gotoTable) &&
+                startIndex.equals(other.startIndex);
+    }
 }
 
 class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
@@ -94,20 +109,21 @@ class LR1ParseOutputEntry {
     public String toString() {
         return "{\"stack\":\"" + stack + "\"," +
                 "\"input\":\"" + input + "\"," +
-                "\"output\":\"" + action + "\"}\n";
+                "\"action\":\"" + action + "\"}\n";
     }
 }
 
 class Pair implements Comparable<Pair> {
+    // When initializing the LR1 parse stack, s0 has not transitioned from any symbol
     static String noSuchSymbol = "";
 
-    private final Integer stateIndex;
     // Can either be terminal or non-terminal
     private final String symbol;
+    private final Integer stateIndex;
 
-    Pair(Integer stateIndex, String symbol) {
-        this.stateIndex = stateIndex;
+    Pair(String symbol, Integer stateIndex) {
         this.symbol = symbol;
+        this.stateIndex = stateIndex;
     }
 
     @Override
@@ -141,13 +157,14 @@ class Pair implements Comparable<Pair> {
 
     @Override
     public String toString() {
-        String s = symbol.equals(noSuchSymbol) ? "" : symbol + " ";
-        return s + stateIndex;
+        String space = symbol.equals(noSuchSymbol) ? "" : " ";
+        return symbol + space + stateIndex;
     }
 }
 
 class ActionTable extends TreeMap<Integer, ActionEntry> {
-    static Integer noNextState = -1;
+    // Used for the Accept action- don't transition out of an Accept state in the DFA
+    static Integer noSuchState = -1;
 
     Action get(Integer state, String terminal) {
         ActionEntry entry = this.get(state);
@@ -193,7 +210,7 @@ class ActionTable extends TreeMap<Integer, ActionEntry> {
     }
 
     void populateWithAccept(Integer fromIndex) {
-        Action action = new Action(ACCEPT, noNextState);
+        Action action = new Action(ACCEPT, noSuchState);
         this.set(fromIndex, TERMINATOR, action);
     }
 

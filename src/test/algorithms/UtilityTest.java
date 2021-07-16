@@ -151,7 +151,7 @@ class UtilityTest {
     @Test
     void makeEntry() {
         LL1ParseOutputEntry expected = new LL1ParseOutputEntry(new Stack<>(), new Queue<>(), null);
-        LL1ParseOutputEntry actual = Utility.makeEntry(new Stack<>(), new Queue<>(), null);
+        LL1ParseOutputEntry actual = Utility.makeLL1ParseOutputEntry(new Stack<>(), new Queue<>(), null);
         assertEquals(expected, actual);
     }
 
