@@ -610,6 +610,7 @@ class Grammar {
     GotoTable constructGotoTable(LR1Collection collection) {
         GotoTable table = new GotoTable();
         Transitions transitions = getTransitionsOnlyWithNonTerminals(collection);
+
         for (Transition transition : transitions) {
             Items from = transition.getFrom();
             String symbol = transition.getSymbol();
@@ -620,6 +621,7 @@ class Grammar {
 
             table.set(fromId, symbol, toId);
         }
+
         return table;
     }
 
@@ -662,32 +664,14 @@ class Grammar {
     }
 
     private void removeRhsOfProductionFromStack(Stack<Pair> stack, Production rule) {
-        Stack<String> reverse = getReversedRhs(rule);
+        Stack<String> rhs = new Stack<>(rule.getRhs());
 
-        while (!reverse.isEmpty()) {
-            String fromTracker = reverse.pop();
+        while (!rhs.isEmpty()) {
+            String fromTracker = rhs.pop();
             Pair currentPair = stack.pop();
             String fromOutputStack = currentPair.getSymbol();
             assert fromTracker.equals(fromOutputStack);
         }
-    }
-
-    private Stack<String> getReversedRhs(Production rule) {
-        List<String> rhs = rule.getRhs();
-
-        Stack<String> initial = new Stack<>();
-        Stack<String> reverse = new Stack<>();
-
-        for (String symbol : rhs) {
-            initial.push(symbol);
-        }
-
-//        while (!initial.isEmpty()) {
-//            reverse.push(initial.pop());
-//        }
-
-//        return reverse;
-        return initial;
     }
 
     private void pushLhsAndGotoEntryOntoStack(LR1ParseTable table, Stack<Pair> stack,
