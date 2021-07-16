@@ -8,7 +8,6 @@ import static algorithms.Grammar.EPSILON;
 
 class First extends TreeSet<String> {
     First(String... symbols) {
-        super();
         this.addAll(Arrays.asList(symbols));
     }
 
@@ -19,7 +18,6 @@ class First extends TreeSet<String> {
 
 class FirstMap extends TreeMap<String, First> {
     FirstMap() {
-        super();
     }
 
     FirstMap deepClone() {

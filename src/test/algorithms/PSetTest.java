@@ -2,8 +2,6 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,7 +12,7 @@ class PSetTest {
         PSet expected = makePSet(0, 1, 2, 3, 5);
 
         PSet targetSet = makePSet(0, 1, 2, 3, 5);
-        Set<Move> moves = makeMoves(
+        Moves moves = makeMoves(
                 makeMove(0, 'a', 1),
                 makeMove(0, 'b', 2),
                 makeMove(1, 'a', 3),
@@ -40,7 +38,7 @@ class PSetTest {
         PSet expected = makePSet();
 
         PSet targetSet = makePSet(0, 1, 2, 3, 5);
-        Set<Move> moves = makeMoves(
+        Moves moves = makeMoves(
                 makeMove(0, 'a', 1),
                 makeMove(0, 'b', 2),
                 makeMove(1, 'a', 3),

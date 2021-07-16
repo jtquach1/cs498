@@ -32,9 +32,9 @@ class PartitionTest {
     void convertToDfaStates() {
         Set<DFAState> expected = new TreeSet<>(
                 Arrays.asList(
-                        new DFAState(0, new TreeSet<>(makePSet(0, 2))),
-                        new DFAState(1, new TreeSet<>(makePSet(1))),
-                        new DFAState(2, new TreeSet<>(makePSet(3)))
+                        new DFAState(0, new States(makePSet(0, 2))),
+                        new DFAState(1, new States(makePSet(1))),
+                        new DFAState(2, new States(makePSet(3)))
                 )
         );
 

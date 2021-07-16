@@ -2,16 +2,12 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.GREEK_EPSILON;
 import static algorithms.Utility.*;
 
 class NFA extends FSA {
-    NFA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
-        Set<Move> moves) {
+    NFA(Alphabet alphabet, States states, State start, States finalStates, Moves moves) {
         super(alphabet, states, start, finalStates, moves);
     }
 
@@ -51,9 +47,9 @@ class NFA extends FSA {
         State finalState = new State();
 
         Alphabet alphabet = makeAlphabet(consumed);
-        Set<State> states = makeStates(start, finalState);
-        Set<State> finalStates = makeStates(finalState);
-        Set<Move> moves = makeMoves(new Move(start, consumed, finalState));
+        States states = makeStates(start, finalState);
+        States finalStates = makeStates(finalState);
+        Moves moves = makeMoves(new Move(start, consumed, finalState));
 
         return new NFA(alphabet, states, start, finalStates, moves);
     }
@@ -72,9 +68,9 @@ class NFA extends FSA {
     private NFA deepClone() {
         State start = this.start;
         Alphabet alphabet = new Alphabet(this.alphabet);
-        Set<State> states = new TreeSet<>(this.states);
-        Set<State> finalStates = new TreeSet<>(this.finalStates);
-        Set<Move> moves = new TreeSet<>(this.moves);
+        States states = new States(this.states);
+        States finalStates = new States(this.finalStates);
+        Moves moves = new Moves(this.moves);
 
         return new NFA(alphabet, states, start, finalStates, moves);
     }
@@ -174,6 +170,7 @@ class NFA extends FSA {
 
 class Regex {
     static String infixToPostfix(String infix) {
+        // We just want to handle one type of Epsilon
         infix = infix.replaceAll(GREEK_EPSILON, EPSILON);
         infix = Regex.markWithConcatenation(infix);
         return infixToPostfix(infix.toCharArray());
@@ -257,11 +254,8 @@ class Regex {
         return c == '.' | c == '*' | c == '|';
     }
 
-    private static void handleOperator(
-            Stack<Character> postfix,
-            Stack<Character> operators,
-            char token
-    ) {
+    private static void handleOperator(Stack<Character> postfix, Stack<Character> operators,
+                                       char token) {
         Character top = operators.peek();
         boolean existsTopOperator = top != null;
         while (existsTopOperator
@@ -290,36 +284,21 @@ class Regex {
     }
 
     private static int getPrecedence(Character operator) {
-        int precedence;
-
-        switch (operator) {
-            case '.':
-                precedence = 1;
-                break;
-            case '|':
-                precedence = 2;
-                break;
-            case '*':
-                precedence = 3;
-                break;
+        return switch (operator) {
+            case '.' -> 1;
+            case '|' -> 2;
+            case '*' -> 3;
 
             // Unimplemented operator
-            default:
-                precedence = 0;
-                break;
-        }
-
-        return precedence;
+            default -> 0;
+        };
     }
 
     private static boolean isLeftParenthesis(Character token) {
         return token == '(';
     }
 
-    private static void handleLeftParenthesis(
-            Stack<Character> operators,
-            char token
-    ) {
+    private static void handleLeftParenthesis(Stack<Character> operators, char token) {
         operators.push(token);
     }
 
@@ -327,10 +306,8 @@ class Regex {
         return token == ')';
     }
 
-    private static void handleRightParenthesis(
-            Stack<Character> postfix,
-            Stack<Character> operators
-    ) {
+    private static void handleRightParenthesis(Stack<Character> postfix,
+                                               Stack<Character> operators) {
         Character top = operators.peek();
         while (!isLeftParenthesis(top)) {
             postfix.push(operators.pop());
@@ -342,10 +319,8 @@ class Regex {
         }
     }
 
-    private static void handleRemainingOperators(
-            Stack<Character> postfix,
-            Stack<Character> operators
-    ) {
+    private static void handleRemainingOperators(Stack<Character> postfix,
+                                                 Stack<Character> operators) {
         while (!operators.isEmpty()) {
             postfix.push(operators.pop());
         }

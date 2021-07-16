@@ -1,6 +1,9 @@
 package algorithms;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.TreeMap;
 
@@ -48,6 +51,12 @@ class Indices extends ArrayList<Integer> {
 }
 
 class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {
+    public LL1ParseOutput() {
+    }
+
+    public LL1ParseOutput(@NotNull Collection<? extends LL1ParseOutputEntry> c) {
+        super(c);
+    }
 }
 
 class LL1ParseOutputEntry {
@@ -59,24 +68,14 @@ class LL1ParseOutputEntry {
         /* We need to deep clone the parameters because their references are
         constantly changing in the LL1 parsing algorithm. */
 
-        this.stack = new Stack<>();
-        this.stack.addAll(stack);
+        this.stack = new Stack<>(stack);
 
         // Lecture slides show the cursor as part of the input
-        this.input = new Queue<>();
-        this.input.addAll(input);
-        this.input.queue(cursor);
+        this.input = new Queue<>(input);
 
-        this.output = output;
-    }
-
-    // For unit tests
-    LL1ParseOutputEntry(Stack<String> stack, Queue<String> input, Integer output) {
-        this.stack = new Stack<>();
-        this.stack.addAll(stack);
-
-        this.input = new Queue<>();
-        this.input.addAll(input);
+        if (cursor != null) {
+            this.input.queue(cursor);
+        }
 
         this.output = output;
     }

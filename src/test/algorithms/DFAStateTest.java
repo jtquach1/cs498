@@ -13,27 +13,27 @@ class DFAStateTest {
 
     @Test
     void convertToStates() {
-        Set<State> expected = new TreeSet<>(
+        States expected = new States(
                 Arrays.asList(
-                        new State(0, new TreeSet<>()),
+                        new State(0, new States()),
                         new State(1, makeStates(2, 3))
                 )
         );
 
         Set<DFAState> dfaStates = new TreeSet<>(
                 Arrays.asList(
-                        new DFAState(0, new TreeSet<>()),
+                        new DFAState(0, new States()),
                         new DFAState(1, makeStates(2, 3))
                 )
         );
-        Set<State> actual = DFAState.convertToStates(dfaStates);
+        States actual = DFAState.convertToStates(dfaStates);
         assertEquals(expected, actual);
     }
 
     @Test
     void convertToState() {
-        State expected = new State(0, new TreeSet<>());
-        DFAState dfaState = new DFAState(0, new TreeSet<>());
+        State expected = new State(0, new States());
+        DFAState dfaState = new DFAState(0, new States());
         State actual = dfaState.convertToState();
         assertEquals(expected, actual);
 
@@ -45,7 +45,7 @@ class DFAStateTest {
 
     @Test
     void isEmpty() {
-        DFAState dfaState = new DFAState(0, new TreeSet<>());
+        DFAState dfaState = new DFAState(0, new States());
         assertTrue(dfaState.isEmpty());
 
         dfaState = new DFAState(0, makeStates(0));
@@ -72,7 +72,7 @@ class DFAStateTest {
     void isNewState() {
         Set<DFAState> dfaStates = new TreeSet<>(
                 Arrays.asList(
-                        new DFAState(0, new TreeSet<>()),
+                        new DFAState(0, new States()),
                         new DFAState(1, makeStates(2, 3))
                 )
         );

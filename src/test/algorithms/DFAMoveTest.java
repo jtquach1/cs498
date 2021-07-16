@@ -14,17 +14,17 @@ class DFAMoveTest {
     void convertToMoves() {
         Set<Move> expected = new TreeSet<>(Collections.singletonList(
                 new Move(
-                        new State(0, new TreeSet<>()),
+                        new State(0, new States()),
                         'a',
-                        new State(1, new TreeSet<>())
+                        new State(1, new States())
                 )
         ));
 
         Set<DFAMove> dfaMoves = new TreeSet<>(Collections.singletonList(
                 new DFAMove(
-                        new DFAState(0, new TreeSet<>()),
+                        new DFAState(0, new States()),
                         'a',
-                        new DFAState(1, new TreeSet<>())
+                        new DFAState(1, new States())
                 )
         ));
         Set<Move> actual = DFAMove.convertToMoves(dfaMoves);
@@ -34,15 +34,15 @@ class DFAMoveTest {
     @Test
     void convertToMove() {
         Move expected = new Move(
-                new State(0, new TreeSet<>()),
+                new State(0, new States()),
                 'a',
-                new State(1, new TreeSet<>())
+                new State(1, new States())
         );
 
         DFAMove dfaMove = new DFAMove(
-                new DFAState(0, new TreeSet<>()),
+                new DFAState(0, new States()),
                 'a',
-                new DFAState(1, new TreeSet<>())
+                new DFAState(1, new States())
         );
         Move actual = dfaMove.convertToMove();
         assertEquals(expected, actual);

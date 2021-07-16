@@ -12,13 +12,12 @@ class FSA {
     static final char PHI = '\u03C6';
 
     protected final Alphabet alphabet;
-    protected final Set<State> states;
-    protected final Set<State> finalStates;
-    protected final Set<Move> moves;
+    protected final States states;
+    protected final States finalStates;
+    protected final Moves moves;
     protected State start;
 
-    FSA(Alphabet alphabet, Set<State> states, State start, Set<State> finalStates,
-        Set<Move> moves) {
+    FSA(Alphabet alphabet, States states, State start, States finalStates, Moves moves) {
         this.alphabet = alphabet;
         this.states = states;
         this.start = start;
@@ -214,15 +213,15 @@ class FSA {
                 "\tENTRY -> " + start.getId() + ";\n");
     }
 
-    public Set<State> getStates() {
+    public States getStates() {
         return states;
     }
 
-    public Set<State> getFinalStates() {
+    public States getFinalStates() {
         return finalStates;
     }
 
-    public Set<Move> getMoves() {
+    public Moves getMoves() {
         return moves;
     }
 
@@ -234,7 +233,6 @@ class Alphabet extends TreeSet<Character> {
     }
 
     Alphabet() {
-        super();
     }
 }
 
@@ -251,7 +249,7 @@ class State implements Comparable<State> {
         this.id = id;
     }
 
-    State(int id, Set<State> states) {
+    State(int id, States states) {
         this.id = id;
         String oldLabel = states.toString();
         oldLabel = oldLabel.substring(1, oldLabel.length() - 1);
@@ -262,7 +260,7 @@ class State implements Comparable<State> {
         State.idCounter = idCounter;
     }
 
-    State getTo(Set<Move> moves, Character consumed) {
+    State getTo(Moves moves, Character consumed) {
         Move move = moves
                 .stream()
                 .filter((m) -> m.hasFrom(this) && m.hasConsumed(consumed))
@@ -303,6 +301,15 @@ class State implements Comparable<State> {
 
     int getId() {
         return id;
+    }
+}
+
+class States extends TreeSet<State> {
+    public States() {
+    }
+
+    public States(@NotNull Collection<? extends State> c) {
+        super(c);
     }
 }
 
@@ -358,5 +365,14 @@ class Move implements Comparable<Move> {
         return Objects.equals(from, other.from)
                 && Objects.equals(consumed, other.consumed)
                 && Objects.equals(to, other.to);
+    }
+}
+
+class Moves extends TreeSet<Move> {
+    public Moves() {
+    }
+
+    public Moves(@NotNull Collection<? extends Move> c) {
+        super(c);
     }
 }

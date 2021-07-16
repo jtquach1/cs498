@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,9 +16,9 @@ class FSATest {
         Alphabet alphabet = new Alphabet(Collections.singleton('a'));
         State start = new State(0);
         State finalState = new State(1);
-        Set<State> states = new TreeSet<>(Arrays.asList(start, finalState));
-        Set<State> finalStates = new TreeSet<>(Collections.singleton(finalState));
-        Set<Move> moves = new TreeSet<>(Collections.singleton(new Move(start, 'a', finalState)));
+        States states = new States(Arrays.asList(start, finalState));
+        States finalStates = new States(Collections.singleton(finalState));
+        Moves moves = new Moves(Collections.singleton(new Move(start, 'a', finalState)));
 
         fsa = new FSA(alphabet, states, start, finalStates, moves);
     }
@@ -28,8 +26,8 @@ class FSATest {
     @Test
     void addState() {
         fsa.addState(new State(2));
-        Set<State> actual = fsa.getStates();
-        Set<State> expected = new TreeSet<>(
+        States actual = fsa.getStates();
+        States expected = new States(
                 Arrays.asList(
                         new State(0),
                         new State(1),
@@ -42,8 +40,8 @@ class FSATest {
     @Test
     void addFinalState() {
         fsa.addFinalState(new State(2));
-        Set<State> actual = fsa.getFinalStates();
-        Set<State> expected = new TreeSet<>(
+        States actual = fsa.getFinalStates();
+        States expected = new States(
                 Arrays.asList(
                         new State(1),
                         new State(2)
@@ -55,8 +53,8 @@ class FSATest {
     @Test
     void removeFinalStates() {
         fsa.removeFinalStates();
-        Set<State> actual = fsa.getFinalStates();
-        Set<State> expected = new TreeSet<>();
+        States actual = fsa.getFinalStates();
+        States expected = new States();
         assertEquals(expected, actual);
     }
 
@@ -67,8 +65,8 @@ class FSATest {
         State to = new State(3);
         fsa.addMove(from, consumed, to);
 
-        Set<Move> actual = fsa.getMoves();
-        Set<Move> expected = new TreeSet<>(
+        Moves actual = fsa.getMoves();
+        Moves expected = new Moves(
                 Arrays.asList(
                         new Move(new State(0), 'a', new State(1)),
                         new Move(new State(2), 'b', new State(3))

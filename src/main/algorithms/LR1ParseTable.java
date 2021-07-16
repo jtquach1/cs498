@@ -56,6 +56,12 @@ class LR1ParseTable {
 }
 
 class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
+    public LR1ParseOutput() {
+    }
+
+    public LR1ParseOutput(@NotNull Collection<? extends LR1ParseOutputEntry> c) {
+        super(c);
+    }
 }
 
 class LR1ParseOutputEntry {
@@ -65,27 +71,13 @@ class LR1ParseOutputEntry {
     Action action;
 
     LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action action, String cursor) {
-        /* We need to deep clone the parameters because their references are
-        constantly changing in the LR1 parsing algorithm. */
+        this.stack = new Stack<>(stack);
 
-        this.stack = new Stack<>();
-        this.stack.addAll(stack);
+        this.input = new Queue<>(input);
 
-        // Lecture slides show the cursor as part of the input
-        this.input = new Queue<>();
-        this.input.addAll(input);
-        this.input.queue(cursor);
-
-        this.action = action;
-    }
-
-    // For unit tests
-    LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action action) {
-        this.stack = new Stack<>();
-        this.stack.addAll(stack);
-
-        this.input = new Queue<>();
-        this.input.addAll(input);
+        if (cursor != null) {
+            this.input.queue(cursor);
+        }
 
         this.action = action;
     }
@@ -115,7 +107,7 @@ class LR1ParseOutputEntry {
 
 class Pair implements Comparable<Pair> {
     // When initializing the LR1 parse stack, s0 has not transitioned from any symbol
-    static String noSuchSymbol = "";
+    static final String noSuchSymbol = "";
 
     // Can either be terminal or non-terminal
     private final String symbol;
@@ -164,7 +156,7 @@ class Pair implements Comparable<Pair> {
 
 class ActionTable extends TreeMap<Integer, ActionEntry> {
     // Used for the Accept action- don't transition out of an Accept state in the DFA
-    static Integer noSuchState = -1;
+    static final Integer noSuchState = -1;
 
     Action get(Integer state, String terminal) {
         ActionEntry entry = this.get(state);
@@ -254,7 +246,7 @@ class ActionEntry extends TreeMap<String, Action> implements Comparable<ActionEn
 class Action implements Comparable<Action> {
     private final Execution execution;
 
-    // Refers to either a collection state index or a production index.
+    // Refers to either a collection state index when shifting OR a production index when reducing.
     private final Integer index;
 
     Action(Execution execution, Integer index) {
@@ -320,7 +312,6 @@ class GotoTable extends TreeMap<Integer, GotoEntry> {
             return null;
         }
 
-        // In case of conflicts, we just want to return one value
         return to;
     }
 }

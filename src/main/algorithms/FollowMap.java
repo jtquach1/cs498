@@ -9,7 +9,6 @@ import java.util.TreeSet;
 
 class Follow extends TreeSet<String> {
     Follow(String... symbols) {
-        super();
         this.addAll(Arrays.asList(symbols));
     }
 
@@ -20,7 +19,6 @@ class Follow extends TreeSet<String> {
 
 class FollowMap extends TreeMap<String, Follow> {
     FollowMap() {
-        super();
     }
 
     FollowMap deepClone() {

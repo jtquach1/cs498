@@ -566,7 +566,7 @@ class Grammar {
         return new LR1ParseTable(actionTable, gotoTable, startIndex);
     }
 
-    ActionTable constructActionTable(LR1Collection collection) {
+    private ActionTable constructActionTable(LR1Collection collection) {
         ActionTable table = new ActionTable();
         Transitions transitions = getTransitionsOnlyWithTerminals(collection);
 
@@ -607,7 +607,7 @@ class Grammar {
         return from.contains(new Item(TERMINATOR, start + "'", start, MARKER));
     }
 
-    GotoTable constructGotoTable(LR1Collection collection) {
+    private GotoTable constructGotoTable(LR1Collection collection) {
         GotoTable table = new GotoTable();
         Transitions transitions = getTransitionsOnlyWithNonTerminals(collection);
 
@@ -786,7 +786,6 @@ class Enumerations extends ArrayList<String> {
 
 class Symbols extends TreeSet<String> {
     Symbols() {
-        super();
     }
 
     Symbols(@NotNull Collection<? extends String> symbols) {

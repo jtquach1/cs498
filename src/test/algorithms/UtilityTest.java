@@ -2,12 +2,13 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
-import java.util.TreeSet;
 
+import static algorithms.Execution.SHIFT;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
+import static algorithms.Pair.noSuchSymbol;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UtilityTest {
@@ -23,10 +24,10 @@ class UtilityTest {
 
     @Test
     void makeMoves() {
-        Set<Move> expected = new TreeSet<>();
+        Moves expected = new Moves();
         expected.add(new Move(new State(0), 'a', new State(0)));
         expected.add(new Move(new State(0), 'b', new State(0)));
-        Set<Move> actual = Utility.makeMoves(
+        Moves actual = Utility.makeMoves(
                 new Move(new State(0), 'a', new State(0)),
                 new Move(new State(0), 'b', new State(0))
         );
@@ -44,17 +45,17 @@ class UtilityTest {
     void makeDFAWithoutPhi() {
         DFA expected = new DFA(
                 new Alphabet(),
-                new TreeSet<>(Collections.singletonList(new State(0))),
+                new States(Collections.singletonList(new State(0))),
                 new State(0),
-                new TreeSet<>(),
-                new TreeSet<>()
+                new States(),
+                new Moves()
         );
         DFA actual = Utility.makeDFA(
                 new Alphabet(),
-                new TreeSet<>(Collections.singletonList(new State(0))),
+                new States(Collections.singletonList(new State(0))),
                 new State(0),
-                new TreeSet<>(),
-                new TreeSet<>()
+                new States(),
+                new Moves()
         );
         assertEquals(expected, actual);
     }
@@ -63,18 +64,18 @@ class UtilityTest {
     void makeDFAWithPhi() {
         DFA expected = new DFA(
                 new Alphabet(),
-                new TreeSet<>(Collections.singletonList(new State(0))),
+                new States(Collections.singletonList(new State(0))),
                 new State(0),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                new States(),
+                new Moves(),
                 new State(1)
         );
         DFA actual = Utility.makeDFA(
                 new Alphabet(),
-                new TreeSet<>(Collections.singletonList(new State(0))),
+                new States(Collections.singletonList(new State(0))),
                 new State(0),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                new States(),
+                new Moves(),
                 new State(1)
         );
         assertEquals(expected, actual);
@@ -85,17 +86,17 @@ class UtilityTest {
     void makeNFA() {
         NFA expected = new NFA(
                 new Alphabet(),
-                new TreeSet<>(Collections.singletonList(new State(0))),
+                new States(Collections.singletonList(new State(0))),
                 new State(0),
-                new TreeSet<>(),
-                new TreeSet<>()
+                new States(),
+                new Moves()
         );
         NFA actual = Utility.makeNFA(
                 new Alphabet(),
-                new TreeSet<>(Collections.singletonList(new State(0))),
+                new States(Collections.singletonList(new State(0))),
                 new State(0),
-                new TreeSet<>(),
-                new TreeSet<>()
+                new States(),
+                new Moves()
         );
         assertEquals(expected, actual);
     }
@@ -122,7 +123,7 @@ class UtilityTest {
 
     @Test
     void makeState() {
-        Set<State> states = new TreeSet<>();
+        States states = new States();
         states.add(new State(1));
         states.add(new State(2));
         State expected = new State(0, states);
@@ -132,44 +133,28 @@ class UtilityTest {
 
     @Test
     void makeStatesWithoutIds() {
-        Set<State> expected = new TreeSet<>();
+        States expected = new States();
         expected.add(new State(0));
         expected.add(new State(1));
-        Set<State> actual = Utility.makeStates(0, 1);
+        States actual = Utility.makeStates(0, 1);
         assertEquals(expected, actual);
     }
 
     @Test
     void makeStatesWithIds() {
-        Set<State> expected = new TreeSet<>();
+        States expected = new States();
         expected.add(new State(0));
         expected.add(new State(1));
-        Set<State> actual = Utility.makeStates(new State(0), new State(1));
+        States actual = Utility.makeStates(new State(0), new State(1));
         assertEquals(expected, actual);
     }
 
     @Test
     void makeEntry() {
-        LL1ParseOutputEntry expected = new LL1ParseOutputEntry(new Stack<>(), new Queue<>(), null);
-        LL1ParseOutputEntry actual = Utility.makeLL1ParseOutputEntry(new Stack<>(), new Queue<>(), null);
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void makeStack() {
-        Stack<String> expected = new Stack<>();
-        expected.add("E");
-        expected.add("F");
-        Stack<String> actual = Utility.makeStack("E", "F");
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void makeQueue() {
-        Queue<String> expected = new Queue<>();
-        expected.add("E");
-        expected.add("F");
-        Queue<String> actual = Utility.makeQueue("E", "F");
+        LL1ParseOutputEntry expected = new LL1ParseOutputEntry(new Stack<>(), new Queue<>(), null
+                , null);
+        LL1ParseOutputEntry actual = Utility.makeLL1ParseOutputEntry(new Stack<>(), new Queue<>()
+                , null);
         assertEquals(expected, actual);
     }
 
@@ -257,5 +242,73 @@ class UtilityTest {
                 "[E ::= " + MARKER + " E + T, " + TERMINATOR + "]"
         );
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeLL1ParseOutputEntry() {
+        LL1ParseOutputEntry actual = Utility.makeLL1ParseOutputEntry(
+                new Stack<>(Arrays.asList(TERMINATOR, "E")),
+                new Queue<>(Arrays.asList("id", "+", "id", "*", "id", TERMINATOR)),
+                null
+        );
+
+        LL1ParseOutputEntry expected = new LL1ParseOutputEntry(
+                new Stack<>(Arrays.asList(TERMINATOR, "E")),
+                new Queue<>(Arrays.asList("+", "id", "*", "id", TERMINATOR)),
+                null,
+                "id"
+        );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeLR1ParseOutputEntry() {
+        LR1ParseOutputEntry actual = Utility.makeLR1ParseOutputEntry(
+                new Stack<>(Collections.singleton(new Pair(noSuchSymbol, 9))),
+                new Queue<>(Arrays.asList("id", "+", "id", "*", "id", TERMINATOR)),
+                new Action(SHIFT, 14)
+        );
+
+        LR1ParseOutputEntry expected = new LR1ParseOutputEntry(
+                new Stack<>(Collections.singleton(new Pair(noSuchSymbol, 9))),
+                new Queue<>(Arrays.asList("+", "id", "*", "id", TERMINATOR)),
+                new Action(SHIFT, 14),
+                "id"
+        );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeStack() {
+        Stack<String> expected = new Stack<>();
+        expected.add("E");
+        expected.add("F");
+        Stack<String> actual = Utility.makeStack("E", "F");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeQueue() {
+        Queue<String> expected = new Queue<>();
+        expected.add("E");
+        expected.add("F");
+        Queue<String> actual = Utility.makeQueue("E", "F");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makePair() {
+        assertEquals(
+                new Pair(noSuchSymbol, 9),
+                Utility.makePair(noSuchSymbol, 9)
+        );
+    }
+
+    @Test
+    void makeAction() {
+        assertEquals(
+                new Action(SHIFT, 14),
+                Utility.makeAction(SHIFT, 14)
+        );
     }
 }

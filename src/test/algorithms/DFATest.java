@@ -3,8 +3,6 @@ package algorithms;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static algorithms.FSA.EPSILON;
 import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,7 +17,7 @@ class DFATest {
     @Test
     void epsilonClosureForOneState() {
         int id = 0;
-        Set<Move> moves = makeMoves(
+        Moves moves = makeMoves(
                 makeMove(0, 'a', 1),
                 makeMove(1, EPSILON, 5),
                 makeMove(2, 'b', 3),
@@ -36,7 +34,7 @@ class DFATest {
                 makeMove(10, 'b', 11)
         );
 
-        Set<State> states = makeStates(1, 5, 6, 8, 9, 10);
+        States states = makeStates(1, 5, 6, 8, 9, 10);
         DFAState expected = new DFAState(id, states);
 
         DFAState actual = DFA.epsilonClosure(new State(1), moves, id);
