@@ -3,8 +3,6 @@ package algorithms;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static algorithms.Utility.makePSet;
 import static algorithms.Utility.makePartition;
@@ -30,7 +28,7 @@ class PartitionTest {
 
     @Test
     void convertToDfaStates() {
-        Set<DFAState> expected = new TreeSet<>(
+        DFAStates expected = new DFAStates(
                 Arrays.asList(
                         new DFAState(0, new States(makePSet(0, 2))),
                         new DFAState(1, new States(makePSet(1))),
@@ -42,7 +40,7 @@ class PartitionTest {
         PSet set2 = makePSet(1);
         PSet set3 = makePSet(0, 2);
         Partition partition = makePartition(set1, set2, set3);
-        Set<DFAState> actual = partition.convertToDfaStates();
+        DFAStates actual = partition.convertToDfaStates();
         assertEquals(expected, actual);
     }
 

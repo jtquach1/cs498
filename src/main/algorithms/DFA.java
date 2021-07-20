@@ -23,47 +23,72 @@ class DFA extends FSA {
         this.phi = phi;
     }
 
-    static DFA NFAtoDFA(NFA nfa) {
-        Alphabet alphabet = nfa.alphabet;
-        State nfaStart = nfa.start;
-        Moves nfaMoves = nfa.moves;
-        States nfaFinalStates = nfa.finalStates;
+    DFA(Alphabet alphabet, DFAStates dfaStates, DFAState dfaStart, DFAStates dfaFinalStates,
+        DFAMoves dfaMoves, State phi, boolean convertingToMinDFA) {
+        super(alphabet, convertToStates(dfaStates), dfaStart.convertToState(),
+                convertToStates(dfaFinalStates), convertToMoves(dfaMoves));
 
-        if (representsEmptyLanguage(nfa)) {
-            return dfaRepresentingEmptyLanguage();
+        if (phi != null) {
+            boolean everyStateConsumesEntireAlphabet = true;
+
+            for (State from : states) {
+                Set<Character> consumedChars = moves
+                        .stream()
+                        .filter(move -> move.hasFrom(from))
+                        .map(Move::getConsumed)
+                        .collect(Collectors.toCollection(TreeSet::new));
+
+                for (Character consumed : alphabet) {
+                    if (!consumedChars.contains(consumed)) {
+                        addMove(from, consumed, phi);
+                        everyStateConsumesEntireAlphabet = false;
+                    }
+                }
+            }
+
+            if (!everyStateConsumesEntireAlphabet || convertingToMinDFA) {
+                this.phi = phi;
+                addState(phi);
+                for (Character consumed : alphabet) {
+                    addMove(phi, consumed, phi);
+                }
+            }
         }
-        int index = 0;
-        DFAState dfaStart = epsilonClosure(nfaStart, nfaMoves, index);
-        Set<DFAState> dfaStates = new TreeSet<>(Collections.singleton(dfaStart));
-        Set<DFAMove> dfaMoves = new TreeSet<>();
-        Stack<DFAState> stack = new Stack<>(Collections.singleton(dfaStart));
-        index++;
+    }
 
-        index = updateIndexAndComputeStates(alphabet, nfaMoves, index, dfaStates, dfaMoves, stack);
-        Set<DFAState> dfaFinalStates = getDFAFinalStates(dfaStates, nfaFinalStates);
+    static DFA NFAtoDFA(NFA nfa) {
+        int index = 0;
+        DFAState dfaStart = epsilonClosure(nfa.start, nfa.moves, index++);
+        DFAStates dfaStates = new DFAStates(Collections.singleton(dfaStart));
+        DFAMoves dfaMoves = new DFAMoves();
+        Stack<DFAState> stack = new Stack<>(Collections.singleton(dfaStart));
+
+        while (!stack.isEmpty()) {
+            DFAState from = stack.pop();
+
+            for (Character consumed : nfa.alphabet) {
+                States reachableStates = getReachableStates(from, nfa.moves, consumed);
+                DFAState to = epsilonClosure(reachableStates, nfa.moves, index);
+
+                if (!to.isEmpty()) {
+                    if (to.isNewState(dfaStates)) {
+                        dfaStates.add(to);
+                        stack.push(to);
+                        index++;
+                    } else {
+                        to.updateWithExistingId(dfaStates);
+                    }
+
+                    dfaMoves.add(new DFAMove(from, consumed, to));
+                }
+            }
+        }
+
+        DFAStates dfaFinalStates = getDFAFinalStates(dfaStates, nfa.finalStates);
         State phi = new State(index);
 
         // DFA states already consume every letter of the alphabet
-        return createDFAFromPowersetConstruction(alphabet, dfaStates, dfaStart, phi,
-                dfaFinalStates, dfaMoves, false);
-    }
-
-    private static boolean representsEmptyLanguage(NFA nfa) {
-        return nfa.alphabet.equals(new Alphabet());
-    }
-
-    @NotNull
-    private static DFA dfaRepresentingEmptyLanguage() {
-        State start = new State(0);
-        DFA dfa = new DFA(
-                new Alphabet(),
-                new States(Collections.singleton(start)),
-                start,
-                new States(),
-                new Moves()
-        );
-        dfa.addFinalState(start);
-        return dfa;
+        return new DFA(nfa.alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, phi, false);
     }
 
     static DFAState epsilonClosure(State state, Moves moves, int index) {
@@ -100,42 +125,10 @@ class DFA extends FSA {
         return closure;
     }
 
-    private static int updateIndexAndComputeStates(
-            Alphabet alphabet,
-            Moves nfaMoves,
-            Integer index,
-            Set<DFAState> dfaStates,
-            Set<DFAMove> dfaMoves,
-            Stack<DFAState> stack
-    ) {
-        while (!stack.isEmpty()) {
-            DFAState from = stack.pop();
-            for (Character consumed : alphabet) {
-                States reachableStates = getReachableStates(from, nfaMoves, consumed);
-                DFAState to = epsilonClosure(reachableStates, nfaMoves, index);
-                if (!to.isEmpty()) {
-                    if (to.isNewState(dfaStates)) {
-                        dfaStates.add(to);
-                        stack.push(to);
-                        index++;
-                    } else {
-                        to.updateWithExistingId(dfaStates);
-                    }
-                    dfaMoves.add(new DFAMove(from, consumed, to));
-                }
-            }
-        }
-        return index;
-    }
-
-    private static States getReachableStates(DFAState states, Moves moves,
-                                             Character consumed) {
-        return getReachableStates(states.getStates(), moves, consumed);
-    }
-
-    private static States getReachableStates(States states, Moves moves,
-                                             Character consumed) {
+    private static States getReachableStates(DFAState dfaState, Moves moves, Character consumed) {
+        States states = dfaState.getStates();
         States validTos = new States();
+
         for (State from : states) {
             States validStates = moves
                     .stream()
@@ -144,6 +137,7 @@ class DFA extends FSA {
                     .collect(Collectors.toCollection(States::new));
             validTos.addAll(validStates);
         }
+
         return validTos;
     }
 
@@ -153,11 +147,8 @@ class DFA extends FSA {
     }
 
     @NotNull
-    private static Set<DFAState> getDFAFinalStates(
-            Set<DFAState> dfaStates,
-            States nfaFinalStates
-    ) {
-        Set<DFAState> dfaFinalStates = new TreeSet<>();
+    private static DFAStates getDFAFinalStates(DFAStates dfaStates, States nfaFinalStates) {
+        DFAStates dfaFinalStates = new DFAStates();
         for (DFAState dfaState : dfaStates) {
             for (State nfaState : dfaState.getStates()) {
                 if (nfaFinalStates.contains(nfaState)) {
@@ -169,55 +160,7 @@ class DFA extends FSA {
         return dfaFinalStates;
     }
 
-    @NotNull
-    private static DFA createDFAFromPowersetConstruction(Alphabet alphabet, Set<DFAState> dfaStates,
-                                                         DFAState dfaStart, State phi,
-                                                         Set<DFAState> dfaFinalStates,
-                                                         Set<DFAMove> dfaMoves,
-                                                         boolean convertingFromMinDFA) {
-        States states = convertToStates(dfaStates);
-        State start = dfaStart.convertToState();
-        States finalStates = convertToStates(dfaFinalStates);
-        Moves moves = convertToMoves(dfaMoves);
-        DFA result = new DFA(alphabet, states, start, finalStates, moves);
-        result.addMovesToPhi(phi, convertingFromMinDFA);
-        return result;
-    }
-
-    private void addMovesToPhi(State phi, boolean convertingFromMinDFA) {
-        boolean everyStateConsumesEntireAlphabet = true;
-        for (State from : states) {
-            Set<Character> consumedChars = moves
-                    .stream()
-                    .filter(move -> move.hasFrom(from))
-                    .map(Move::getConsumed)
-                    .collect(Collectors.toCollection(TreeSet::new));
-            for (Character consumed : alphabet) {
-                if (!consumedChars.contains(consumed)) {
-                    addMove(from, consumed, phi);
-                    everyStateConsumesEntireAlphabet = false;
-                }
-            }
-        }
-        setPhi(phi, convertingFromMinDFA, everyStateConsumesEntireAlphabet);
-    }
-
-    private void setPhi(State phi, boolean convertingFromMinDFA,
-                        boolean everyStateConsumesEntireAlphabet) {
-        if (!everyStateConsumesEntireAlphabet || convertingFromMinDFA) {
-            this.phi = phi;
-            addState(phi);
-            for (Character consumed : alphabet) {
-                addMove(phi, consumed, phi);
-            }
-        }
-    }
-
     static DFA DFAtoMinDFA(DFA dfa) {
-        if (dfa.equals(dfaRepresentingEmptyLanguage())) {
-            return dfa;
-        }
-
         Partition partition = dfa.getPartition();
         return dfa.createDFAFromPartition(partition);
     }
@@ -240,6 +183,7 @@ class DFA extends FSA {
                             PSet targetSet = partition.getExistingSetContainingState(to);
                             PSet included = targetSet.getIncludedStates(moves, set, consumed);
                             PSet excluded = targetSet.getExcludedStates(moves, set, consumed);
+
                             if (!excluded.isEmpty()) {
                                 partition.replaceSet(set, included, excluded);
                                 break;
@@ -268,30 +212,28 @@ class DFA extends FSA {
     }
 
     private DFA createDFAFromPartition(Partition partition) {
-        Set<DFAState> dfaStates = partition.convertToDfaStates();
-
+        DFAStates dfaStates = partition.convertToDfaStates();
         DFAState dfaStart = findDFAState(dfaStates, start);
-        State phi = findDFAState(dfaStates, this.phi).convertToState();
+        State phi = this.phi != null ? findDFAState(dfaStates, this.phi).convertToState() : null;
 
-        Set<DFAState> dfaFinalStates = finalStates
+        DFAStates dfaFinalStates = finalStates
                 .stream()
                 .map((state) -> findDFAState(dfaStates, state))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toCollection(DFAStates::new));
 
-        Set<DFAMove> dfaMoves = moves
+        DFAMoves dfaMoves = moves
                 .stream()
                 .map((move) -> new DFAMove(
                         findDFAState(dfaStates, move.getFrom()),
                         move.getConsumed(),
                         findDFAState(dfaStates, move.getTo())
                 ))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toCollection(DFAMoves::new));
 
-        return createDFAFromPowersetConstruction(alphabet, dfaStates, dfaStart, phi,
-                dfaFinalStates, dfaMoves, true);
+        return new DFA(alphabet, dfaStates, dfaStart, dfaFinalStates, dfaMoves, phi, true);
     }
 
-    private static DFAState findDFAState(Set<DFAState> dfaStates, State state) {
+    private static DFAState findDFAState(DFAStates dfaStates, State state) {
         return dfaStates
                 .stream()
                 .filter((dfaState) -> dfaState.getStates().contains(state))
@@ -316,7 +258,7 @@ class DFAMove implements Comparable<DFAMove> {
     }
 
     @NotNull
-    static Moves convertToMoves(Set<DFAMove> dfaMoves) {
+    static Moves convertToMoves(DFAMoves dfaMoves) {
         return dfaMoves
                 .stream()
                 .map(DFAMove::convertToMove)
@@ -367,6 +309,14 @@ class DFAMove implements Comparable<DFAMove> {
     }
 }
 
+class DFAMoves extends TreeSet<DFAMove> {
+    public DFAMoves() {
+    }
+
+    public DFAMoves(@NotNull Collection<? extends DFAMove> c) {
+        super(c);
+    }
+}
 
 class DFAState implements Comparable<DFAState> {
     private final States states;
@@ -378,7 +328,7 @@ class DFAState implements Comparable<DFAState> {
     }
 
     @NotNull
-    static States convertToStates(Set<DFAState> dfaStates) {
+    static States convertToStates(DFAStates dfaStates) {
         return dfaStates
                 .stream()
                 .map(DFAState::convertToState)
@@ -394,7 +344,7 @@ class DFAState implements Comparable<DFAState> {
         return states.isEmpty();
     }
 
-    void updateWithExistingId(Set<DFAState> dfaStates) {
+    void updateWithExistingId(DFAStates dfaStates) {
         dfaStates
                 .stream()
                 .filter(dfaState -> dfaState.states.equals(states))
@@ -402,7 +352,7 @@ class DFAState implements Comparable<DFAState> {
                 .ifPresent(match -> this.id = match.id);
     }
 
-    boolean isNewState(Set<DFAState> dfaStates) {
+    boolean isNewState(DFAStates dfaStates) {
         return dfaStates
                 .stream()
                 .noneMatch(dfaState -> dfaState.states.equals(states));
@@ -437,6 +387,15 @@ class DFAState implements Comparable<DFAState> {
     }
 }
 
+class DFAStates extends TreeSet<DFAState> {
+    public DFAStates() {
+    }
+
+    public DFAStates(@NotNull Collection<? extends DFAState> c) {
+        super(c);
+    }
+}
+
 class Partition extends TreeSet<PSet> {
     Partition() {
     }
@@ -454,15 +413,21 @@ class Partition extends TreeSet<PSet> {
     }
 
     @NotNull
-    Set<DFAState> convertToDfaStates() {
-        Set<DFAState> dfaStates = new TreeSet<>();
+    DFAStates convertToDfaStates() {
+        DFAStates dfaStates = new DFAStates();
         int id = 0;
+
+        /* We only create states out of non-empty partitions. A Partition set might be empty
+        in the case that we are making a minimal DFA representing the empty language. */
         for (PSet set : this) {
-            States states = new States(set);
-            DFAState dfaState = new DFAState(id, states);
-            dfaStates.add(dfaState);
-            id++;
+            if (!set.isEmpty()) {
+                States states = new States(set);
+                DFAState dfaState = new DFAState(id, states);
+                dfaStates.add(dfaState);
+                id++;
+            }
         }
+
         return dfaStates;
     }
 

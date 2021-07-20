@@ -20,7 +20,7 @@ class DFAStateTest {
                 )
         );
 
-        Set<DFAState> dfaStates = new TreeSet<>(
+        DFAStates dfaStates = new DFAStates(
                 Arrays.asList(
                         new DFAState(0, new States()),
                         new DFAState(1, makeStates(2, 3))
@@ -56,7 +56,7 @@ class DFAStateTest {
     void updateWithExistingId() {
         DFAState expected = new DFAState(1, makeStates(0, 1, 2));
 
-        Set<DFAState> dfaStates = new TreeSet<>(
+        DFAStates dfaStates = new DFAStates(
                 Arrays.asList(
                         new DFAState(1, makeStates(0, 1, 2)),
                         new DFAState(2, makeStates(3))
@@ -70,7 +70,7 @@ class DFAStateTest {
 
     @Test
     void isNewState() {
-        Set<DFAState> dfaStates = new TreeSet<>(
+        DFAStates dfaStates = new DFAStates(
                 Arrays.asList(
                         new DFAState(0, new States()),
                         new DFAState(1, makeStates(2, 3))

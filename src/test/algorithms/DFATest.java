@@ -463,7 +463,7 @@ class DFATest {
         DFA expected = makeDFA(
                 makeAlphabet(),
                 makeStates(0),
-                new State(0),
+                new State(0, makeStates(0, 1)),
                 makeStates(0),
                 makeMoves()
         );
@@ -770,7 +770,7 @@ class DFATest {
         DFA dfa = makeDFA(
                 makeAlphabet(),
                 makeStates(0),
-                new State(0),
+                new State(0, makeStates(0, 1)),
                 makeStates(0),
                 makeMoves()
         );
@@ -778,7 +778,7 @@ class DFATest {
         DFA expected = makeDFA(
                 makeAlphabet(),
                 makeStates(0),
-                new State(0),
+                new State(0, makeStates(0)),
                 makeStates(0),
                 makeMoves()
         );

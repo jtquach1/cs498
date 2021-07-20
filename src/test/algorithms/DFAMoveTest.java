@@ -12,7 +12,7 @@ class DFAMoveTest {
 
     @Test
     void convertToMoves() {
-        Set<Move> expected = new TreeSet<>(Collections.singletonList(
+        Moves expected = new Moves(Collections.singletonList(
                 new Move(
                         new State(0, new States()),
                         'a',
@@ -20,14 +20,14 @@ class DFAMoveTest {
                 )
         ));
 
-        Set<DFAMove> dfaMoves = new TreeSet<>(Collections.singletonList(
+        DFAMoves dfaMoves = new DFAMoves(Collections.singletonList(
                 new DFAMove(
                         new DFAState(0, new States()),
                         'a',
                         new DFAState(1, new States())
                 )
         ));
-        Set<Move> actual = DFAMove.convertToMoves(dfaMoves);
+        Moves actual = DFAMove.convertToMoves(dfaMoves);
         assertEquals(expected, actual);
     }
 
