@@ -391,12 +391,12 @@ class Item extends Production {
         this.lookahead = lookahead;
     }
 
-    List<String> getAlpha() {
+    Sequence getAlpha() {
         int untilMarker = rhs.indexOf(MARKER);
         return rhs.subList(0, untilMarker);
     }
 
-    List<String> getBeta() {
+    Sequence getBeta() {
         int afterMarker = rhs.indexOf(MARKER) + 1;
         int toEnd = rhs.size();
         return rhs.subList(afterMarker, toEnd);
@@ -465,12 +465,12 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
 
     @NotNull
     private static String[] getNewRhs(Item item) {
-        List<String> beta = item.getBeta();
+        Sequence beta = item.getBeta();
         String nonTerminal = beta.get(0);
-        List<String> alpha = item.getAlpha();
-        List<String> subBeta = beta.subList(1, beta.size());
+        Sequence alpha = item.getAlpha();
+        Sequence subBeta = beta.subList(1, beta.size());
 
-        List<String> newRhs = new ArrayList<>(alpha);
+        Sequence newRhs = new Sequence(alpha);
         newRhs.add(nonTerminal);
         newRhs.add(MARKER);
         newRhs.addAll(subBeta);
@@ -480,7 +480,7 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
     @NotNull
     private Predicate<Item> aboutToParseSymbol(String symbol) {
         return item -> {
-            List<String> beta = item.getBeta();
+            Sequence beta = item.getBeta();
             if (beta == null || beta.isEmpty()) {
                 return false;
             }
@@ -513,7 +513,7 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
             Items partiallyParsedForms = getPartiallyParsedForms(closure, rule);
 
             partiallyParsedForms.forEach(item -> {
-                        List<String> betaLookahead = getBetaLookahead(item);
+                        Sequence betaLookahead = getBetaLookahead(item);
                         First first = firstMap.first(betaLookahead);
                         first.forEach(addCorrespondingItem(closure, rule));
                     }
@@ -524,7 +524,7 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
     @NotNull
     private static Consumer<String> addCorrespondingItem(Items closure, Production rule) {
         String lhs = rule.getLhs();
-        List<String> rhs = rule.getRhs();
+        Sequence rhs = rule.getRhs();
 
         return token -> {
             Item newItem = getItemAfterParsingSymbol(token, lhs, rhs);
@@ -533,19 +533,19 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
     }
 
     @NotNull
-    private static Item getItemAfterParsingSymbol(String token, String lhs, List<String> rhs) {
-        List<String> gamma = new ArrayList<>();
+    private static Item getItemAfterParsingSymbol(String token, String lhs, Sequence rhs) {
+        Sequence gamma = new Sequence();
         gamma.add(MARKER);
         gamma.addAll(rhs);
         return new Item(token, lhs, gamma.toArray(new String[0]));
     }
 
     @NotNull
-    private static List<String> getBetaLookahead(Item item) {
-        List<String> beta = item.getBeta();
-        List<String> subBeta = beta.subList(1, beta.size());
+    private static Sequence getBetaLookahead(Item item) {
+        Sequence beta = item.getBeta();
+        Sequence subBeta = beta.subList(1, beta.size());
         String lookahead = item.getLookahead();
-        List<String> sequence = new ArrayList<>(subBeta);
+        Sequence sequence = new Sequence(subBeta);
         sequence.add(lookahead);
         return sequence;
     }
@@ -561,7 +561,7 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
 
     private static Predicate<Item> hasNonTerminalToParse(String lhs) {
         return item -> {
-            List<String> beta = item.getBeta();
+            Sequence beta = item.getBeta();
             if (!beta.isEmpty()) {
                 return beta.get(0).equals(lhs);
             }

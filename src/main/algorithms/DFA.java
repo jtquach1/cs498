@@ -212,7 +212,7 @@ class DFA extends FSA {
     }
 
     private DFA createDFAFromPartition(Partition partition) {
-        DFAStates dfaStates = partition.convertToDfaStates();
+        DFAStates dfaStates = partition.convertToDFAStates();
         DFAState dfaStart = findDFAState(dfaStates, start);
         State phi = this.phi != null ? findDFAState(dfaStates, this.phi).convertToState() : null;
 
@@ -361,7 +361,7 @@ class DFAState implements Comparable<DFAState> {
     @Override
     public int compareTo(@NotNull DFAState other) {
         return Comparator.comparing(DFAState::getId)
-                .thenComparing(s -> s.getStates().toString())
+                .thenComparing(DFAState::getStates)
                 .compare(this, other);
     }
 
@@ -413,7 +413,7 @@ class Partition extends TreeSet<PSet> {
     }
 
     @NotNull
-    DFAStates convertToDfaStates() {
+    DFAStates convertToDFAStates() {
         DFAStates dfaStates = new DFAStates();
         int id = 0;
 
@@ -438,7 +438,7 @@ class Partition extends TreeSet<PSet> {
     }
 }
 
-class PSet extends States implements Comparable<PSet> {
+class PSet extends States {
     PSet(@NotNull Collection<? extends State> states) {
         super(states);
     }
@@ -470,11 +470,5 @@ class PSet extends States implements Comparable<PSet> {
                 .stream()
                 .filter((from) -> !this.contains(getTo(moves, consumed, from)))
                 .collect(Collectors.toCollection(PSet::new));
-    }
-
-    @Override
-    public int compareTo(@NotNull PSet other) {
-        return Comparator.comparing(PSet::toString)
-                .compare(this, other);
     }
 }

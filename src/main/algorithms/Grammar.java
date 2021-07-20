@@ -137,14 +137,14 @@ class Grammar {
     private Consumer<Production> populateFollowMap(FirstMap firstMap, FollowMap followMap) {
         return production -> {
             String lhs = production.getLhs();
-            List<String> rhs = production.getRhs();
+            Sequence rhs = production.getRhs();
             int n = rhs.size();
 
             for (int i = 0; i < n; i++) {
                 Follow followOfSymbol = getFollowOfSymbol(followMap, rhs, i);
                 if (followOfSymbol == null) continue;
 
-                List<String> subsequence = rhs.subList(i + 1, n);
+                Sequence subsequence = rhs.subList(i + 1, n);
                 First firstOfSubsequence = firstMap.first(subsequence);
                 followOfSymbol.addAll(firstOfSubsequence);
                 followOfSymbol.remove(EPSILON);
@@ -157,7 +157,7 @@ class Grammar {
     }
 
     @Nullable
-    private Follow getFollowOfSymbol(FollowMap followMap, List<String> rhs, int i) {
+    private Follow getFollowOfSymbol(FollowMap followMap, Sequence rhs, int i) {
         String symbol = rhs.get(i);
 
         // Terminals do not have follow sets.
@@ -262,9 +262,9 @@ class Grammar {
         index = table.get(top, symbol);
         if (index != null) {
             Production rule = productions.get(index);
-            List<String> reverse = new ArrayList<>(rule.getRhs());
-            Collections.reverse(reverse);
-            reverse.forEach(stack::push);
+            Sequence rhs = new Sequence(rule.getRhs());
+            Collections.reverse(rhs);
+            stack.addAll(rhs);
         } else {
             throw new Exception("No rule to follow");
         }
@@ -284,16 +284,15 @@ class Grammar {
     }
 
     @NotNull
-    private static Queue<String> initializeSentence(String w) {
+    private static Queue<String> initializeSentence(String delimitedBySpaces) {
         /* If the sentence doesn't end with the terminator, we will get an
         ArrayIndexOutOfBounds exception otherwise during LL1 or LR1 parsing. */
-        if (!w.endsWith(TERMINATOR)) {
-            w += " " + TERMINATOR;
+        if (!delimitedBySpaces.endsWith(TERMINATOR)) {
+            delimitedBySpaces += " " + TERMINATOR;
         }
-        List<String> sentence = Arrays.asList(w.strip().split(" "));
-        Queue<String> result = new Queue<>();
-        result.addAll(sentence);
-        return result;
+
+        List<String> sentence = Arrays.asList(delimitedBySpaces.strip().split(" "));
+        return new Queue<>(sentence);
     }
 
     @NotNull
@@ -319,7 +318,7 @@ class Grammar {
 
     Grammar removeLeftRecursion() {
         Grammar grammar = this.deepClone();
-        Enumerations enumerations = enumerateNonTerminals();
+        Sequence enumerations = enumerateNonTerminals();
         int n = enumerations.size();
 
         for (int i = 0; i < n; i++) {
@@ -332,21 +331,21 @@ class Grammar {
         return grammar;
     }
 
-    private void eliminateDirectLeftRecursion(Enumerations enums, int i) {
-        Productions alphaForms = getAlphaForms(isLeftRecursiveAlphaForm(enums, i));
-        Productions betaForms = getBetaForms(isNonLeftRecursiveBetaForm(enums, i));
+    private void eliminateDirectLeftRecursion(Sequence enumerations, int i) {
+        Productions alphaForms = getAlphaForms(isLeftRecursiveAlphaForm(enumerations, i));
+        Productions betaForms = getBetaForms(isNonLeftRecursiveBetaForm(enumerations, i));
 
         for (Production alphaForm : alphaForms) {
             // Remove Y ::= Y α
             productions.remove(alphaForm);
 
-            List<String> rhs = alphaForm.getRhs();
-            List<String> alpha = rhs.subList(1, rhs.size());
+            Sequence rhs = alphaForm.getRhs();
+            Sequence alpha = rhs.subList(1, rhs.size());
             String y = alphaForm.getLhs();
             String yPrime = y + "'";
 
             for (Production betaForm : betaForms) {
-                List<String> beta = betaForm.getRhs();
+                Sequence beta = betaForm.getRhs();
 
                 boolean removedRecursion = addBetaForm(y, yPrime, beta);
                 removedRecursion |= addAlphaForm(alpha, yPrime);
@@ -363,14 +362,14 @@ class Grammar {
         }
     }
 
-    private boolean addBetaForm(String y, String yPrime, List<String> beta) {
+    private boolean addBetaForm(String y, String yPrime, Sequence beta) {
         // Add Y ::= β Y'
         String[] newRhs = getNewRhs(beta, Collections.singleton(yPrime));
         Production newProduction = new Production(y, newRhs);
         return productions.add(newProduction);
     }
 
-    private boolean addAlphaForm(List<String> alpha, String yPrime) {
+    private boolean addAlphaForm(Sequence alpha, String yPrime) {
         // Add Y' ::= α Y'
         String[] rhs = getNewRhs(alpha, Collections.singleton(yPrime));
         Production production = new Production(yPrime, rhs);
@@ -384,40 +383,40 @@ class Grammar {
         return productions.add(production);
     }
 
-    private static Predicate<Production> isNonLeftRecursiveBetaForm(Enumerations enums, int j) {
+    private static Predicate<Production> isNonLeftRecursiveBetaForm(Sequence enumerations, int j) {
         // Does the production have the form `Y ::= β` where β does not contain Y?
         return production -> {
-            String expectedY = enums.get(j);
+            String expectedY = enumerations.get(j);
             String actualY = production.getLhs();
             boolean doesNotContainY = !production.getRhs().get(0).equals(actualY);
             return expectedY.equals(actualY) && doesNotContainY;
         };
     }
 
-    private static Predicate<Production> isLeftRecursiveAlphaForm(Enumerations enums, int i) {
+    private static Predicate<Production> isLeftRecursiveAlphaForm(Sequence enumerations, int i) {
         // Does the production have the form `Y ::= Y α`?
         return production -> {
-            String expectedY = enums.get(i);
+            String expectedY = enumerations.get(i);
             String actualY = production.getLhs();
             String firstSymbolOfRhs = production.getRhs().get(0);
             return expectedY.equals(actualY) && expectedY.equals(firstSymbolOfRhs);
         };
     }
 
-    private void eliminateIndirectLeftRecursion(Enumerations enums, int i, int j) {
-        Productions alphaForms = getAlphaForms(isAlphaForm(enums, i, j));
-        Productions betaForms = getBetaForms(isBetaForm(enums, j));
+    private void eliminateIndirectLeftRecursion(Sequence enumerations, int i, int j) {
+        Productions alphaForms = getAlphaForms(isAlphaForm(enumerations, i, j));
+        Productions betaForms = getBetaForms(isBetaForm(enumerations, j));
 
         for (Production alphaForm : alphaForms) {
             // Remove Xi ::= Xj α
             productions.remove(alphaForm);
 
-            List<String> rhs = alphaForm.getRhs();
-            List<String> alpha = rhs.subList(1, rhs.size());
+            Sequence rhs = alphaForm.getRhs();
+            Sequence alpha = rhs.subList(1, rhs.size());
             String xi = alphaForm.getLhs();
 
             for (Production betaForm : betaForms) {
-                List<String> beta = betaForm.getRhs();
+                Sequence beta = betaForm.getRhs();
                 String[] newRhs = getNewRhs(beta, alpha);
                 Production betaAlphaForm = new Production(xi, newRhs);
 
@@ -445,34 +444,34 @@ class Grammar {
 
     @NotNull
     private static String[] getNewRhs(Collection<String> first, Collection<String> second) {
-        List<String> newRhs = new ArrayList<>();
+        Sequence newRhs = new Sequence();
         newRhs.addAll(first);
         newRhs.addAll(second);
         return newRhs.toArray(new String[0]);
     }
 
-    private static Predicate<Production> isBetaForm(Enumerations enums, int j) {
+    private static Predicate<Production> isBetaForm(Sequence enumerations, int j) {
         // Does the production have the form `Xj ::= β` where β can be directly left recursive?
         return production -> {
-            String expectedXj = enums.get(j);
+            String expectedXj = enumerations.get(j);
             String actualXj = production.getLhs();
             return expectedXj.equals(actualXj);
         };
     }
 
-    private static Predicate<Production> isAlphaForm(Enumerations enums, int i, int j) {
+    private static Predicate<Production> isAlphaForm(Sequence enumerations, int i, int j) {
         // Does the production have the form `Xi ::= Xj α`?
         return production -> {
-            String expectedXi = enums.get(i);
+            String expectedXi = enumerations.get(i);
             String actualXi = production.getLhs();
-            String expectedXj = enums.get(j);
+            String expectedXj = enumerations.get(j);
             String actualXj = production.getRhs().get(0);
             return expectedXi.equals(actualXi) && expectedXj.equals(actualXj);
         };
     }
 
-    private Enumerations enumerateNonTerminals() {
-        Enumerations enumerations = new Enumerations();
+    private Sequence enumerateNonTerminals() {
+        Sequence enumerations = new Sequence();
         ListWithUniques<String> withoutStart = new ListWithUniques<>(nonTerminals,
                 String::compareTo);
         withoutStart.remove(start);
@@ -541,7 +540,7 @@ class Grammar {
 
         String lhs = startRule.getLhs();
 
-        List<String> rhs = new ArrayList<>();
+        Sequence rhs = new Sequence();
         rhs.add(MARKER);
         rhs.addAll(startRule.getRhs());
 
@@ -670,10 +669,12 @@ class Grammar {
         Stack<String> rhs = new Stack<>(rule.getRhs());
 
         while (!rhs.isEmpty()) {
-            String fromTracker = rhs.pop();
+            String fromRhs = rhs.pop();
             Pair currentPair = stack.pop();
-            String fromOutputStack = currentPair.getSymbol();
-            assert fromTracker.equals(fromOutputStack);
+            String fromStack = currentPair.getSymbol();
+
+            // Let's check that we're reducing to the correct production.
+            assert fromRhs.equals(fromStack);
         }
     }
 
@@ -725,20 +726,40 @@ class Grammar {
     }
 }
 
+class Sequence extends ArrayList<String> implements Comparable<Sequence> {
+    public Sequence() {
+    }
+
+    public Sequence(@NotNull Collection<? extends String> c) {
+        super(c);
+    }
+
+    public Sequence subList(int fromIndex, int toIndex) {
+        return new Sequence(super.subList(fromIndex, toIndex));
+    }
+
+    @Override
+    public int compareTo(@NotNull Sequence other) {
+        return Comparator
+                .comparing(Sequence::toString)
+                .compare(this, other);
+    }
+}
+
 class Production implements Comparable<Production> {
     protected final String lhs;
-    protected final ArrayList<String> rhs;
+    protected final Sequence rhs;
 
     Production(String lhs, String... rhs) {
         this.lhs = lhs;
-        this.rhs = new ArrayList<>(Arrays.asList(rhs));
+        this.rhs = new Sequence(Arrays.asList(rhs));
     }
 
     @Override
     public int compareTo(@NotNull Production other) {
         return Comparator
                 .comparing(Production::getLhs)
-                .thenComparing(p -> p.getRhs().toString())
+                .thenComparing(Production::getRhs)
                 .compare(this, other);
     }
 
@@ -746,7 +767,7 @@ class Production implements Comparable<Production> {
         return lhs;
     }
 
-    ArrayList<String> getRhs() {
+    Sequence getRhs() {
         return rhs;
     }
 
@@ -782,9 +803,6 @@ class Production implements Comparable<Production> {
         }
         return sb.toString();
     }
-}
-
-class Enumerations extends ArrayList<String> {
 }
 
 class Symbols extends TreeSet<String> {

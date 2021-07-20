@@ -14,17 +14,17 @@ class ItemTest {
 
     @Test
     void getAlpha() {
-        List<String> expected = new ArrayList<>();
+        Sequence expected = new Sequence();
         Item item = new Item(TERMINATOR, "E'", MARKER, "E");
-        List<String> actual = item.getAlpha();
+        Sequence actual = item.getAlpha();
         assertEquals(expected, actual);
     }
 
     @Test
     void getBeta() {
-        List<String> expected = new ArrayList<>(Collections.singletonList("E"));
+        Sequence expected = new Sequence(Collections.singletonList("E"));
         Item item = new Item(TERMINATOR, "E'", MARKER, "E");
-        List<String> actual = item.getBeta();
+        Sequence actual = item.getBeta();
         assertEquals(expected, actual);
     }
 }

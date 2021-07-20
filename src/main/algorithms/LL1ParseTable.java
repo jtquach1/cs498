@@ -80,20 +80,21 @@ class FirstMap extends TreeMap<String, First> {
     void addFirstSetOfSequenceToFirstSetOfSymbol(Production p) {
         String lhs = p.getLhs();
         First set = this.get(lhs);
-        set.addAll(this.first(p.getRhs()));
+        Sequence rhs = p.getRhs();
+        set.addAll(this.first(rhs));
     }
 
-    First first(List<String> sequence) {
+    First first(Sequence sequence) {
         First F = new First();
 
-        // An empty sequence has no characters
+        // An empty sequence has no characters.
         if (sequence.size() != 0) {
 
             String firstSymbol = sequence.get(0);
             First entry = this.get(firstSymbol);
 
             if (entry == null) {
-                // If the entry doesn't already exist, it must be the terminator
+                // If the entry doesn't already exist, it must be the terminator.
                 entry = new First();
                 entry.add(firstSymbol);
             }

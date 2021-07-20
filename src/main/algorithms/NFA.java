@@ -2,6 +2,8 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.GREEK_EPSILON;
 import static algorithms.Utility.*;
@@ -329,12 +331,9 @@ class Regex {
     @NotNull
     private static String generatePostfixString(Stack<Character> input) {
         StringBuilder sb = new StringBuilder();
-        Stack<Character> reverse = new Stack<>();
+        Collections.reverse(input);
         while (!input.isEmpty()) {
-            reverse.push(input.pop());
-        }
-        while (!reverse.isEmpty()) {
-            sb.append(reverse.pop());
+            sb.append(input.pop());
         }
         return sb.toString();
     }

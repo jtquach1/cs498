@@ -224,7 +224,6 @@ class FSA {
     public Moves getMoves() {
         return moves;
     }
-
 }
 
 class Alphabet extends TreeSet<Character> {
@@ -304,12 +303,19 @@ class State implements Comparable<State> {
     }
 }
 
-class States extends TreeSet<State> {
+class States extends TreeSet<State> implements Comparable<States> {
     public States() {
     }
 
     public States(@NotNull Collection<? extends State> c) {
         super(c);
+    }
+
+    @Override
+    public int compareTo(@NotNull States other) {
+        return Comparator
+                .comparing(States::toString)
+                .compare(this, other);
     }
 }
 

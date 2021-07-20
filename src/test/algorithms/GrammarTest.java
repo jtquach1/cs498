@@ -16,6 +16,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
 
+    static FirstMap sampleExamProblem3FirstMap;
+    static FirstMap arithmeticExpressionReduxFirstMap;
+    static FirstMap arithmeticExpressionFirstMap;
+    static FollowMap sampleExamProblem3FollowMap;
+    static FollowMap arithmeticExpressionReduxFollowMap;
+    static FollowMap arithmeticExpressionFollowMap;
+    static LL1ParseTable sampleExamProblem3LL1ParseTable;
+    static LL1ParseTable arithmeticExpressionReduxLL1ParseTable;
+    static LL1ParseTable arithmeticExpressionLL1ParseTable;
+    // Item sets computed for arithmetic expression grammar
+    static Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17,
+            s18,
+            s19, s20, s21;
+    static Transitions arithmeticExpressionTransitions;
+    static ActionTable arithmeticExpressionActionTable;
+    static GotoTable arithmeticExpressionGotoTable;
+    static LR1Collection arithmeticExpressionCollection;
+    static LR1ParseTable arithmeticExpressionLR1ParseTable;
+    static ActionTable sampleExamProblem4ActionTable;
+    static GotoTable sampleExamProblem4GotoTable;
+    static LR1ParseTable sampleExamProblem4LR1ParseTable;
     // From lecture slides, non LL(1) grammar
     Grammar arithmeticExpression,
 
@@ -33,32 +54,6 @@ class GrammarTest {
 
     // Textbook example with direct and indirect left recursion
     leftRecursionExample;
-
-    static FirstMap sampleExamProblem3FirstMap;
-    static FirstMap arithmeticExpressionReduxFirstMap;
-    static FirstMap arithmeticExpressionFirstMap;
-
-    static FollowMap sampleExamProblem3FollowMap;
-    static FollowMap arithmeticExpressionReduxFollowMap;
-    static FollowMap arithmeticExpressionFollowMap;
-
-    static LL1ParseTable sampleExamProblem3LL1ParseTable;
-    static LL1ParseTable arithmeticExpressionReduxLL1ParseTable;
-    static LL1ParseTable arithmeticExpressionLL1ParseTable;
-
-    // Item sets computed for arithmetic expression grammar
-    static Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18,
-            s19, s20, s21;
-
-    static Transitions arithmeticExpressionTransitions;
-    static ActionTable arithmeticExpressionActionTable;
-    static GotoTable arithmeticExpressionGotoTable;
-    static LR1Collection arithmeticExpressionCollection;
-    static LR1ParseTable arithmeticExpressionLR1ParseTable;
-
-    static ActionTable sampleExamProblem4ActionTable;
-    static GotoTable sampleExamProblem4GotoTable;
-    static LR1ParseTable sampleExamProblem4LR1ParseTable;
 
     @BeforeEach
     void setUp() {
@@ -468,6 +463,7 @@ class GrammarTest {
                 arithmeticExpressionGotoTable,
                 9
         );
+
         // Use indices from sample exam answers rather than try to recompute everything
         sampleExamProblem4ActionTable = new ActionTable();
         sampleExamProblem4ActionTable.set(0, "+", makeAction(SHIFT, 4));

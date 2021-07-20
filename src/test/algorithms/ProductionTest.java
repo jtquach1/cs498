@@ -2,9 +2,7 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static algorithms.Grammar.EPSILON;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,8 +20,8 @@ class ProductionTest {
     @Test
     void getRhs() {
         Production p = new Production("E", "T", "E'");
-        List<String> actual = p.getRhs();
-        List<String> expected = new ArrayList<>(Arrays.asList("T", "E'"));
+        Sequence actual = p.getRhs();
+        Sequence expected = new Sequence(Arrays.asList("T", "E'"));
         assertEquals(expected, actual);
     }
 

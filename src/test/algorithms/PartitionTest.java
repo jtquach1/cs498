@@ -40,7 +40,7 @@ class PartitionTest {
         PSet set2 = makePSet(1);
         PSet set3 = makePSet(0, 2);
         Partition partition = makePartition(set1, set2, set3);
-        DFAStates actual = partition.convertToDfaStates();
+        DFAStates actual = partition.convertToDFAStates();
         assertEquals(expected, actual);
     }
 

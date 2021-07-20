@@ -2,7 +2,6 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -145,7 +144,7 @@ class FirstMapTest {
         map.put("id", new First("id"));
         map.put(EPSILON, new First(EPSILON));
 
-        First actual = map.first(new ArrayList<>(Arrays.asList("*", "F", "T'")));
+        First actual = map.first(new Sequence(Arrays.asList("*", "F", "T'")));
         First expected = new First("*");
         assertEquals(expected, actual);
 
@@ -163,7 +162,7 @@ class FirstMapTest {
         map.put("id", new First("id"));
         map.put(EPSILON, new First(EPSILON));
 
-        actual = map.first(new ArrayList<>(Collections.singletonList(EPSILON)));
+        actual = map.first(new Sequence(Collections.singletonList(EPSILON)));
         expected = new First(EPSILON);
         assertEquals(expected, actual);
     }
