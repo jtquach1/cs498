@@ -286,7 +286,7 @@ class Grammar {
     @NotNull
     private static Queue<String> initializeSentence(String w) {
         /* If the sentence doesn't end with the terminator, we will get an
-        ArrayIndexOutOfBounds exception otherwise when doing LL1 parsing. */
+        ArrayIndexOutOfBounds exception otherwise during LL1 or LR1 parsing. */
         if (!w.endsWith(TERMINATOR)) {
             w += " " + TERMINATOR;
         }
@@ -318,18 +318,18 @@ class Grammar {
     }
 
     Grammar removeLeftRecursion() {
-        Grammar cfg = this.deepClone();
-        Enumerations enums = enumerateNonTerminals();
-        int n = enums.size();
+        Grammar grammar = this.deepClone();
+        Enumerations enumerations = enumerateNonTerminals();
+        int n = enumerations.size();
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < i; j++) {
-                cfg.eliminateIndirectLeftRecursion(enums, i, j);
+                grammar.eliminateIndirectLeftRecursion(enumerations, i, j);
             }
-            cfg.eliminateDirectLeftRecursion(enums, i);
+            grammar.eliminateDirectLeftRecursion(enumerations, i);
         }
 
-        return cfg;
+        return grammar;
     }
 
     private void eliminateDirectLeftRecursion(Enumerations enums, int i) {
