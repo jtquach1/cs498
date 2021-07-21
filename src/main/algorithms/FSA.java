@@ -164,9 +164,9 @@ class FSA {
         int stateId = state.getId();
 
         if (thisIsDFAWithPhiState) {
-            boolean isGivenStatePhi = stateId == ((DFA) this).getPhi().getId();
+            boolean givenStateIsPhi = stateId == ((DFA) this).getPhi().getId();
 
-            if (isGivenStatePhi) {
+            if (givenStateIsPhi) {
                 return Character.toString(PHI);
             }
         }

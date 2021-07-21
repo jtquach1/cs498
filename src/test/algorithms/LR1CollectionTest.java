@@ -49,7 +49,8 @@ class LR1CollectionTest {
     void add() {
         Transitions transitions = new Transitions();
         transitions.add(makeTransition(s0, "E", s1));
-        LR1Collection expected = new LR1Collection(Arrays.asList(s0, s1), transitions, s0);
+        LR1Collection expected = new LR1Collection(s0, transitions);
+        expected.addAll(Arrays.asList(s0, s1));
 
         LR1Collection actual = collection;
         Transition transition = new Transition(s0, "E", s1);

@@ -141,11 +141,11 @@ class Grammar {
             int n = rhs.size();
 
             for (int i = 0; i < n; i++) {
-                Follow followOfSymbol = getFollowOfSymbol(followMap, rhs, i);
+                Symbols followOfSymbol = getFollowOfSymbol(followMap, rhs, i);
                 if (followOfSymbol == null) continue;
 
                 Sequence subsequence = rhs.subList(i + 1, n);
-                First firstOfSubsequence = firstMap.first(subsequence);
+                Symbols firstOfSubsequence = firstMap.first(subsequence);
                 followOfSymbol.addAll(firstOfSubsequence);
                 followOfSymbol.remove(EPSILON);
 
@@ -157,7 +157,7 @@ class Grammar {
     }
 
     @Nullable
-    private Follow getFollowOfSymbol(FollowMap followMap, Sequence rhs, int i) {
+    private Symbols getFollowOfSymbol(FollowMap followMap, Sequence rhs, int i) {
         String symbol = rhs.get(i);
 
         // Terminals do not have follow sets.
@@ -188,14 +188,14 @@ class Grammar {
 
             for (Production production : subset) {
                 int productionIndex = productions.indexOf(production);
-                First firstOfRhs = firstMap.first(production.getRhs());
+                Symbols firstOfRhs = firstMap.first(production.getRhs());
 
                 for (String firstTerminal : firstOfRhs) {
                     if (!firstTerminal.equals(EPSILON)) {
                         table.set(nonTerminal, firstTerminal, productionIndex);
                     }
                     if (firstOfRhs.contains(EPSILON)) {
-                        Follow followOfNonTerminal = followMap.get(nonTerminal);
+                        Symbols followOfNonTerminal = followMap.get(nonTerminal);
 
                         for (String followTerminal : followOfNonTerminal) {
                             table.set(nonTerminal, followTerminal, productionIndex);
@@ -256,10 +256,10 @@ class Grammar {
     }
 
     @NotNull
-    private Integer replaceTopWithRule(LL1ParseTable table, Stack<String> stack,
-                                       String symbol, String top) throws Exception {
+    private Integer replaceTopWithRule(LL1ParseTable table, Stack<String> stack, String symbol,
+                                       String top) throws Exception {
         Integer index;
-        index = table.get(top, symbol);
+        index = table.getIndex(top, symbol);
         if (index != null) {
             Production rule = productions.get(index);
             Sequence rhs = new Sequence(rule.getRhs());
@@ -285,7 +285,7 @@ class Grammar {
 
     @NotNull
     private static Queue<String> initializeSentence(String delimitedBySpaces) {
-        /* If the sentence doesn't end with the terminator, we will get an
+        /* If the sentence doesn't end with the terminator, we will getIndex an
         ArrayIndexOutOfBounds exception otherwise during LL1 or LR1 parsing. */
         if (!delimitedBySpaces.endsWith(TERMINATOR)) {
             delimitedBySpaces += " " + TERMINATOR;
@@ -305,7 +305,7 @@ class Grammar {
 
     boolean isLL1(LL1ParseTable table) {
         for (String nonTerminal : nonTerminals) {
-            LL1ParseTableEntry entry = table.get(nonTerminal);
+            TreeMap<String, Indices> entry = table.get(nonTerminal);
             Collection<Indices> values = entry.values();
             for (Indices indices : values) {
                 if (indices.size() > 1) {
@@ -811,6 +811,10 @@ class Symbols extends TreeSet<String> {
 
     Symbols(@NotNull Collection<? extends String> symbols) {
         super(symbols);
+    }
+
+    Symbols(String... symbols) {
+        super(Arrays.asList(symbols));
     }
 }
 

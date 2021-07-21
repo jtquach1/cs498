@@ -11,11 +11,11 @@ class FollowMapTest {
     @Test
     void deepClone() {
         FollowMap expected = new FollowMap();
-        expected.put("E", new Follow(")", TERMINATOR));
-        expected.put("E'", new Follow(")", TERMINATOR));
-        expected.put("F", new Follow("+", "*", ")", TERMINATOR));
-        expected.put("T", new Follow("+", ")", TERMINATOR));
-        expected.put("T'", new Follow("+", ")", TERMINATOR));
+        expected.put("E", new Symbols(")", TERMINATOR));
+        expected.put("E'", new Symbols(")", TERMINATOR));
+        expected.put("F", new Symbols("+", "*", ")", TERMINATOR));
+        expected.put("T", new Symbols("+", ")", TERMINATOR));
+        expected.put("T'", new Symbols("+", ")", TERMINATOR));
         FollowMap actual = expected.deepClone();
         assertEquals(expected, actual);
         assertNotSame(expected, actual);
@@ -29,7 +29,7 @@ class FollowMapTest {
     @Test
     void initializeFollowSetOfNonTerminal() {
         FollowMap expected = new FollowMap();
-        expected.put("E", new Follow());
+        expected.put("E", new Symbols());
         FollowMap actual = new FollowMap();
         actual.initializeFollowSetOfNonTerminal("E");
         assertEquals(expected, actual);

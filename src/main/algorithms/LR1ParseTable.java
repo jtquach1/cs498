@@ -55,6 +55,99 @@ class LR1ParseTable {
     }
 }
 
+class ActionTable extends Table<Integer, String, Action> {
+    // We don't transition out of an Accept state in the DFA generated from an LR1 collection.
+    static final Integer noSuchState = -1;
+
+    void populateWithReduce(Productions productions, Items from, Integer fromIndex) {
+        from
+                .stream()
+                .filter(item -> item.getBeta().isEmpty())
+                .forEach(item -> {
+                            String lhs = item.getLhs();
+                            String[] alpha = item.getAlpha().toArray(new String[0]);
+                            String symbol = item.getLookahead();
+
+                            Production production = new Production(lhs, alpha);
+                            Integer index = productions.indexOf(production);
+                            Action action = new Action(REDUCE, index);
+
+                            this.set(fromIndex, symbol, action);
+                        }
+                );
+    }
+
+    void populateWithAccept(Integer fromIndex) {
+        Action action = new Action(ACCEPT, noSuchState);
+        this.set(fromIndex, TERMINATOR, action);
+    }
+
+    void populateWithShift(Integer fromIndex, String terminal, Integer toIndex) {
+        Action action = new Action(SHIFT, toIndex);
+        this.set(fromIndex, terminal, action);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (Integer fromId : this.keySet()) {
+            sb.append("\"" + fromId + "\": " + this.get(fromId) + ",");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+}
+
+class Action implements Comparable<Action> {
+    private final Execution execution;
+
+    // Refers to an LR1 collection state index when shifting OR a production index when reducing.
+    private final Integer index;
+
+    Action(Execution execution, Integer index) {
+        this.execution = execution;
+        this.index = index;
+    }
+
+    @Override
+    public int compareTo(@NotNull Action other) {
+        return Comparator
+                .comparing(Action::getExecution)
+                .thenComparing(Action::getIndex)
+                .compare(this, other);
+    }
+
+    Execution getExecution() {
+        return execution;
+    }
+
+    Integer getIndex() {
+        return index;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(execution, index);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Action other = (Action) o;
+        return execution == other.execution && index.equals(other.index);
+    }
+
+    @Override
+    public String toString() {
+        return "{ \"execution\": \"" + execution + "\", \"index\": \"" + index + "\"}";
+    }
+}
+
+class GotoTable extends Table<Integer, String, Integer> {
+}
+
 class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
     public LR1ParseOutput() {
     }
@@ -155,191 +248,17 @@ class Pair implements Comparable<Pair> {
     }
 }
 
-class ActionTable extends TreeMap<Integer, ActionEntry> {
-    // We don't transition out of an Accept state in the DFA generated from an LR1 collection.
-    static final Integer noSuchState = -1;
-
-    Action get(Integer state, String terminal) {
-        ActionEntry entry = this.get(state);
-        if (entry == null) {
-            return null;
-        }
-
-        Action action = entry.get(terminal);
-        if (terminal == null || action == null) {
-            return null;
-        }
-
-        return action;
-    }
-
-    void populateWithReduce(Productions productions, Items from, Integer fromIndex) {
-        from
-                .stream()
-                .filter(item -> item.getBeta().isEmpty())
-                .forEach(item -> {
-                            String lhs = item.getLhs();
-                            String[] alpha = item.getAlpha().toArray(new String[0]);
-                            String symbol = item.getLookahead();
-
-                            Production production = new Production(lhs, alpha);
-                            Integer index = productions.indexOf(production);
-                            Action action = new Action(REDUCE, index);
-
-                            this.set(fromIndex, symbol, action);
-                        }
-                );
-    }
-
-    void set(Integer state, String terminal, Action action) {
-        ActionEntry entry = this.get(state);
-
-        if (entry == null) {
-            entry = new ActionEntry();
-            this.put(state, entry);
-        }
-
-        entry.put(terminal, action);
-    }
-
-    void populateWithAccept(Integer fromIndex) {
-        Action action = new Action(ACCEPT, noSuchState);
-        this.set(fromIndex, TERMINATOR, action);
-    }
-
-    void populateWithShift(Integer fromIndex, String terminal, Integer toIndex) {
-        Action action = new Action(SHIFT, toIndex);
-        this.set(fromIndex, terminal, action);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (Integer fromId : this.keySet()) {
-            sb.append("\"" + fromId + "\": " + this.get(fromId) + ",");
-        }
-        sb.append("}");
-        return sb.toString();
-    }
-}
-
-class ActionEntry extends TreeMap<String, Action> implements Comparable<ActionEntry> {
-    @Override
-    public int compareTo(@NotNull ActionEntry other) {
-        return Comparator
-                .comparing(ActionEntry::toString)
-                .compare(this, other);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (String terminal : this.keySet()) {
-            sb.append("\"" + terminal + "\": " + this.get(terminal) + ",");
-        }
-        sb.append("}");
-        return sb.toString();
-    }
-}
-
-class Action implements Comparable<Action> {
-    private final Execution execution;
-
-    // Refers to an LR1 collection state index when shifting OR a production index when reducing.
-    private final Integer index;
-
-    Action(Execution execution, Integer index) {
-        this.execution = execution;
-        this.index = index;
-    }
-
-    @Override
-    public int compareTo(@NotNull Action other) {
-        return Comparator
-                .comparing(Action::getExecution)
-                .thenComparing(Action::getIndex)
-                .compare(this, other);
-    }
-
-    Execution getExecution() {
-        return execution;
-    }
-
-    Integer getIndex() {
-        return index;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(execution, index);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Action other = (Action) o;
-        return execution == other.execution && index.equals(other.index);
-    }
-
-    @Override
-    public String toString() {
-        return "{ \"execution\": \"" + execution + "\", \"index\": \"" + index + "\"}";
-    }
-}
-
-class GotoTable extends TreeMap<Integer, GotoEntry> {
-    void set(Integer from, String nonTerminal, Integer to) {
-        GotoEntry entry = this.get(from);
-
-        if (entry == null) {
-            entry = new GotoEntry();
-            this.put(from, entry);
-        }
-
-        entry.put(nonTerminal, to);
-    }
-
-    Integer get(Integer from, String nonTerminal) {
-        GotoEntry entry = this.get(from);
-        if (entry == null) {
-            return null;
-        }
-
-        Integer to = entry.get(nonTerminal);
-        if (nonTerminal == null || to == null) {
-            return null;
-        }
-
-        return to;
-    }
-}
-
-class GotoEntry extends TreeMap<String, Integer> implements Comparable<GotoEntry> {
-    @Override
-    public int compareTo(@NotNull GotoEntry other) {
-        return Comparator
-                .comparing(GotoEntry::toString)
-                .compare(this, other);
-    }
-}
-
 class LR1Collection extends ListWithUniques<Items> {
     private final Transitions transitions;
+
+    /* We store a reference to the starting item set because its index is unstable when the
+    collection is being populated. After population, we use its index to create the
+    LR1ParseTable. Indices are easier to read than the constituent item sets, and we do not need
+    the item sets during parsing. */
     private final Items start;
 
     LR1Collection(Items start, Transitions transitions) {
         super(Items::compareTo);
-        this.add(start);
-        this.transitions = transitions;
-        this.start = start;
-    }
-
-    LR1Collection(@NotNull Collection<? extends Items> c, Transitions transitions, Items start) {
-        super(Items::compareTo);
-        this.addAll(c);
         this.add(start);
         this.transitions = transitions;
         this.start = start;
@@ -351,7 +270,9 @@ class LR1Collection extends ListWithUniques<Items> {
 
     LR1Collection deepClone() {
         Transitions transitions = this.transitions.deepClone();
-        return new LR1Collection(this, transitions, start);
+        LR1Collection clone = new LR1Collection(start, transitions);
+        clone.addAll(this);
+        return clone;
     }
 
     void add(Transition transition) {
@@ -405,7 +326,7 @@ class Item extends Production {
     public int compareTo(@NotNull Item other) {
         return Comparator
                 .comparing(Item::getLhs)
-                .thenComparing(item -> item.getRhs().toString())
+                .thenComparing(Item::getRhs)
                 .thenComparing(Item::getLookahead)
                 .compare(this, other);
     }
@@ -514,7 +435,7 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
 
             partiallyParsedForms.forEach(item -> {
                         Sequence betaLookahead = getBetaLookahead(item);
-                        First first = firstMap.first(betaLookahead);
+                        Symbols first = firstMap.first(betaLookahead);
                         first.forEach(addCorrespondingItem(closure, rule));
                     }
             );

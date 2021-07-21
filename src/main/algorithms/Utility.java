@@ -2,10 +2,7 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class Utility {
@@ -33,21 +30,14 @@ class Utility {
 
     static NFA makeNFA(Alphabet alphabet, States states, State start,
                        States finalStates, Moves moves) {
-        return new NFA(
-                alphabet,
-                states,
-                start,
-                finalStates,
-                moves
-        );
+        return new NFA(alphabet, states, start, finalStates, moves);
     }
 
     static PSet makePSet(Integer... stateIds) {
-        PSet set = new PSet();
-        for (Integer stateId : stateIds) {
-            set.add(new State(stateId));
-        }
-        return set;
+        return Arrays
+                .stream(stateIds)
+                .map(State::new)
+                .collect(Collectors.toCollection(PSet::new));
     }
 
     static Partition makePartition(PSet... sets) {
@@ -59,11 +49,10 @@ class Utility {
     }
 
     static States makeStates(Integer... stateIds) {
-        States states = new States();
-        for (int stateId : stateIds) {
-            states.add(new State(stateId));
-        }
-        return states;
+        return Arrays
+                .stream(stateIds)
+                .map(State::new)
+                .collect(Collectors.toCollection(States::new));
     }
 
     static States makeStates(State... states) {
@@ -110,11 +99,11 @@ class Utility {
     }
 
     static Symbols makeNonTerminals(String... symbols) {
-        return new Symbols(Arrays.asList(symbols));
+        return new Symbols(symbols);
     }
 
     static Symbols makeTerminals(String... symbols) {
-        return new Symbols(Arrays.asList(symbols));
+        return new Symbols(symbols);
     }
 
     static Productions makeProductions(String... lines) {
@@ -171,6 +160,14 @@ class Utility {
     static Action makeAction(Execution execution, Integer index) {
         return new Action(execution, index);
     }
+
+    static Symbols makeFirst(String... symbols) {
+        return new Symbols(symbols);
+    }
+
+    static Symbols makeFollow(String... symbols) {
+        return new Symbols(symbols);
+    }
 }
 
 class Queue<T> extends ArrayList<T> {
@@ -217,8 +214,8 @@ class Stack<T> extends ArrayList<T> {
 }
 
 class ListWithUniques<T> extends ArrayList<T> {
-    /* Similar to a set, where only unique elements are stored but
-    their order of insertion is preserved. */
+    /* Similar to a set, where only unique elements are stored.
+    Elements are indexed, but their indices may change due to sorting. */
     private final Comparator<T> comparator;
 
     ListWithUniques(final Comparator<T> comparator) {
@@ -252,5 +249,26 @@ class ListWithUniques<T> extends ArrayList<T> {
             hasChanged |= add(item);
         }
         return hasChanged;
+    }
+}
+
+class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, V>> {
+    void set(K1 key1, K2 key2, V value) {
+        TreeMap<K2, V> entry = this.computeIfAbsent(key1, k -> new TreeMap<>());
+        entry.put(key2, value);
+    }
+
+    V get(K1 key1, K2 key2) {
+        TreeMap<K2, V> entry = this.get(key1);
+        if (entry == null) {
+            return null;
+        }
+
+        V value = entry.get(key2);
+        if (key2 == null || value == null) {
+            return null;
+        }
+
+        return value;
     }
 }

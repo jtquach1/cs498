@@ -27,8 +27,7 @@ class GrammarTest {
     static LL1ParseTable arithmeticExpressionLL1ParseTable;
     // Item sets computed for arithmetic expression grammar
     static Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17,
-            s18,
-            s19, s20, s21;
+            s18, s19, s20, s21;
     static Transitions arithmeticExpressionTransitions;
     static ActionTable arithmeticExpressionActionTable;
     static GotoTable arithmeticExpressionGotoTable;
@@ -139,53 +138,53 @@ class GrammarTest {
         );
 
         sampleExamProblem3FirstMap = new FirstMap();
-        sampleExamProblem3FirstMap.put("a", new First("a"));
-        sampleExamProblem3FirstMap.put("b", new First("b"));
-        sampleExamProblem3FirstMap.put("c", new First("c"));
-        sampleExamProblem3FirstMap.put(EPSILON, new First(EPSILON));
-        sampleExamProblem3FirstMap.put("S", new First("a", "b", "c"));
-        sampleExamProblem3FirstMap.put("A", new First("c", "b"));
-        sampleExamProblem3FirstMap.put("B", new First("c", EPSILON));
+        sampleExamProblem3FirstMap.put("a", makeFirst("a"));
+        sampleExamProblem3FirstMap.put("b", makeFirst("b"));
+        sampleExamProblem3FirstMap.put("c", makeFirst("c"));
+        sampleExamProblem3FirstMap.put(EPSILON, makeFirst(EPSILON));
+        sampleExamProblem3FirstMap.put("S", makeFirst("a", "b", "c"));
+        sampleExamProblem3FirstMap.put("A", makeFirst("c", "b"));
+        sampleExamProblem3FirstMap.put("B", makeFirst("c", EPSILON));
 
         arithmeticExpressionReduxFirstMap = new FirstMap();
-        arithmeticExpressionReduxFirstMap.put("(", new First("("));
-        arithmeticExpressionReduxFirstMap.put(")", new First(")"));
-        arithmeticExpressionReduxFirstMap.put("*", new First("*"));
-        arithmeticExpressionReduxFirstMap.put("+", new First("+"));
-        arithmeticExpressionReduxFirstMap.put("E", new First("(", "id"));
-        arithmeticExpressionReduxFirstMap.put("E'", new First("+", EPSILON));
-        arithmeticExpressionReduxFirstMap.put("F", new First("(", "id"));
-        arithmeticExpressionReduxFirstMap.put("T", new First("(", "id"));
-        arithmeticExpressionReduxFirstMap.put("T'", new First("*", EPSILON));
-        arithmeticExpressionReduxFirstMap.put("id", new First("id"));
-        arithmeticExpressionReduxFirstMap.put(EPSILON, new First(EPSILON));
+        arithmeticExpressionReduxFirstMap.put("(", makeFirst("("));
+        arithmeticExpressionReduxFirstMap.put(")", makeFirst(")"));
+        arithmeticExpressionReduxFirstMap.put("*", makeFirst("*"));
+        arithmeticExpressionReduxFirstMap.put("+", makeFirst("+"));
+        arithmeticExpressionReduxFirstMap.put("E", makeFirst("(", "id"));
+        arithmeticExpressionReduxFirstMap.put("E'", makeFirst("+", EPSILON));
+        arithmeticExpressionReduxFirstMap.put("F", makeFirst("(", "id"));
+        arithmeticExpressionReduxFirstMap.put("T", makeFirst("(", "id"));
+        arithmeticExpressionReduxFirstMap.put("T'", makeFirst("*", EPSILON));
+        arithmeticExpressionReduxFirstMap.put("id", makeFirst("id"));
+        arithmeticExpressionReduxFirstMap.put(EPSILON, makeFirst(EPSILON));
 
         arithmeticExpressionFirstMap = new FirstMap();
-        arithmeticExpressionFirstMap.put("(", new First("("));
-        arithmeticExpressionFirstMap.put(")", new First(")"));
-        arithmeticExpressionFirstMap.put("*", new First("*"));
-        arithmeticExpressionFirstMap.put("+", new First("+"));
-        arithmeticExpressionFirstMap.put("E", new First("(", "id"));
-        arithmeticExpressionFirstMap.put("F", new First("(", "id"));
-        arithmeticExpressionFirstMap.put("T", new First("(", "id"));
-        arithmeticExpressionFirstMap.put("id", new First("id"));
+        arithmeticExpressionFirstMap.put("(", makeFirst("("));
+        arithmeticExpressionFirstMap.put(")", makeFirst(")"));
+        arithmeticExpressionFirstMap.put("*", makeFirst("*"));
+        arithmeticExpressionFirstMap.put("+", makeFirst("+"));
+        arithmeticExpressionFirstMap.put("E", makeFirst("(", "id"));
+        arithmeticExpressionFirstMap.put("F", makeFirst("(", "id"));
+        arithmeticExpressionFirstMap.put("T", makeFirst("(", "id"));
+        arithmeticExpressionFirstMap.put("id", makeFirst("id"));
 
         sampleExamProblem3FollowMap = new FollowMap();
-        sampleExamProblem3FollowMap.put("S", new Follow(TERMINATOR));
-        sampleExamProblem3FollowMap.put("A", new Follow("a"));
-        sampleExamProblem3FollowMap.put("B", new Follow("a"));
+        sampleExamProblem3FollowMap.put("S", makeFollow(TERMINATOR));
+        sampleExamProblem3FollowMap.put("A", makeFollow("a"));
+        sampleExamProblem3FollowMap.put("B", makeFollow("a"));
 
         arithmeticExpressionReduxFollowMap = new FollowMap();
-        arithmeticExpressionReduxFollowMap.put("E", new Follow(")", TERMINATOR));
-        arithmeticExpressionReduxFollowMap.put("E'", new Follow(")", TERMINATOR));
-        arithmeticExpressionReduxFollowMap.put("F", new Follow("+", "*", ")", TERMINATOR));
-        arithmeticExpressionReduxFollowMap.put("T", new Follow("+", ")", TERMINATOR));
-        arithmeticExpressionReduxFollowMap.put("T'", new Follow("+", ")", TERMINATOR));
+        arithmeticExpressionReduxFollowMap.put("E", makeFollow(")", TERMINATOR));
+        arithmeticExpressionReduxFollowMap.put("E'", makeFollow(")", TERMINATOR));
+        arithmeticExpressionReduxFollowMap.put("F", makeFollow("+", "*", ")", TERMINATOR));
+        arithmeticExpressionReduxFollowMap.put("T", makeFollow("+", ")", TERMINATOR));
+        arithmeticExpressionReduxFollowMap.put("T'", makeFollow("+", ")", TERMINATOR));
 
         arithmeticExpressionFollowMap = new FollowMap();
-        arithmeticExpressionFollowMap.put("E", new Follow("+", ")", TERMINATOR));
-        arithmeticExpressionFollowMap.put("F", new Follow("+", "*", ")", TERMINATOR));
-        arithmeticExpressionFollowMap.put("T", new Follow("+", "*", ")", TERMINATOR));
+        arithmeticExpressionFollowMap.put("E", makeFollow("+", ")", TERMINATOR));
+        arithmeticExpressionFollowMap.put("F", makeFollow("+", "*", ")", TERMINATOR));
+        arithmeticExpressionFollowMap.put("T", makeFollow("+", "*", ")", TERMINATOR));
 
         sampleExamProblem3LL1ParseTable = new LL1ParseTable();
         sampleExamProblem3LL1ParseTable.set("S", "a", 5);
@@ -448,14 +447,13 @@ class GrammarTest {
         arithmeticExpressionGotoTable.set(3, "F", 19);
         arithmeticExpressionGotoTable.set(17, "F", 21);
 
-        arithmeticExpressionCollection = new LR1Collection(
+        arithmeticExpressionCollection = new LR1Collection(s0, arithmeticExpressionTransitions);
+        arithmeticExpressionCollection.addAll(
                 Arrays.asList(
                         s0, s1, s2, s3, s4, s5, s6, s7,
                         s8, s9, s10, s11, s12, s13, s14,
                         s15, s16, s17, s18, s19, s20, s21
-                ),
-                arithmeticExpressionTransitions,
-                s0
+                )
         );
 
         arithmeticExpressionLR1ParseTable = new LR1ParseTable(

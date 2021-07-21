@@ -2,100 +2,83 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.TreeMap;
 
 import static algorithms.Grammar.EPSILON;
 
-class Follow extends TreeSet<String> {
-    Follow(String... symbols) {
-        this.addAll(Arrays.asList(symbols));
-    }
-
-    Follow(@NotNull Collection<? extends String> sets) {
-        super(sets);
-    }
-}
-
-class FollowMap extends TreeMap<String, Follow> {
+class FollowMap extends TreeMap<String, Symbols> {
     FollowMap() {
     }
 
     FollowMap deepClone() {
         FollowMap mapClone = new FollowMap();
         for (String symbol : this.keySet()) {
-            Follow old = this.get(symbol);
-            Follow clone = new Follow(old);
+            Symbols old = this.get(symbol);
+            Symbols clone = new Symbols(old);
             mapClone.put(symbol, clone);
         }
         return mapClone;
     }
 
     void initializeFollowSetOfNonTerminal(String symbol) {
-        Follow set = new Follow();
+        Symbols set = new Symbols();
         this.put(symbol, set);
     }
 }
 
-class First extends TreeSet<String> {
-    First(String... symbols) {
-        this.addAll(Arrays.asList(symbols));
-    }
-
-    First(@NotNull Collection<? extends String> sets) {
-        super(sets);
-    }
-}
-
-class FirstMap extends TreeMap<String, First> {
+class FirstMap extends TreeMap<String, Symbols> {
     FirstMap() {
     }
 
     FirstMap deepClone() {
         FirstMap mapClone = new FirstMap();
         for (String symbol : this.keySet()) {
-            First old = this.get(symbol);
-            First clone = new First(old);
+            Symbols old = this.get(symbol);
+            Symbols clone = new Symbols(old);
             mapClone.put(symbol, clone);
         }
         return mapClone;
     }
 
     void initializeFirstSetOfTerminal(String symbol) {
-        First set = new First();
+        Symbols set = new Symbols();
         set.add(symbol);
         this.put(symbol, set);
     }
 
     void initializeFirstSetOfNonTerminal(String symbol) {
-        First set = new First();
+        Symbols set = new Symbols();
         this.put(symbol, set);
     }
 
     void addEpsilonToFirstSetOfNonTerminal(Production p) {
         String lhs = p.getLhs();
-        First set = this.get(lhs);
+        Symbols set = this.get(lhs);
         set.add(EPSILON);
     }
 
     void addFirstSetOfSequenceToFirstSetOfSymbol(Production p) {
         String lhs = p.getLhs();
-        First set = this.get(lhs);
+        Symbols set = this.get(lhs);
         Sequence rhs = p.getRhs();
         set.addAll(this.first(rhs));
     }
 
-    First first(Sequence sequence) {
-        First F = new First();
+    Symbols first(Sequence sequence) {
+        Symbols F = new Symbols();
 
         // An empty sequence has no characters.
         if (sequence.size() != 0) {
 
             String firstSymbol = sequence.get(0);
-            First entry = this.get(firstSymbol);
+            Symbols entry = this.get(firstSymbol);
 
             if (entry == null) {
                 // If the entry doesn't already exist, it must be the terminator.
-                entry = new First();
+                entry = new Symbols();
                 entry.add(firstSymbol);
             }
 
@@ -115,41 +98,22 @@ class FirstMap extends TreeMap<String, First> {
     }
 }
 
-class LL1ParseTable extends TreeMap<String, LL1ParseTableEntry> {
+class LL1ParseTable extends Table<String, String, Indices> {
 
     void set(String nonTerminal, String terminal, int productionIndex) {
-        LL1ParseTableEntry entry = this.get(nonTerminal);
-        Indices indices;
-        if (entry == null) {
-            entry = new LL1ParseTableEntry();
-            this.put(nonTerminal, entry);
-        }
-        indices = entry.get(terminal);
+        Indices indices = super.get(nonTerminal, terminal);
         if (indices == null) {
             indices = new Indices();
         }
-
         indices.add(productionIndex);
-        entry.put(terminal, indices);
+        super.set(nonTerminal, terminal, indices);
     }
 
-    Integer get(String nonTerminal, String symbol) {
-        LL1ParseTableEntry entry = this.get(nonTerminal);
-        if (entry == null) {
-            return null;
-        }
-
-        Indices indices = entry.get(symbol);
-        if (symbol == null || indices == null) {
-            return null;
-        }
-
+    Integer getIndex(String nonTerminal, String terminal) {
         // In case of conflicts, we just want to return one value.
-        return indices.get(0);
+        Indices indices = super.get(nonTerminal, terminal);
+        return indices != null ? indices.get(0) : null;
     }
-}
-
-class LL1ParseTableEntry extends TreeMap<String, Indices> {
 }
 
 class Indices extends ArrayList<Integer> {

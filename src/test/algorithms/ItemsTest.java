@@ -7,8 +7,7 @@ import java.util.Arrays;
 
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
-import static algorithms.Utility.makeItems;
-import static algorithms.Utility.makeProductions;
+import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
@@ -34,15 +33,15 @@ class ItemsTest {
         );
 
         augmentedArithmeticExpressionFirstMap = new FirstMap();
-        augmentedArithmeticExpressionFirstMap.put("(", new First("("));
-        augmentedArithmeticExpressionFirstMap.put(")", new First(")"));
-        augmentedArithmeticExpressionFirstMap.put("*", new First("*"));
-        augmentedArithmeticExpressionFirstMap.put("+", new First("+"));
-        augmentedArithmeticExpressionFirstMap.put("E'", new First("(", "id"));
-        augmentedArithmeticExpressionFirstMap.put("E", new First("(", "id"));
-        augmentedArithmeticExpressionFirstMap.put("F", new First("(", "id"));
-        augmentedArithmeticExpressionFirstMap.put("T", new First("(", "id"));
-        augmentedArithmeticExpressionFirstMap.put("id", new First("id"));
+        augmentedArithmeticExpressionFirstMap.put("(", makeFirst("("));
+        augmentedArithmeticExpressionFirstMap.put(")", makeFirst(")"));
+        augmentedArithmeticExpressionFirstMap.put("*", makeFirst("*"));
+        augmentedArithmeticExpressionFirstMap.put("+", makeFirst("+"));
+        augmentedArithmeticExpressionFirstMap.put("E'", makeFirst("(", "id"));
+        augmentedArithmeticExpressionFirstMap.put("E", makeFirst("(", "id"));
+        augmentedArithmeticExpressionFirstMap.put("F", makeFirst("(", "id"));
+        augmentedArithmeticExpressionFirstMap.put("T", makeFirst("(", "id"));
+        augmentedArithmeticExpressionFirstMap.put("id", makeFirst("id"));
 
         sampleExamProblem4Productions = makeProductions(
                 "X ::= Y = Z",
@@ -53,12 +52,12 @@ class ItemsTest {
         );
 
         sampleExamProblem4FirstMap = new FirstMap();
-        sampleExamProblem4FirstMap.put("+", new First("+"));
-        sampleExamProblem4FirstMap.put("=", new First("="));
-        sampleExamProblem4FirstMap.put("a", new First("a"));
-        sampleExamProblem4FirstMap.put("X", new First("+", "a"));
-        sampleExamProblem4FirstMap.put("Y", new First("+", "a"));
-        sampleExamProblem4FirstMap.put("Z", new First("+", "a"));
+        sampleExamProblem4FirstMap.put("+", makeFirst("+"));
+        sampleExamProblem4FirstMap.put("=", makeFirst("="));
+        sampleExamProblem4FirstMap.put("a", makeFirst("a"));
+        sampleExamProblem4FirstMap.put("X", makeFirst("+", "a"));
+        sampleExamProblem4FirstMap.put("Y", makeFirst("+", "a"));
+        sampleExamProblem4FirstMap.put("Z", makeFirst("+", "a"));
     }
 
     @Test

@@ -2,6 +2,8 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.TreeMap;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -10,7 +12,7 @@ class LL1ParseTableTest {
     @Test
     void set() {
         LL1ParseTable expected = new LL1ParseTable();
-        LL1ParseTableEntry entry = new LL1ParseTableEntry();
+        TreeMap<String, Indices> entry = new TreeMap<>();
         Indices indices = new Indices();
         indices.add(1);
         entry.put("a", indices);
@@ -23,17 +25,17 @@ class LL1ParseTableTest {
     }
 
     @Test
-    void get() {
+    void getIndex() {
         LL1ParseTable table = new LL1ParseTable();
-        LL1ParseTableEntry entry = new LL1ParseTableEntry();
+        TreeMap<String, Indices> entry = new TreeMap<>();
         Indices indices = new Indices();
         indices.add(1);
         indices.add(5);
         entry.put("a", indices);
         table.put("S", entry);
 
-        assertEquals(1, table.get("S", "a"));
-        assertNull(table.get("A", "a"));
-        assertNull(table.get("S", "b"));
+        assertEquals(1, table.getIndex("S", "a"));
+        assertNull(table.getIndex("A", "a"));
+        assertNull(table.getIndex("S", "b"));
     }
 }

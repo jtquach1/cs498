@@ -151,10 +151,15 @@ class UtilityTest {
 
     @Test
     void makeEntry() {
-        LL1ParseOutputEntry expected = new LL1ParseOutputEntry(new Stack<>(), new Queue<>(), null
-                , null);
-        LL1ParseOutputEntry actual = Utility.makeLL1ParseOutputEntry(new Stack<>(), new Queue<>()
-                , null);
+        LL1ParseOutputEntry expected = new LL1ParseOutputEntry(new Stack<>(), new Queue<>(),
+                null, null);
+        LL1ParseOutputEntry actual = Utility.makeLL1ParseOutputEntry(new Stack<>(), new Queue<>(),
+                null);
+        assertEquals(expected, actual);
+
+        expected = new LL1ParseOutputEntry(new Stack<>(), new Queue<>(), null, "id");
+        actual = Utility.makeLL1ParseOutputEntry(new Stack<>(),
+                new Queue<>(Collections.singleton("id")), null);
         assertEquals(expected, actual);
     }
 
@@ -310,5 +315,23 @@ class UtilityTest {
                 new Action(SHIFT, 14),
                 Utility.makeAction(SHIFT, 14)
         );
+    }
+
+    @Test
+    void makeFirst() {
+        Symbols expected = new Symbols();
+        expected.add("id");
+        expected.add("+");
+        Symbols actual = Utility.makeFirst("id", "+");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void makeFollow() {
+        Symbols expected = new Symbols();
+        expected.add("id");
+        expected.add("+");
+        Symbols actual = Utility.makeFollow("id", "+");
+        assertEquals(expected, actual);
     }
 }
