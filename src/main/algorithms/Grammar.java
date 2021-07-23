@@ -258,8 +258,7 @@ class Grammar {
     @NotNull
     private Integer replaceTopWithRule(LL1ParseTable table, Stack<String> stack, String symbol,
                                        String top) throws Exception {
-        Integer index;
-        index = table.getIndex(top, symbol);
+        Integer index = table.getIndex(top, symbol);
         if (index != null) {
             Production rule = productions.get(index);
             Sequence rhs = new Sequence(rule.getRhs());
@@ -304,16 +303,13 @@ class Grammar {
     }
 
     boolean isLL1(LL1ParseTable table) {
-        for (String nonTerminal : nonTerminals) {
-            TreeMap<String, Indices> entry = table.get(nonTerminal);
-            Collection<Indices> values = entry.values();
-            for (Indices indices : values) {
-                if (indices.size() > 1) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return nonTerminals
+                .stream()
+                .noneMatch(nonTerminal -> table
+                        .get(nonTerminal)
+                        .values()
+                        .stream()
+                        .anyMatch(indices -> indices.size() > 1));
     }
 
     Grammar removeLeftRecursion() {
@@ -665,7 +661,7 @@ class Grammar {
         return output;
     }
 
-    private void removeRhsOfProductionFromStack(Stack<Pair> stack, Production rule) {
+    private static void removeRhsOfProductionFromStack(Stack<Pair> stack, Production rule) {
         Stack<String> rhs = new Stack<>(rule.getRhs());
 
         while (!rhs.isEmpty()) {
@@ -678,8 +674,8 @@ class Grammar {
         }
     }
 
-    private void pushLhsAndGotoEntryOntoStack(LR1ParseTable table, Stack<Pair> stack,
-                                              Production rule) {
+    private static void pushLhsAndGotoEntryOntoStack(LR1ParseTable table, Stack<Pair> stack,
+                                                     Production rule) {
         Pair pair = stack.peek();
         Integer topState = pair.getStateIndex();
 
@@ -689,15 +685,15 @@ class Grammar {
         stack.push(new Pair(lhs, state));
     }
 
-    private boolean isAccept(Action action) {
+    private static boolean isAccept(Action action) {
         return action.getExecution().equals(ACCEPT);
     }
 
-    private boolean isReduce(Action action) {
+    private static boolean isReduce(Action action) {
         return action.getExecution().equals(REDUCE);
     }
 
-    private boolean isShift(Action action) {
+    private static boolean isShift(Action action) {
         return action.getExecution().equals(SHIFT);
     }
 
@@ -727,10 +723,10 @@ class Grammar {
 }
 
 class Sequence extends ArrayList<String> implements Comparable<Sequence> {
-    public Sequence() {
+    Sequence() {
     }
 
-    public Sequence(@NotNull Collection<? extends String> c) {
+    Sequence(@NotNull Collection<? extends String> c) {
         super(c);
     }
 

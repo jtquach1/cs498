@@ -310,10 +310,10 @@ class DFAMove implements Comparable<DFAMove> {
 }
 
 class DFAMoves extends TreeSet<DFAMove> {
-    public DFAMoves() {
+    DFAMoves() {
     }
 
-    public DFAMoves(@NotNull Collection<? extends DFAMove> c) {
+    DFAMoves(@NotNull Collection<? extends DFAMove> c) {
         super(c);
     }
 }
@@ -388,10 +388,10 @@ class DFAState implements Comparable<DFAState> {
 }
 
 class DFAStates extends TreeSet<DFAState> {
-    public DFAStates() {
+    DFAStates() {
     }
 
-    public DFAStates(@NotNull Collection<? extends DFAState> c) {
+    DFAStates(@NotNull Collection<? extends DFAState> c) {
         super(c);
     }
 }

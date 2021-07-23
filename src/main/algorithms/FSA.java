@@ -213,15 +213,15 @@ class FSA {
                 "\tENTRY -> " + start.getId() + ";\n");
     }
 
-    public States getStates() {
+    States getStates() {
         return states;
     }
 
-    public States getFinalStates() {
+    States getFinalStates() {
         return finalStates;
     }
 
-    public Moves getMoves() {
+    Moves getMoves() {
         return moves;
     }
 }
@@ -304,10 +304,10 @@ class State implements Comparable<State> {
 }
 
 class States extends TreeSet<State> implements Comparable<States> {
-    public States() {
+    States() {
     }
 
-    public States(@NotNull Collection<? extends State> c) {
+    States(@NotNull Collection<? extends State> c) {
         super(c);
     }
 
@@ -375,10 +375,10 @@ class Move implements Comparable<Move> {
 }
 
 class Moves extends TreeSet<Move> {
-    public Moves() {
+    Moves() {
     }
 
-    public Moves(@NotNull Collection<? extends Move> c) {
+    Moves(@NotNull Collection<? extends Move> c) {
         super(c);
     }
 }

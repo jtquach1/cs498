@@ -27,15 +27,15 @@ class LR1ParseTable {
         this.startIndex = startIndex;
     }
 
-    public Integer getStartIndex() {
+    Integer getStartIndex() {
         return startIndex;
     }
 
-    public ActionTable getActionTable() {
+    ActionTable getActionTable() {
         return actionTable;
     }
 
-    public GotoTable getGotoTable() {
+    GotoTable getGotoTable() {
         return gotoTable;
     }
 
@@ -149,52 +149,18 @@ class GotoTable extends Table<Integer, String, Integer> {
 }
 
 class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
-    public LR1ParseOutput() {
+    LR1ParseOutput() {
     }
 
-    public LR1ParseOutput(@NotNull Collection<? extends LR1ParseOutputEntry> c) {
+    LR1ParseOutput(@NotNull Collection<? extends LR1ParseOutputEntry> c) {
         super(c);
     }
 }
 
-class LR1ParseOutputEntry {
+class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> {
     // Contains states represented as Integers and non-terminals represented as Strings.
-    Stack<Pair> stack;
-    Queue<String> input;
-    Action action;
-
-    LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action action, String cursor) {
-        this.stack = new Stack<>(stack);
-
-        this.input = new Queue<>(input);
-
-        if (cursor != null) {
-            this.input.queue(cursor);
-        }
-
-        this.action = action;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(stack, input, action);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LR1ParseOutputEntry other = (LR1ParseOutputEntry) o;
-        return Objects.equals(stack, other.stack) &&
-                Objects.equals(input, other.input) &&
-                Objects.equals(action, other.action);
-    }
-
-    @Override
-    public String toString() {
-        return "{\"stack\":\"" + stack + "\"," +
-                "\"input\":\"" + input + "\"," +
-                "\"action\":\"" + action + "\"}\n";
+    LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action output, String cursor) {
+        super(stack, input, output, cursor);
     }
 }
 

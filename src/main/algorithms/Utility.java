@@ -171,10 +171,10 @@ class Utility {
 }
 
 class Queue<T> extends ArrayList<T> {
-    public Queue() {
+    Queue() {
     }
 
-    public Queue(@NotNull Collection<? extends T> c) {
+    Queue(@NotNull Collection<? extends T> c) {
         super(c);
     }
 
@@ -270,5 +270,48 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, V>> {
         }
 
         return value;
+    }
+}
+
+class OutputEntry<E1, E2, E3> {
+    Stack<E1> stack;
+    Queue<E2> input;
+    E3 output;
+
+    OutputEntry(Stack<E1> stack, Queue<E2> input, E3 output, E2 cursor) {
+        /* We need to deep clone the parameters because their references are
+        constantly during parsing. */
+        this.stack = new Stack<>(stack);
+
+        // Lecture slides show the cursor as part of the input.
+        this.input = new Queue<>(input);
+
+        if (cursor != null) {
+            this.input.queue(cursor);
+        }
+
+        this.output = output;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stack, input, output);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OutputEntry<?, ?, ?> other = (OutputEntry<?, ?, ?>) o;
+        return Objects.equals(stack, other.stack) &&
+                Objects.equals(input, other.input) &&
+                Objects.equals(output, other.output);
+    }
+
+    @Override
+    public String toString() {
+        return "{\"stack\":\"" + stack + "\"," +
+                "\"input\":\"" + input + "\"," +
+                "\"output\":\"" + output + "\"}\n";
     }
 }
