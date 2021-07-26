@@ -76,7 +76,6 @@ class Grammar {
         String[] lines = grammar.split("\r?\n|\r");
 
         Symbols nonTerminals = new Symbols();
-        Symbols terminals = new Symbols();
         String start = null;
         Productions productions = new Productions();
 
@@ -91,11 +90,15 @@ class Grammar {
             }
         }
 
-        productions.forEach(production -> production
-                .getRhs()
+        Symbols terminals = productions
                 .stream()
-                .filter(symbol -> !nonTerminals.contains(symbol))
-                .forEach(terminals::add));
+                .map(production -> production
+                        .getRhs()
+                        .stream()
+                        .filter(symbol -> !nonTerminals.contains(symbol))
+                        .collect(Collectors.toSet()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(Symbols::new));
 
         return new Grammar(nonTerminals, terminals, start, productions);
     }
@@ -258,7 +261,7 @@ class Grammar {
     @NotNull
     private Integer replaceTopWithRule(LL1ParseTable table, Stack<String> stack, String symbol,
                                        String top) throws Exception {
-        Integer index = table.getIndex(top, symbol);
+        Integer index = table.get(top, symbol);
         if (index != null) {
             Production rule = productions.get(index);
             Sequence rhs = new Sequence(rule.getRhs());
@@ -303,6 +306,7 @@ class Grammar {
     }
 
     boolean isLL1(LL1ParseTable table) {
+        // A grammar is LL1 only if the table has at most 1 index per entry.
         return nonTerminals
                 .stream()
                 .noneMatch(nonTerminal -> table
@@ -581,11 +585,11 @@ class Grammar {
         for (Items from : collection) {
             Integer fromIndex = collection.indexOf(from);
 
-            table.populateWithReduce(productions, from, fromIndex);
-
             // An accept state doesn't have a production to reduce to.
             if (isAcceptState(from)) {
                 table.populateWithAccept(fromIndex);
+            } else {
+                table.populateWithReduce(productions, from, fromIndex);
             }
         }
 
@@ -703,6 +707,19 @@ class Grammar {
         Integer index = table.getStartIndex();
         stack.push(new Pair(noSuchSymbol, index));
         return stack;
+    }
+
+    boolean isLR1(LR1ParseTable table) {
+        ActionTable actionTable = table.getActionTable();
+        Collection<TreeMap<String, List<Action>>> entries = actionTable.values();
+
+        // A grammar is LR1 only if the Action table has at most 1 action per entry.
+        return entries
+                .stream()
+                .noneMatch(entry -> entry
+                        .values()
+                        .stream()
+                        .anyMatch(actions -> actions.size() > 1));
     }
 
     @Override

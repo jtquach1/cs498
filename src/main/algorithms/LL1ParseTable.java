@@ -97,27 +97,7 @@ class FirstMap extends TreeMap<String, Symbols> {
     }
 }
 
-class LL1ParseTable extends Table<String, String, Indices> {
-    void set(String nonTerminal, String terminal, int productionIndex) {
-        Indices indices = super.get(nonTerminal, terminal);
-        if (indices == null) {
-            indices = new Indices();
-        }
-        indices.add(productionIndex);
-        super.set(nonTerminal, terminal, indices);
-    }
-
-    Integer getIndex(String nonTerminal, String terminal) {
-        // In case of conflicts, we just want to return one value.
-        Indices indices = super.get(nonTerminal, terminal);
-        return indices != null ? indices.get(0) : null;
-    }
-}
-
-class Indices extends ArrayList<Integer> {
-    /* We use a list of integers to see whether a parsed grammar was LL1.
-     If the list contains more than one index, then the grammar is ambiguous
-     and must have left recursion removed. */
+class LL1ParseTable extends Table<String, String, Integer> {
 }
 
 class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {
@@ -130,6 +110,9 @@ class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {
 }
 
 class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> {
+    /* We use a list of integers to see whether a parsed grammar was LL1.
+     If the list contains more than one index, then the grammar is ambiguous
+     and must have left recursion removed. */
     LL1ParseOutputEntry(Stack<String> stack, Queue<String> input, Integer output, String cursor) {
         super(stack, input, output, cursor);
     }

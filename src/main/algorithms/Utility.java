@@ -252,24 +252,52 @@ class ListWithUniques<T> extends ArrayList<T> {
     }
 }
 
-class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, V>> {
+class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
     void set(K1 key1, K2 key2, V value) {
-        TreeMap<K2, V> entry = this.computeIfAbsent(key1, k -> new TreeMap<>());
-        entry.put(key2, value);
+        TreeMap<K2, List<V>> entry = this.computeIfAbsent(key1, k -> new TreeMap<>());
+
+        List<V> values = entry.get(key2);
+        if (values == null) {
+            values = new ArrayList<>();
+        }
+        values.add(value);
+
+        entry.put(key2, values);
     }
 
     V get(K1 key1, K2 key2) {
-        TreeMap<K2, V> entry = this.get(key1);
+        TreeMap<K2, List<V>> entry = this.get(key1);
         if (entry == null) {
             return null;
         }
 
-        V value = entry.get(key2);
-        if (key2 == null || value == null) {
+        List<V> values = entry.get(key2);
+        if (key2 == null || values == null) {
             return null;
         }
 
-        return value;
+        // In case of conflicts, we just want to return one value.
+        return values.get(0);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (K1 key1 : this.keySet()) {
+            TreeMap<K2, List<V>> entry = this.get(key1);
+            sb.append("\"" + key1 + "\": ");
+            sb.append("[");
+            for (K2 key2 : entry.keySet()) {
+                sb.append("{");
+                sb.append("\"" + key2 + "\": ");
+                sb.append(entry.get(key2));
+                sb.append("},");
+            }
+            sb.append("],");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }
 

@@ -86,17 +86,6 @@ class ActionTable extends Table<Integer, String, Action> {
         Action action = new Action(SHIFT, toIndex);
         this.set(fromIndex, terminal, action);
     }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (Integer fromId : this.keySet()) {
-            sb.append("\"" + fromId + "\": " + this.get(fromId) + ",");
-        }
-        sb.append("}");
-        return sb.toString();
-    }
 }
 
 class Action implements Comparable<Action> {

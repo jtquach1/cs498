@@ -52,7 +52,13 @@ class GrammarTest {
     sampleExamProblem4,
 
     // Textbook example with direct and indirect left recursion
-    leftRecursionExample;
+    leftRecursionExample,
+
+    // From lecture slides
+    ambiguousArithmeticExpression,
+
+    // From lecture slides
+    danglingElseProblem;
 
     @BeforeEach
     void setUp() {
@@ -134,6 +140,30 @@ class GrammarTest {
                         "S ::= b",
                         "A ::= S c",
                         "A ::= d"
+                )
+        );
+
+        ambiguousArithmeticExpression = new Grammar(
+                makeNonTerminals(),
+                makeTerminals("+", "*", "(", ")", "id"),
+                "E",
+                makeProductions(
+                        "E ::= E + E",
+                        "E ::= E * E",
+                        "E ::= ( E )",
+                        "E ::= id"
+                )
+        );
+
+        danglingElseProblem = new Grammar(
+                makeNonTerminals("E"),
+                makeTerminals("if", "(", ")", "else", "s", "e"),
+                "S",
+                makeProductions(
+                        "S ::= if ( E ) S",
+                        "S ::= if ( E ) S else S",
+                        "S ::= s",
+                        "E ::= e"
                 )
         );
 
@@ -746,6 +776,21 @@ class GrammarTest {
     void isLL1() {
         assertFalse(arithmeticExpression.isLL1(arithmeticExpressionLL1ParseTable));
         assertTrue(arithmeticExpressionRedux.isLL1(arithmeticExpressionReduxLL1ParseTable));
+
+//        {
+//            FirstMap firstMap = ambiguousArithmeticExpression.first();
+//            FollowMap followMap = ambiguousArithmeticExpression.follow(firstMap);
+//            LL1ParseTable ambiguousArithmeticExpressionLL1ParseTable =
+//                    ambiguousArithmeticExpression.generateLL1ParseTable(firstMap, followMap);
+//            assertFalse(ambiguousArithmeticExpression.isLL1(ambiguousArithmeticExpressionLL1ParseTable));
+//        }
+//        {
+//            FirstMap firstMap = danglingElseProblem.first();
+//            FollowMap followMap = danglingElseProblem.follow(firstMap);
+//            LL1ParseTable danglingElseLL1ParseTable = danglingElseProblem.generateLL1ParseTable(firstMap,
+//                    followMap);
+//            assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
+//        }
     }
 
     @Test
@@ -1040,5 +1085,22 @@ class GrammarTest {
                         "a = + a " + TERMINATOR
                 )
         );
+    }
+
+    @Test
+    void isLR1() {
+        assertTrue(arithmeticExpression.isLR1(arithmeticExpressionLR1ParseTable));
+        assertTrue(sampleExamProblem4.isLR1(sampleExamProblem4LR1ParseTable));
+
+//        {
+//            LR1Collection collection = ambiguousArithmeticExpression.computeLR1Collection();
+//            LR1ParseTable table = ambiguousArithmeticExpression.generateLR1ParseTable(collection);
+//            assertFalse(ambiguousArithmeticExpression.isLR1(table));
+//        }
+//        {
+//            LR1Collection collection = danglingElseProblem.computeLR1Collection();
+//            LR1ParseTable table = danglingElseProblem.generateLR1ParseTable(collection);
+//            assertFalse(danglingElseProblem.isLR1(table));
+//        }
     }
 }
