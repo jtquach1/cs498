@@ -726,6 +726,12 @@ class Grammar {
                         .anyMatch(actions -> actions.size() > 1));
     }
 
+    boolean containsEpsilonProductions() {
+        return productions
+                .stream()
+                .anyMatch(production -> production.getRhs().contains(EPSILON));
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(nonTerminals, terminals, start, productions);

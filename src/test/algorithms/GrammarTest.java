@@ -59,7 +59,10 @@ class GrammarTest {
     ambiguousArithmeticExpression,
 
     // From lecture slides, not LR(1)
-    danglingElseProblem;
+    danglingElseProblem,
+
+    // Textbook example, not LL(1)
+    exercise3_2;
 
     @BeforeEach
     void setUp() {
@@ -165,6 +168,18 @@ class GrammarTest {
                         "S ::= if ( E ) S else S",
                         "S ::= s",
                         "E ::= e"
+                )
+        );
+
+        exercise3_2 = new Grammar(
+                makeNonTerminals("L"),
+                makeTerminals("(", ")", "a", EPSILON),
+                "S",
+                makeProductions(
+                        "S ::= ( L )",
+                        "S ::= a",
+                        "L ::= L S",
+                        "L ::= " + EPSILON
                 )
         );
 
@@ -794,6 +809,14 @@ class GrammarTest {
                             followMap);
             assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
         }
+
+        {
+            FirstMap firstMap = exercise3_2.first();
+            FollowMap followMap = exercise3_2.follow(firstMap);
+            LL1ParseTable exercise3_2LL1ParseTable = exercise3_2.generateLL1ParseTable(firstMap,
+                    followMap);
+            assertFalse(exercise3_2.isLL1(exercise3_2LL1ParseTable));
+        }
     }
 
     @Test
@@ -864,22 +887,6 @@ class GrammarTest {
 
     @Test
     void parseSentenceLR1() throws Exception {
-        {
-            LR1Collection collection = arithmeticExpressionRedux.computeLR1Collection();
-            LR1ParseTable arithmeticExpressionReduxLR1ParseTable =
-                    arithmeticExpressionRedux.generateLR1ParseTable(collection);
-
-            String sentence = "id + id * id " + TERMINATOR;
-
-            // TODO: Fix this test!!! It keeps erroring midway through.
-            // issue: epsilon productions probably mess up how the collection is computed..
-            // the parse table can't seem to reduce to an epsilon production
-            LR1ParseOutput output =
-                    arithmeticExpressionRedux.parseSentence(arithmeticExpressionReduxLR1ParseTable, sentence);
-
-        }
-
-
         assertEquals(
                 new LR1ParseOutput(
                         Arrays.asList(
@@ -1112,9 +1119,9 @@ class GrammarTest {
 
         {
             LR1Collection collection = arithmeticExpressionRedux.computeLR1Collection();
-            LR1ParseTable arithmeticExpressionLR1ReduxParseTable =
+            LR1ParseTable arithmeticExpressionReduxLR1ParseTable =
                     arithmeticExpressionRedux.generateLR1ParseTable(collection);
-            assertTrue(arithmeticExpressionRedux.isLR1(arithmeticExpressionLR1ReduxParseTable));
+            assertTrue(arithmeticExpressionRedux.isLR1(arithmeticExpressionReduxLR1ParseTable));
         }
 
         assertTrue(sampleExamProblem4.isLR1(sampleExamProblem4LR1ParseTable));
@@ -1128,6 +1135,12 @@ class GrammarTest {
             LR1Collection collection = danglingElseProblem.computeLR1Collection();
             LR1ParseTable table = danglingElseProblem.generateLR1ParseTable(collection);
             assertFalse(danglingElseProblem.isLR1(table));
+        }
+
+        {
+            LR1Collection collection = exercise3_2.computeLR1Collection();
+            LR1ParseTable exercise3_2LR1ParseTable = exercise3_2.generateLR1ParseTable(collection);
+            assertTrue(exercise3_2.isLR1(exercise3_2LR1ParseTable));
         }
     }
 }
