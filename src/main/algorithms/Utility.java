@@ -282,22 +282,22 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (K1 key1 : this.keySet()) {
-            TreeMap<K2, List<V>> entry = this.get(key1);
-            sb.append("\"" + key1 + "\": ");
-            sb.append("[");
-            for (K2 key2 : entry.keySet()) {
-                sb.append("{");
-                sb.append("\"" + key2 + "\": ");
-                sb.append(entry.get(key2));
-                sb.append("},");
-            }
-            sb.append("],");
-        }
-        sb.append("}");
-        return sb.toString();
+        String rows = this
+                .keySet()
+                .stream()
+                .map(key1 -> {
+                    TreeMap<K2, List<V>> entry = this.get(key1);
+                    String entries = entry
+                            .keySet()
+                            .stream()
+                            .map(key2 -> "{\"" + key2 + "\":" + entry.get(key2) + "}")
+                            .collect(Collectors.joining(","));
+
+                    return "\"" + key1 + "\":" + "[" + entries + "]";
+                })
+                .collect(Collectors.joining(","));
+
+        return "{" + rows + "}";
     }
 }
 

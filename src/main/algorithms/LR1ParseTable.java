@@ -53,11 +53,20 @@ class LR1ParseTable {
                 gotoTable.equals(other.gotoTable) &&
                 startIndex.equals(other.startIndex);
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"actionTable\": " + actionTable +
+                ", \"gotoTable\": " + gotoTable +
+                ", \"startIndex\": " + startIndex +
+                '}';
+    }
 }
 
 class ActionTable extends Table<Integer, String, Action> {
     // We don't transition out of an Accept state in the DFA generated from an LR1 collection.
-    static final Integer noSuchState = -1;
+    static final Integer noSuchState = -2;
 
     void populateWithReduce(Productions productions, Items from, Integer fromIndex) {
         from
@@ -115,6 +124,18 @@ class Action implements Comparable<Action> {
         return index;
     }
 
+    boolean executesAccept() {
+        return execution.equals(ACCEPT);
+    }
+
+    boolean executesReduce() {
+        return execution.equals(REDUCE);
+    }
+
+    boolean executesShift() {
+        return execution.equals(SHIFT);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(execution, index);
@@ -130,7 +151,7 @@ class Action implements Comparable<Action> {
 
     @Override
     public String toString() {
-        return "{ \"execution\": \"" + execution + "\", \"index\": \"" + index + "\"}";
+        return "{ \"execution\":\"" + execution + "\", \"index\":\"" + index + "\"}";
     }
 }
 
@@ -256,6 +277,17 @@ class LR1Collection extends ListWithUniques<Items> {
     Items getStart() {
         return start;
     }
+
+    @Override
+    public String toString() {
+        String collection = super.toString();
+
+        return "{" +
+                "\"collection\": " + collection +
+                ", \"transitions\":" + transitions +
+                ", \"start\":" + start +
+                '}';
+    }
 }
 
 class Item extends Production {
@@ -306,8 +338,16 @@ class Item extends Production {
 
     @Override
     public String toString() {
-        String rule = super.toString();
-        return "[" + rule + ", " + lookahead + "]";
+        String symbols = rhs
+                .stream()
+                .map(symbol -> "\"" + symbol + "\"")
+                .collect(Collectors.joining(", "));
+
+        return "{" +
+                "\"lhs\":\"" + lhs + "\", " +
+                "\"rhs\":[" + symbols + "], " +
+                "\"lookahead\":\"" + lookahead + "\"" +
+                "}";
     }
 }
 
@@ -498,6 +538,15 @@ class Transition implements Comparable<Transition> {
         return Objects.equals(from, other.from) &&
                 Objects.equals(symbol, other.symbol) &&
                 Objects.equals(to, other.to);
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"from\":" + from +
+                ", \"symbol\": \"" + symbol + "\"" +
+                ", \"to\":" + to +
+                '}';
     }
 }
 

@@ -36,6 +36,7 @@ class GrammarTest {
     static ActionTable sampleExamProblem4ActionTable;
     static GotoTable sampleExamProblem4GotoTable;
     static LR1ParseTable sampleExamProblem4LR1ParseTable;
+
     // From lecture slides, non LL(1) grammar
     Grammar arithmeticExpression,
 
@@ -54,10 +55,10 @@ class GrammarTest {
     // Textbook example with direct and indirect left recursion
     leftRecursionExample,
 
-    // From lecture slides
+    // From lecture slides, neither LL(1) nor LR(1)
     ambiguousArithmeticExpression,
 
-    // From lecture slides
+    // From lecture slides, not LR(1)
     danglingElseProblem;
 
     @BeforeEach
@@ -776,21 +777,23 @@ class GrammarTest {
     void isLL1() {
         assertFalse(arithmeticExpression.isLL1(arithmeticExpressionLL1ParseTable));
         assertTrue(arithmeticExpressionRedux.isLL1(arithmeticExpressionReduxLL1ParseTable));
+        assertTrue(sampleExamProblem3.isLL1(sampleExamProblem3LL1ParseTable));
 
-//        {
-//            FirstMap firstMap = ambiguousArithmeticExpression.first();
-//            FollowMap followMap = ambiguousArithmeticExpression.follow(firstMap);
-//            LL1ParseTable ambiguousArithmeticExpressionLL1ParseTable =
-//                    ambiguousArithmeticExpression.generateLL1ParseTable(firstMap, followMap);
-//            assertFalse(ambiguousArithmeticExpression.isLL1(ambiguousArithmeticExpressionLL1ParseTable));
-//        }
-//        {
-//            FirstMap firstMap = danglingElseProblem.first();
-//            FollowMap followMap = danglingElseProblem.follow(firstMap);
-//            LL1ParseTable danglingElseLL1ParseTable = danglingElseProblem.generateLL1ParseTable(firstMap,
-//                    followMap);
-//            assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
-//        }
+        {
+            FirstMap firstMap = ambiguousArithmeticExpression.first();
+            FollowMap followMap = ambiguousArithmeticExpression.follow(firstMap);
+            LL1ParseTable ambiguousArithmeticExpressionLL1ParseTable =
+                    ambiguousArithmeticExpression.generateLL1ParseTable(firstMap, followMap);
+            assertFalse(ambiguousArithmeticExpression.isLL1(ambiguousArithmeticExpressionLL1ParseTable));
+        }
+        {
+            FirstMap firstMap = danglingElseProblem.first();
+            FollowMap followMap = danglingElseProblem.follow(firstMap);
+            LL1ParseTable danglingElseLL1ParseTable =
+                    danglingElseProblem.generateLL1ParseTable(firstMap,
+                            followMap);
+            assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
+        }
     }
 
     @Test
@@ -861,6 +864,22 @@ class GrammarTest {
 
     @Test
     void parseSentenceLR1() throws Exception {
+        {
+            LR1Collection collection = arithmeticExpressionRedux.computeLR1Collection();
+            LR1ParseTable arithmeticExpressionReduxLR1ParseTable =
+                    arithmeticExpressionRedux.generateLR1ParseTable(collection);
+
+            String sentence = "id + id * id " + TERMINATOR;
+
+            // TODO: Fix this test!!! It keeps erroring midway through.
+            // issue: epsilon productions probably mess up how the collection is computed..
+            // the parse table can't seem to reduce to an epsilon production
+            LR1ParseOutput output =
+                    arithmeticExpressionRedux.parseSentence(arithmeticExpressionReduxLR1ParseTable, sentence);
+
+        }
+
+
         assertEquals(
                 new LR1ParseOutput(
                         Arrays.asList(
@@ -1090,17 +1109,25 @@ class GrammarTest {
     @Test
     void isLR1() {
         assertTrue(arithmeticExpression.isLR1(arithmeticExpressionLR1ParseTable));
+
+        {
+            LR1Collection collection = arithmeticExpressionRedux.computeLR1Collection();
+            LR1ParseTable arithmeticExpressionLR1ReduxParseTable =
+                    arithmeticExpressionRedux.generateLR1ParseTable(collection);
+            assertTrue(arithmeticExpressionRedux.isLR1(arithmeticExpressionLR1ReduxParseTable));
+        }
+
         assertTrue(sampleExamProblem4.isLR1(sampleExamProblem4LR1ParseTable));
 
-//        {
-//            LR1Collection collection = ambiguousArithmeticExpression.computeLR1Collection();
-//            LR1ParseTable table = ambiguousArithmeticExpression.generateLR1ParseTable(collection);
-//            assertFalse(ambiguousArithmeticExpression.isLR1(table));
-//        }
-//        {
-//            LR1Collection collection = danglingElseProblem.computeLR1Collection();
-//            LR1ParseTable table = danglingElseProblem.generateLR1ParseTable(collection);
-//            assertFalse(danglingElseProblem.isLR1(table));
-//        }
+        {
+            LR1Collection collection = ambiguousArithmeticExpression.computeLR1Collection();
+            LR1ParseTable table = ambiguousArithmeticExpression.generateLR1ParseTable(collection);
+            assertFalse(ambiguousArithmeticExpression.isLR1(table));
+        }
+        {
+            LR1Collection collection = danglingElseProblem.computeLR1Collection();
+            LR1ParseTable table = danglingElseProblem.generateLR1ParseTable(collection);
+            assertFalse(danglingElseProblem.isLR1(table));
+        }
     }
 }

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
 
@@ -25,6 +26,24 @@ class FollowMap extends TreeMap<String, Symbols> {
     void initializeFollowSetOfNonTerminal(String symbol) {
         Symbols set = new Symbols();
         this.put(symbol, set);
+    }
+
+    @Override
+    public String toString() {
+        String entries = this
+                .keySet()
+                .stream()
+                .map(key -> {
+                    String values = this.get(key)
+                            .stream()
+                            .map(value -> "\"" + value + "\"")
+                            .collect(Collectors.joining(","));
+
+                    return "\"" + key + "\":" + "[" + values + "]";
+                })
+                .collect(Collectors.joining(","));
+
+        return "{" + entries + "}";
     }
 }
 
@@ -68,32 +87,57 @@ class FirstMap extends TreeMap<String, Symbols> {
 
     Symbols first(Sequence sequence) {
         Symbols F = new Symbols();
+        int i = 0;
 
         // An empty sequence has no characters.
         if (sequence.size() != 0) {
 
-            String firstSymbol = sequence.get(0);
-            Symbols entry = this.get(firstSymbol);
+            String symbol = sequence.get(i++);
+            Symbols entry = this.get(symbol);
 
             if (entry == null) {
                 // If the entry doesn't already exist, it must be the terminator.
                 entry = new Symbols();
-                entry.add(firstSymbol);
+                entry.add(symbol);
             }
 
             F.addAll(entry);
-            int i = 1;
             int n = sequence.size();
 
             while (F.contains(EPSILON) && i < n) {
                 F.remove(EPSILON);
-                String symbol = sequence.get(i);
-                F.addAll(this.get(symbol));
+                symbol = sequence.get(i);
+                entry = this.get(symbol);
+
+                if (entry == null) {
+                    entry = new Symbols();
+                    entry.add(symbol);
+                }
+
+                F.addAll(entry);
                 i++;
             }
         }
 
         return F;
+    }
+
+    @Override
+    public String toString() {
+        String entries = this
+                .keySet()
+                .stream()
+                .map(key -> {
+                    String values = this.get(key)
+                            .stream()
+                            .map(value -> "\"" + value + "\"")
+                            .collect(Collectors.joining(","));
+
+                    return "\"" + key + "\":" + "[" + values + "]";
+                })
+                .collect(Collectors.joining(","));
+
+        return "{" + entries + "}";
     }
 }
 

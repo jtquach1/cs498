@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static algorithms.Execution.*;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Item.MARKER;
 import static algorithms.Pair.noSuchSymbol;
@@ -145,6 +144,8 @@ class Grammar {
 
             for (int i = 0; i < n; i++) {
                 Symbols followOfSymbol = getFollowOfSymbol(followMap, rhs, i);
+
+                // We do not calculate the follow sets for terminals.
                 if (followOfSymbol == null) continue;
 
                 Sequence subsequence = rhs.subList(i + 1, n);
@@ -222,7 +223,7 @@ class Grammar {
         Queue<String> sentence = initializeSentence(delimitedBySpaces);
         Stack<String> stack = initializeStackForLL1Parsing();
         String symbol = sentence.dequeue();
-        LL1ParseOutput output = initializeLL1ParseOutput(sentence, stack, symbol);
+        LL1ParseOutput parseOutput = initializeLL1ParseOutput(sentence, stack, symbol);
 
         while (true) {
             String top = stack.pop();
@@ -236,9 +237,9 @@ class Grammar {
             } else {
                 throw new Exception("Illegal symbol " + top);
             }
-            output.add(new LL1ParseOutputEntry(stack, sentence, index, symbol));
+            parseOutput.add(new LL1ParseOutputEntry(stack, sentence, index, symbol));
         }
-        return output;
+        return parseOutput;
     }
 
     private static boolean isTerminator(String symbol, String top) {
@@ -343,6 +344,10 @@ class Grammar {
             Sequence alpha = rhs.subList(1, rhs.size());
             String y = alphaForm.getLhs();
             String yPrime = y + "'";
+
+            while (isNonTerminal(yPrime)) {
+                yPrime += "'";
+            }
 
             for (Production betaForm : betaForms) {
                 Sequence beta = betaForm.getRhs();
@@ -552,9 +557,20 @@ class Grammar {
         Symbols terminals = new Symbols(this.terminals);
         Productions productions = new Productions(this.productions);
 
-        String newStart = start + "'";
+        String newStart = getNewStart();
         productions.add(new Production(newStart, start));
         return new Grammar(nonTerminals, terminals, newStart, productions);
+    }
+
+    @NotNull
+    private String getNewStart() {
+        String newStart = start + "'";
+
+        // Might be possible that newStart already exists
+        while (isNonTerminal(newStart)) {
+            newStart += "'";
+        }
+        return newStart;
     }
 
     LR1ParseTable generateLR1ParseTable(LR1Collection collection) {
@@ -605,7 +621,7 @@ class Grammar {
     }
 
     private boolean isAcceptState(Items from) {
-        return from.contains(new Item(TERMINATOR, start + "'", start, MARKER));
+        return from.contains(new Item(TERMINATOR, getNewStart(), start, MARKER));
     }
 
     private GotoTable constructGotoTable(LR1Collection collection) {
@@ -638,31 +654,31 @@ class Grammar {
         Queue<String> sentence = initializeSentence(delimitedBySpaces);
         Stack<Pair> stack = initializeStackForLR1Parsing(table);
         String terminal = sentence.dequeue();
-        LR1ParseOutput output = new LR1ParseOutput();
+        LR1ParseOutput parseOutput = new LR1ParseOutput();
 
         while (true) {
             Pair pair = stack.peek();
             Integer topState = pair.getStateIndex();
             Action action = table.getActionTable().get(topState, terminal);
-            output.add(new LR1ParseOutputEntry(stack, sentence, action, terminal));
+            parseOutput.add(new LR1ParseOutputEntry(stack, sentence, action, terminal));
 
-            if (isShift(action)) {
+            if (action == null) {
+                throw new Exception("No such Action at state " + topState + " and symbol " + terminal);
+            } else if (action.executesShift()) {
                 Integer state = action.getIndex();
                 stack.push(new Pair(terminal, state));
                 terminal = sentence.dequeue();
-            } else if (isReduce(action)) {
+            } else if (action.executesReduce()) {
                 Integer rule = action.getIndex();
                 Production production = productions.get(rule);
                 removeRhsOfProductionFromStack(stack, production);
                 pushLhsAndGotoEntryOntoStack(table, stack, production);
-            } else if (isAccept(action)) {
+            } else if (action.executesAccept()) {
                 break;
-            } else {
-                throw new Exception("No such Action at state " + topState + " and symbol " + terminal);
             }
         }
 
-        return output;
+        return parseOutput;
     }
 
     private static void removeRhsOfProductionFromStack(Stack<Pair> stack, Production rule) {
@@ -687,18 +703,6 @@ class Grammar {
         Integer state = table.getGotoTable().get(topState, lhs);
 
         stack.push(new Pair(lhs, state));
-    }
-
-    private static boolean isAccept(Action action) {
-        return action.getExecution().equals(ACCEPT);
-    }
-
-    private static boolean isReduce(Action action) {
-        return action.getExecution().equals(REDUCE);
-    }
-
-    private static boolean isShift(Action action) {
-        return action.getExecution().equals(SHIFT);
     }
 
     @NotNull
@@ -804,17 +808,15 @@ class Production implements Comparable<Production> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(lhs + " ::= ");
-        for (int i = 0; i < rhs.size(); i++) {
-            String symbol = rhs.get(i);
-            if (i == rhs.size() - 1) {
-                sb.append(symbol);
-            } else {
-                sb.append(symbol + " ");
-            }
-        }
-        return sb.toString();
+        String symbols = rhs
+                .stream()
+                .map(symbol -> "\"" + symbol + "\"")
+                .collect(Collectors.joining(","));
+
+        return "{" +
+                "\"lhs\":\"" + lhs + "\"," +
+                "\"rhs\":[" + symbols + "]" +
+                "}";
     }
 }
 
