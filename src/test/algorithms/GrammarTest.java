@@ -16,53 +16,47 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
 
+    static Grammar arithmeticExpression;             // From lecture slides, not LL(1)
+    static Grammar augmentedArithmeticExpression;    // From lecture slides, not LL(1)
+    static Grammar arithmeticExpressionRedux;        // From lecture slides, is LL(1)
+    static Grammar sampleExamProblem3;               // From Spring 2019 sample exam
+    static Grammar sampleExamProblem4;               // From Spring 2019 sample exam
+    static Grammar directAndIndirectLeftRecursion;   // Textbook example
+    static Grammar ambiguousArithmeticExpression;    // From lecture slides, neither LL(1) nor LR(1)
+    static Grammar danglingElseProblem;              // From lecture slides, not LR(1)
+
     static FirstMap sampleExamProblem3FirstMap;
     static FirstMap arithmeticExpressionReduxFirstMap;
     static FirstMap arithmeticExpressionFirstMap;
+    static FirstMap ambiguousArithmeticExpressionFirstMap;
+    static FirstMap danglingElseProblemFirstMap;
     static FollowMap sampleExamProblem3FollowMap;
     static FollowMap arithmeticExpressionReduxFollowMap;
     static FollowMap arithmeticExpressionFollowMap;
+    static FollowMap ambiguousArithmeticExpressionFollowMap;
+    static FollowMap danglingElseProblemFollowMap;
     static LL1ParseTable sampleExamProblem3LL1ParseTable;
     static LL1ParseTable arithmeticExpressionReduxLL1ParseTable;
     static LL1ParseTable arithmeticExpressionLL1ParseTable;
+    static LL1ParseTable ambiguousArithmeticExpressionLL1ParseTable;
+    static LL1ParseTable danglingElseLL1ParseTable;
+
     // Item sets computed for arithmetic expression grammar
     static Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17,
             s18, s19, s20, s21;
     static Transitions arithmeticExpressionTransitions;
     static ActionTable arithmeticExpressionActionTable;
-    static GotoTable arithmeticExpressionGotoTable;
-    static LR1Collection arithmeticExpressionCollection;
-    static LR1ParseTable arithmeticExpressionLR1ParseTable;
     static ActionTable sampleExamProblem4ActionTable;
+    static GotoTable arithmeticExpressionGotoTable;
     static GotoTable sampleExamProblem4GotoTable;
+    static LR1Collection arithmeticExpressionCollection;
+    static LR1Collection ambiguousArithmeticExpressionLR1Collection;
+    static LR1Collection danglingElseProblemLR1Collection;
+
+    static LR1ParseTable arithmeticExpressionLR1ParseTable;
     static LR1ParseTable sampleExamProblem4LR1ParseTable;
-
-    // From lecture slides, non LL(1) grammar
-    Grammar arithmeticExpression,
-
-    // From lecture slides, non LL(1) grammar with new start state
-    augmentedArithmeticExpression,
-
-    // From lecture slides, LL(1) grammar
-    arithmeticExpressionRedux,
-
-    // From Spring 2019 sample exam, problem 3
-    sampleExamProblem3,
-
-    // From Spring 2019 sample exam, problem 4
-    sampleExamProblem4,
-
-    // Textbook example with direct and indirect left recursion
-    leftRecursionExample,
-
-    // From lecture slides, neither LL(1) nor LR(1)
-    ambiguousArithmeticExpression,
-
-    // From lecture slides, not LR(1)
-    danglingElseProblem,
-
-    // Textbook example, not LL(1)
-    exercise3_2;
+    static LR1ParseTable ambiguousArithmeticExpressionLR1ParseTable;
+    static LR1ParseTable danglingElseProblemLR1ParseTable;
 
     @BeforeEach
     void setUp() {
@@ -106,6 +100,7 @@ class GrammarTest {
                         "F ::= id"
                 )
         );
+
         augmentedArithmeticExpression = new Grammar(
                 makeNonTerminals("E", "T", "F"),
                 makeTerminals("+", "*", "(", ")", "id"),
@@ -120,6 +115,7 @@ class GrammarTest {
                         "F ::= id"
                 )
         );
+
         arithmeticExpressionRedux = new Grammar(
                 makeNonTerminals("E'", "T", "T'", "F"),
                 makeTerminals("+", EPSILON, "*", "(", ")", "id"),
@@ -135,7 +131,8 @@ class GrammarTest {
                         "F ::= id"
                 )
         );
-        leftRecursionExample = new Grammar(
+
+        directAndIndirectLeftRecursion = new Grammar(
                 makeNonTerminals("A"),
                 makeTerminals("a", "b", "c", "d"),
                 "S",
@@ -171,18 +168,6 @@ class GrammarTest {
                 )
         );
 
-        exercise3_2 = new Grammar(
-                makeNonTerminals("L"),
-                makeTerminals("(", ")", "a", EPSILON),
-                "S",
-                makeProductions(
-                        "S ::= ( L )",
-                        "S ::= a",
-                        "L ::= L S",
-                        "L ::= " + EPSILON
-                )
-        );
-
         sampleExamProblem3FirstMap = new FirstMap();
         sampleExamProblem3FirstMap.put("a", makeFirst("a"));
         sampleExamProblem3FirstMap.put("b", makeFirst("b"));
@@ -215,6 +200,10 @@ class GrammarTest {
         arithmeticExpressionFirstMap.put("T", makeFirst("(", "id"));
         arithmeticExpressionFirstMap.put("id", makeFirst("id"));
 
+        ambiguousArithmeticExpressionFirstMap = ambiguousArithmeticExpression.first();
+
+        danglingElseProblemFirstMap = danglingElseProblem.first();
+
         sampleExamProblem3FollowMap = new FollowMap();
         sampleExamProblem3FollowMap.put("S", makeFollow(TERMINATOR));
         sampleExamProblem3FollowMap.put("A", makeFollow("a"));
@@ -231,6 +220,11 @@ class GrammarTest {
         arithmeticExpressionFollowMap.put("E", makeFollow("+", ")", TERMINATOR));
         arithmeticExpressionFollowMap.put("F", makeFollow("+", "*", ")", TERMINATOR));
         arithmeticExpressionFollowMap.put("T", makeFollow("+", "*", ")", TERMINATOR));
+
+        ambiguousArithmeticExpressionFollowMap =
+                ambiguousArithmeticExpression.follow(ambiguousArithmeticExpressionFirstMap);
+
+        danglingElseProblemFollowMap = danglingElseProblem.follow(danglingElseProblemFirstMap);
 
         sampleExamProblem3LL1ParseTable = new LL1ParseTable();
         sampleExamProblem3LL1ParseTable.set("S", "a", 5);
@@ -267,6 +261,13 @@ class GrammarTest {
         arithmeticExpressionLL1ParseTable.set("T", "id", 5);
         arithmeticExpressionLL1ParseTable.set("F", "(", 2);
         arithmeticExpressionLL1ParseTable.set("F", "id", 3);
+
+        ambiguousArithmeticExpressionLL1ParseTable =
+                ambiguousArithmeticExpression.generateLL1ParseTable(ambiguousArithmeticExpressionFirstMap, ambiguousArithmeticExpressionFollowMap);
+
+        danglingElseLL1ParseTable =
+                danglingElseProblem.generateLL1ParseTable(danglingElseProblemFirstMap,
+                        danglingElseProblemFollowMap);
 
         s0 = makeItems(
                 "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
@@ -502,6 +503,11 @@ class GrammarTest {
                 )
         );
 
+        ambiguousArithmeticExpressionLR1Collection =
+                ambiguousArithmeticExpression.computeLR1Collection();
+
+        danglingElseProblemLR1Collection = danglingElseProblem.computeLR1Collection();
+
         arithmeticExpressionLR1ParseTable = new LR1ParseTable(
                 arithmeticExpressionActionTable,
                 arithmeticExpressionGotoTable,
@@ -549,6 +555,12 @@ class GrammarTest {
                 sampleExamProblem4GotoTable,
                 0
         );
+
+        ambiguousArithmeticExpressionLR1ParseTable =
+                ambiguousArithmeticExpression.generateLR1ParseTable(ambiguousArithmeticExpressionLR1Collection);
+
+        danglingElseProblemLR1ParseTable =
+                danglingElseProblem.generateLR1ParseTable(danglingElseProblemLR1Collection);
     }
 
     @Test
@@ -567,6 +579,16 @@ class GrammarTest {
                 arithmeticExpressionFirstMap,
                 arithmeticExpression.first()
         );
+
+        assertEquals(
+                ambiguousArithmeticExpressionFirstMap,
+                ambiguousArithmeticExpression.first()
+        );
+
+        assertEquals(
+                danglingElseProblemFirstMap,
+                danglingElseProblem.first()
+        );
     }
 
     @Test
@@ -582,6 +604,16 @@ class GrammarTest {
         assertEquals(
                 arithmeticExpressionFollowMap,
                 arithmeticExpression.follow(arithmeticExpressionFirstMap)
+        );
+
+        assertEquals(
+                ambiguousArithmeticExpressionFollowMap,
+                ambiguousArithmeticExpression.follow(ambiguousArithmeticExpressionFirstMap)
+        );
+
+        assertEquals(
+                danglingElseProblemFollowMap,
+                danglingElseProblem.follow(danglingElseProblemFirstMap)
         );
     }
 
@@ -603,12 +635,27 @@ class GrammarTest {
                 )
         );
 
-        // From lecture slides, non LL(1) grammar
         assertEquals(
                 arithmeticExpressionLL1ParseTable,
                 arithmeticExpression.generateLL1ParseTable(
                         arithmeticExpressionFirstMap,
                         arithmeticExpressionFollowMap
+                )
+        );
+
+        assertEquals(
+                ambiguousArithmeticExpressionLL1ParseTable,
+                ambiguousArithmeticExpression.generateLL1ParseTable(
+                        ambiguousArithmeticExpressionFirstMap,
+                        ambiguousArithmeticExpressionFollowMap
+                )
+        );
+
+        assertEquals(
+                danglingElseLL1ParseTable,
+                danglingElseProblem.generateLL1ParseTable(
+                        danglingElseProblemFirstMap,
+                        danglingElseProblemFollowMap
                 )
         );
     }
@@ -620,72 +667,70 @@ class GrammarTest {
 
         assertEquals(
                 new LL1ParseOutput(
-                        Arrays.asList(
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "S"),
-                                        makeQueue("b", "c", "c", "c", "a", TERMINATOR),
-                                        null
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "A"),
-                                        makeQueue("b", "c", "c", "c", "a", TERMINATOR),
-                                        4
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B", "b"),
-                                        makeQueue("b", "c", "c", "c", "a", TERMINATOR),
-                                        0
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B"),
-                                        makeQueue("c", "c", "c", "a", TERMINATOR),
-                                        null
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B", "c"),
-                                        makeQueue("c", "c", "c", "a", TERMINATOR),
-                                        2
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B"),
-                                        makeQueue("c", "c", "a", TERMINATOR),
-                                        null
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B", "c"),
-                                        makeQueue("c", "c", "a", TERMINATOR),
-                                        2
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B"),
-                                        makeQueue("c", "a", TERMINATOR),
-                                        null
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B", "c"),
-                                        makeQueue("c", "a", TERMINATOR),
-                                        2
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "B"),
-                                        makeQueue("a", TERMINATOR),
-                                        null
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a", "ɛ"),
-                                        makeQueue("a", TERMINATOR),
-                                        3
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "a"),
-                                        makeQueue("a", TERMINATOR),
-                                        null
-                                ),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR),
-                                        makeQueue(TERMINATOR),
-                                        null
-                                )
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "S"),
+                                makeQueue("b", "c", "c", "c", "a", TERMINATOR),
+                                null
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "A"),
+                                makeQueue("b", "c", "c", "c", "a", TERMINATOR),
+                                4
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B", "b"),
+                                makeQueue("b", "c", "c", "c", "a", TERMINATOR),
+                                0
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B"),
+                                makeQueue("c", "c", "c", "a", TERMINATOR),
+                                null
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B", "c"),
+                                makeQueue("c", "c", "c", "a", TERMINATOR),
+                                2
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B"),
+                                makeQueue("c", "c", "a", TERMINATOR),
+                                null
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B", "c"),
+                                makeQueue("c", "c", "a", TERMINATOR),
+                                2
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B"),
+                                makeQueue("c", "a", TERMINATOR),
+                                null
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B", "c"),
+                                makeQueue("c", "a", TERMINATOR),
+                                2
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "B"),
+                                makeQueue("a", TERMINATOR),
+                                null
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a", "ɛ"),
+                                makeQueue("a", TERMINATOR),
+                                3
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "a"),
+                                makeQueue("a", TERMINATOR),
+                                null
+                        ),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR),
+                                makeQueue(TERMINATOR),
+                                null
                         )
                 ),
                 sampleExamProblem3.parseSentence(
@@ -696,88 +741,86 @@ class GrammarTest {
 
         assertEquals(
                 new LL1ParseOutput(
-                        Arrays.asList(
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E"),
-                                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T"),
-                                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                                        0),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "F"),
-                                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                                        5),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "id"),
-                                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                                        4),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'"),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", EPSILON),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        7),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'"),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T", "+"),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        1),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T"),
-                                        makeQueue("id", "*", "id", TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "F"),
-                                        makeQueue("id", "*", "id", TERMINATOR),
-                                        5),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "id"),
-                                        makeQueue("id", "*", "id", TERMINATOR),
-                                        4),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'"),
-                                        makeQueue("*", "id", TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "F", "*"),
-                                        makeQueue("*", "id", TERMINATOR),
-                                        6),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "F"),
-                                        makeQueue("id", TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'", "id"),
-                                        makeQueue("id", TERMINATOR),
-                                        4),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", "T'"),
-                                        makeQueue(TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'", EPSILON),
-                                        makeQueue(TERMINATOR),
-                                        7),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, "E'"),
-                                        makeQueue(TERMINATOR),
-                                        null),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR, EPSILON),
-                                        makeQueue(TERMINATOR),
-                                        2),
-                                makeLL1ParseOutputEntry(
-                                        makeStack(TERMINATOR),
-                                        makeQueue(TERMINATOR),
-                                        null)
-                        )
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E"),
+                                makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T"),
+                                makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                                0),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "F"),
+                                makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                                5),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "id"),
+                                makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                                4),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'"),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", EPSILON),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                7),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'"),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T", "+"),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                1),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T"),
+                                makeQueue("id", "*", "id", TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "F"),
+                                makeQueue("id", "*", "id", TERMINATOR),
+                                5),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "id"),
+                                makeQueue("id", "*", "id", TERMINATOR),
+                                4),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'"),
+                                makeQueue("*", "id", TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "F", "*"),
+                                makeQueue("*", "id", TERMINATOR),
+                                6),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "F"),
+                                makeQueue("id", TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'", "id"),
+                                makeQueue("id", TERMINATOR),
+                                4),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", "T'"),
+                                makeQueue(TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'", EPSILON),
+                                makeQueue(TERMINATOR),
+                                7),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, "E'"),
+                                makeQueue(TERMINATOR),
+                                null),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR, EPSILON),
+                                makeQueue(TERMINATOR),
+                                2),
+                        makeLL1ParseOutputEntry(
+                                makeStack(TERMINATOR),
+                                makeQueue(TERMINATOR),
+                                null)
                 ),
                 arithmeticExpressionRedux.parseSentence(
                         arithmeticExpressionReduxLL1ParseTable,
@@ -793,30 +836,8 @@ class GrammarTest {
         assertFalse(arithmeticExpression.isLL1(arithmeticExpressionLL1ParseTable));
         assertTrue(arithmeticExpressionRedux.isLL1(arithmeticExpressionReduxLL1ParseTable));
         assertTrue(sampleExamProblem3.isLL1(sampleExamProblem3LL1ParseTable));
-
-        {
-            FirstMap firstMap = ambiguousArithmeticExpression.first();
-            FollowMap followMap = ambiguousArithmeticExpression.follow(firstMap);
-            LL1ParseTable ambiguousArithmeticExpressionLL1ParseTable =
-                    ambiguousArithmeticExpression.generateLL1ParseTable(firstMap, followMap);
-            assertFalse(ambiguousArithmeticExpression.isLL1(ambiguousArithmeticExpressionLL1ParseTable));
-        }
-        {
-            FirstMap firstMap = danglingElseProblem.first();
-            FollowMap followMap = danglingElseProblem.follow(firstMap);
-            LL1ParseTable danglingElseLL1ParseTable =
-                    danglingElseProblem.generateLL1ParseTable(firstMap,
-                            followMap);
-            assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
-        }
-
-        {
-            FirstMap firstMap = exercise3_2.first();
-            FollowMap followMap = exercise3_2.follow(firstMap);
-            LL1ParseTable exercise3_2LL1ParseTable = exercise3_2.generateLL1ParseTable(firstMap,
-                    followMap);
-            assertFalse(exercise3_2.isLL1(exercise3_2LL1ParseTable));
-        }
+        assertFalse(ambiguousArithmeticExpression.isLL1(ambiguousArithmeticExpressionLL1ParseTable));
+        assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
     }
 
     @Test
@@ -835,7 +856,7 @@ class GrammarTest {
                                 "A' ::= " + EPSILON
                         )
                 ),
-                leftRecursionExample.removeLeftRecursion()
+                directAndIndirectLeftRecursion.removeLeftRecursion()
         );
 
         assertEquals(
@@ -874,7 +895,20 @@ class GrammarTest {
 
     @Test
     void computeLR1Collection() {
-        assertEquals(arithmeticExpressionCollection, arithmeticExpression.computeLR1Collection());
+        assertEquals(
+                arithmeticExpressionCollection,
+                arithmeticExpression.computeLR1Collection()
+        );
+
+        assertEquals(
+                ambiguousArithmeticExpressionLR1Collection,
+                ambiguousArithmeticExpression.computeLR1Collection()
+        );
+
+        assertEquals(
+                danglingElseProblemLR1Collection,
+                danglingElseProblem.computeLR1Collection()
+        );
     }
 
     @Test
@@ -883,116 +917,124 @@ class GrammarTest {
                 arithmeticExpressionLR1ParseTable,
                 arithmeticExpression.generateLR1ParseTable(arithmeticExpressionCollection)
         );
+
+        assertEquals(
+                ambiguousArithmeticExpressionLR1ParseTable,
+                ambiguousArithmeticExpression.generateLR1ParseTable(ambiguousArithmeticExpressionLR1Collection)
+        );
+
+        assertEquals(
+                danglingElseProblemLR1ParseTable,
+                danglingElseProblem.generateLR1ParseTable(danglingElseProblemLR1Collection)
+        );
     }
 
     @Test
     void parseSentenceLR1() throws Exception {
         assertEquals(
                 new LR1ParseOutput(
-                        Arrays.asList(
-                                makeLR1ParseOutputEntry(
-                                        makeStack(makePair(noSuchSymbol, 9)),
-                                        makeQueue("id", "+", "id", "*", "id", TERMINATOR),
-                                        makeAction(SHIFT, 14)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("id", 14)),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        makeAction(REDUCE, 3)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("F", 18)),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        makeAction(REDUCE, 4)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("T", 7)),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        makeAction(REDUCE, 1)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4)),
-                                        makeQueue("+", "id", "*", "id", TERMINATOR),
-                                        makeAction(SHIFT, 2)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2)),
-                                        makeQueue("id", "*", "id", TERMINATOR),
-                                        makeAction(SHIFT, 14)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("id", 14)),
-                                        makeQueue("*", "id", TERMINATOR),
-                                        makeAction(REDUCE, 3)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("F", 18)),
-                                        makeQueue("*", "id", TERMINATOR),
-                                        makeAction(REDUCE, 4)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("T", 0)),
-                                        makeQueue("*", "id", TERMINATOR),
-                                        makeAction(SHIFT, 16)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("T", 0),
-                                                makePair("*", 16)),
-                                        makeQueue("id", TERMINATOR),
-                                        makeAction(SHIFT, 14)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("T", 0),
-                                                makePair("*", 16),
-                                                makePair("id", 14)),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 3)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("T", 0),
-                                                makePair("*", 16),
-                                                makePair("F", 20)),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 5)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4),
-                                                makePair("+", 2),
-                                                makePair("T", 0)),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 0)),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 9),
-                                                makePair("E", 4)),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(ACCEPT, noSuchState))
-                        )
+                        makeLR1ParseOutputEntry(
+                                makeStack(makePair(noSuchSymbol, 9)),
+                                makeQueue("id", "+", "id", "*", "id", TERMINATOR),
+                                makeAction(SHIFT, 14)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("id", 14)),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                makeAction(REDUCE, 3)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("F", 18)),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                makeAction(REDUCE, 4)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("T", 7)),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                makeAction(REDUCE, 1)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4)),
+                                makeQueue("+", "id", "*", "id", TERMINATOR),
+                                makeAction(SHIFT, 2)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2)),
+                                makeQueue("id", "*", "id", TERMINATOR),
+                                makeAction(SHIFT, 14)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("id", 14)),
+                                makeQueue("*", "id", TERMINATOR),
+                                makeAction(REDUCE, 3)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("F", 18)),
+                                makeQueue("*", "id", TERMINATOR),
+                                makeAction(REDUCE, 4)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("T", 0)),
+                                makeQueue("*", "id", TERMINATOR),
+                                makeAction(SHIFT, 16)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("T", 0),
+                                        makePair("*", 16)),
+                                makeQueue("id", TERMINATOR),
+                                makeAction(SHIFT, 14)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("T", 0),
+                                        makePair("*", 16),
+                                        makePair("id", 14)),
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 3)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("T", 0),
+                                        makePair("*", 16),
+                                        makePair("F", 20)),
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 5)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4),
+                                        makePair("+", 2),
+                                        makePair("T", 0)),
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 0)),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 9),
+                                        makePair("E", 4)),
+                                makeQueue(TERMINATOR),
+                                makeAction(ACCEPT, noSuchState))
                 ),
                 arithmeticExpression.parseSentence(
                         arithmeticExpressionLR1ParseTable,
@@ -1002,108 +1044,106 @@ class GrammarTest {
 
         assertEquals(
                 new LR1ParseOutput(
-                        Arrays.asList(
-                                makeLR1ParseOutputEntry(
-                                        makeStack(makePair(noSuchSymbol, 0)),
-                                        makeQueue("a", "=", "+", "a", TERMINATOR),
-                                        makeAction(SHIFT, 5)
+                        makeLR1ParseOutputEntry(
+                                makeStack(makePair(noSuchSymbol, 0)),
+                                makeQueue("a", "=", "+", "a", TERMINATOR),
+                                makeAction(SHIFT, 5)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("a", 5)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("a", 5)
-                                        ),
-                                        makeQueue("=", "+", "a", TERMINATOR),
-                                        makeAction(REDUCE, 3)
+                                makeQueue("=", "+", "a", TERMINATOR),
+                                makeAction(REDUCE, 3)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2)
-                                        ),
-                                        makeQueue("=", "+", "a", TERMINATOR),
-                                        makeAction(SHIFT, 6)
+                                makeQueue("=", "+", "a", TERMINATOR),
+                                makeAction(SHIFT, 6)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6)
-                                        ),
-                                        makeQueue("+", "a", TERMINATOR),
-                                        makeAction(SHIFT, 11)
+                                makeQueue("+", "a", TERMINATOR),
+                                makeAction(SHIFT, 11)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6),
+                                        makePair("+", 11)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6),
-                                                makePair("+", 11)
-                                        ),
-                                        makeQueue("a", TERMINATOR),
-                                        makeAction(SHIFT, 12)
+                                makeQueue("a", TERMINATOR),
+                                makeAction(SHIFT, 12)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6),
+                                        makePair("+", 11),
+                                        makePair("a", 12)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6),
-                                                makePair("+", 11),
-                                                makePair("a", 12)
-                                        ),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 3)
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 3)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6),
+                                        makePair("+", 11),
+                                        makePair("Y", 9)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6),
-                                                makePair("+", 11),
-                                                makePair("Y", 9)
-                                        ),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 4)
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 4)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6),
+                                        makePair("+", 11),
+                                        makePair("Z", 13)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6),
-                                                makePair("+", 11),
-                                                makePair("Z", 13)
-                                        ),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 2)
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 2)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6),
+                                        makePair("Y", 9)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6),
-                                                makePair("Y", 9)
-                                        ),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 4)
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 4)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("Y", 2),
+                                        makePair("=", 6),
+                                        makePair("Z", 10)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("Y", 2),
-                                                makePair("=", 6),
-                                                makePair("Z", 10)
-                                        ),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(REDUCE, 0)
+                                makeQueue(TERMINATOR),
+                                makeAction(REDUCE, 0)
+                        ),
+                        makeLR1ParseOutputEntry(
+                                makeStack(
+                                        makePair(noSuchSymbol, 0),
+                                        makePair("X", 1)
                                 ),
-                                makeLR1ParseOutputEntry(
-                                        makeStack(
-                                                makePair(noSuchSymbol, 0),
-                                                makePair("X", 1)
-                                        ),
-                                        makeQueue(TERMINATOR),
-                                        makeAction(ACCEPT, noSuchState)
-                                )
+                                makeQueue(TERMINATOR),
+                                makeAction(ACCEPT, noSuchState)
                         )
                 ),
                 sampleExamProblem4.parseSentence(
@@ -1116,31 +1156,14 @@ class GrammarTest {
     @Test
     void isLR1() {
         assertTrue(arithmeticExpression.isLR1(arithmeticExpressionLR1ParseTable));
-
-        {
-            LR1Collection collection = arithmeticExpressionRedux.computeLR1Collection();
-            LR1ParseTable arithmeticExpressionReduxLR1ParseTable =
-                    arithmeticExpressionRedux.generateLR1ParseTable(collection);
-            assertTrue(arithmeticExpressionRedux.isLR1(arithmeticExpressionReduxLR1ParseTable));
-        }
-
         assertTrue(sampleExamProblem4.isLR1(sampleExamProblem4LR1ParseTable));
+        assertFalse(ambiguousArithmeticExpression.isLR1(ambiguousArithmeticExpressionLR1ParseTable));
+        assertFalse(danglingElseProblem.isLR1(danglingElseProblemLR1ParseTable));
+    }
 
-        {
-            LR1Collection collection = ambiguousArithmeticExpression.computeLR1Collection();
-            LR1ParseTable table = ambiguousArithmeticExpression.generateLR1ParseTable(collection);
-            assertFalse(ambiguousArithmeticExpression.isLR1(table));
-        }
-        {
-            LR1Collection collection = danglingElseProblem.computeLR1Collection();
-            LR1ParseTable table = danglingElseProblem.generateLR1ParseTable(collection);
-            assertFalse(danglingElseProblem.isLR1(table));
-        }
-
-        {
-            LR1Collection collection = exercise3_2.computeLR1Collection();
-            LR1ParseTable exercise3_2LR1ParseTable = exercise3_2.generateLR1ParseTable(collection);
-            assertTrue(exercise3_2.isLR1(exercise3_2LR1ParseTable));
-        }
+    @Test
+    void containsEpsilonProductions() {
+        assertTrue(arithmeticExpressionRedux.containsEpsilonProductions());
+        assertFalse(arithmeticExpression.containsEpsilonProductions());
     }
 }

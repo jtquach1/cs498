@@ -3,6 +3,7 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -148,8 +149,8 @@ class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {
     LL1ParseOutput() {
     }
 
-    LL1ParseOutput(@NotNull Collection<? extends LL1ParseOutputEntry> c) {
-        super(c);
+    LL1ParseOutput(LL1ParseOutputEntry... entries) {
+        super(Arrays.asList(entries));
     }
 }
 

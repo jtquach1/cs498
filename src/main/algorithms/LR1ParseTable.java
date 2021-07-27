@@ -162,8 +162,8 @@ class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
     LR1ParseOutput() {
     }
 
-    LR1ParseOutput(@NotNull Collection<? extends LR1ParseOutputEntry> c) {
-        super(c);
+    LR1ParseOutput(LR1ParseOutputEntry... entries) {
+        super(Arrays.asList(entries));
     }
 }
 
