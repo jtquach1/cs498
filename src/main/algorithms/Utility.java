@@ -322,11 +322,6 @@ class OutputEntry<E1, E2, E3> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(stack, input, output);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

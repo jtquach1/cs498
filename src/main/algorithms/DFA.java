@@ -294,11 +294,6 @@ class DFAMove implements Comparable<DFAMove> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(from, consumed, to);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -371,11 +366,6 @@ class DFAState implements Comparable<DFAState> {
 
     States getStates() {
         return states;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(states, id);
     }
 
     @Override

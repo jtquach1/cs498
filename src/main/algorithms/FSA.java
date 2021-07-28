@@ -93,11 +93,6 @@ class FSA {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(alphabet, states, finalStates, moves, start);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -273,11 +268,6 @@ class State implements Comparable<State> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, alternativeLabel);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -356,11 +346,6 @@ class Move implements Comparable<Move> {
 
     State getTo() {
         return to;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(from, consumed, to);
     }
 
     @Override

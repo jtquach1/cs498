@@ -40,11 +40,6 @@ class LR1ParseTable {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(actionTable, gotoTable, startIndex);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -137,11 +132,6 @@ class Action implements Comparable<Action> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(execution, index);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -205,11 +195,6 @@ class Pair implements Comparable<Pair> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(stateIndex, symbol);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -265,11 +250,6 @@ class LR1Collection extends ListWithUniques<Items> {
         return transitions.equals(other.transitions) && start.equals(other.start);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), transitions);
-    }
-
     public boolean contains(Transition transition) {
         return transitions.contains(transition) && super.contains(transition.getTo());
     }
@@ -320,11 +300,6 @@ class Item extends Production {
 
     String getLookahead() {
         return lookahead;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), lookahead);
     }
 
     @Override
@@ -523,11 +498,6 @@ class Transition implements Comparable<Transition> {
 
     Items getTo() {
         return to;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(from, symbol, to);
     }
 
     @Override
