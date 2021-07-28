@@ -551,6 +551,10 @@ class Transition implements Comparable<Transition> {
 }
 
 class Transitions extends TreeSet<Transition> {
+    public Transitions(Transition... transitions) {
+        super(List.of(transitions));
+    }
+
     Transitions deepClone() {
         Transitions clone = new Transitions();
         clone.addAll(this);

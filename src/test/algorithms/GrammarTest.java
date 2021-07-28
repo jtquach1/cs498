@@ -15,48 +15,52 @@ import static algorithms.Utility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GrammarTest {
-
+    static Grammar sampleExamProblem3;               // From Spring 2019 sample exam
+    static Grammar arithmeticExpressionRedux;        // From lecture slides, is LL(1)
     static Grammar arithmeticExpression;             // From lecture slides, not LL(1)
     static Grammar augmentedArithmeticExpression;    // From lecture slides, not LL(1)
-    static Grammar arithmeticExpressionRedux;        // From lecture slides, is LL(1)
-    static Grammar sampleExamProblem3;               // From Spring 2019 sample exam
     static Grammar sampleExamProblem4;               // From Spring 2019 sample exam
     static Grammar directAndIndirectLeftRecursion;   // Textbook example
     static Grammar ambiguousArithmeticExpression;    // From lecture slides, neither LL(1) nor LR(1)
     static Grammar danglingElseProblem;              // From lecture slides, not LR(1)
+    static Grammar tinyAmbiguousExpression;          // Neither LL(1) nor LR(1)
 
     static FirstMap sampleExamProblem3FirstMap;
     static FirstMap arithmeticExpressionReduxFirstMap;
     static FirstMap arithmeticExpressionFirstMap;
     static FirstMap ambiguousArithmeticExpressionFirstMap;
     static FirstMap danglingElseProblemFirstMap;
+    static FirstMap tinyAmbiguousExpressionFirstMap;
     static FollowMap sampleExamProblem3FollowMap;
     static FollowMap arithmeticExpressionReduxFollowMap;
     static FollowMap arithmeticExpressionFollowMap;
     static FollowMap ambiguousArithmeticExpressionFollowMap;
     static FollowMap danglingElseProblemFollowMap;
+    static FollowMap tinyAmbiguousExpressionFollowMap;
     static LL1ParseTable sampleExamProblem3LL1ParseTable;
     static LL1ParseTable arithmeticExpressionReduxLL1ParseTable;
     static LL1ParseTable arithmeticExpressionLL1ParseTable;
     static LL1ParseTable ambiguousArithmeticExpressionLL1ParseTable;
-    static LL1ParseTable danglingElseLL1ParseTable;
+    static LL1ParseTable danglingElseProblemLL1ParseTable;
+    static LL1ParseTable tinyAmbiguousExpressionLL1ParseTable;
 
-    // Item sets computed for arithmetic expression grammar
     static Items s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17,
-            s18, s19, s20, s21;
-    static Transitions arithmeticExpressionTransitions;
-    static ActionTable arithmeticExpressionActionTable;
-    static ActionTable sampleExamProblem4ActionTable;
-    static GotoTable arithmeticExpressionGotoTable;
-    static GotoTable sampleExamProblem4GotoTable;
-    static LR1Collection arithmeticExpressionCollection;
-    static LR1Collection ambiguousArithmeticExpressionLR1Collection;
-    static LR1Collection danglingElseProblemLR1Collection;
+            s18, s19, s20, s21;         // For arithmetic expression
+    static Items a0, a1, a2, a3, a4;    // For tiny ambiguous expression
 
-    static LR1ParseTable arithmeticExpressionLR1ParseTable;
+    static Transitions arithmeticExpressionTransitions;
+    static Transitions tinyAmbiguousExpressionTransitions;
+    static LR1Collection arithmeticExpressionCollection;
+    static LR1Collection tinyAmbiguousExpressionLR1Collection;
+    static ActionTable sampleExamProblem4ActionTable;
+    static ActionTable arithmeticExpressionActionTable;
+    static ActionTable tinyAmbiguousExpressionActionTable;
+    static GotoTable sampleExamProblem4GotoTable;
+    static GotoTable arithmeticExpressionGotoTable;
+    static GotoTable tinyAmbiguousExpressionGotoTable;
     static LR1ParseTable sampleExamProblem4LR1ParseTable;
-    static LR1ParseTable ambiguousArithmeticExpressionLR1ParseTable;
-    static LR1ParseTable danglingElseProblemLR1ParseTable;
+    static LR1ParseTable arithmeticExpressionLR1ParseTable;
+    static LR1ParseTable tinyAmbiguousExpressionLR1ParseTable;
 
     @BeforeEach
     void setUp() {
@@ -168,6 +172,17 @@ class GrammarTest {
                 )
         );
 
+        tinyAmbiguousExpression = new Grammar(
+                makeNonTerminals(),
+                makeTerminals("id"),
+                "E",
+                makeProductions(
+                        "E ::= E E",
+                        "E ::= E id",
+                        "E ::= id"
+                )
+        );
+
         sampleExamProblem3FirstMap = new FirstMap();
         sampleExamProblem3FirstMap.put("a", makeFirst("a"));
         sampleExamProblem3FirstMap.put("b", makeFirst("b"));
@@ -200,9 +215,27 @@ class GrammarTest {
         arithmeticExpressionFirstMap.put("T", makeFirst("(", "id"));
         arithmeticExpressionFirstMap.put("id", makeFirst("id"));
 
-        ambiguousArithmeticExpressionFirstMap = ambiguousArithmeticExpression.first();
+        ambiguousArithmeticExpressionFirstMap = new FirstMap();
+        ambiguousArithmeticExpressionFirstMap.put("(", makeFirst("("));
+        ambiguousArithmeticExpressionFirstMap.put(")", makeFirst(")"));
+        ambiguousArithmeticExpressionFirstMap.put("*", makeFirst("*"));
+        ambiguousArithmeticExpressionFirstMap.put("+", makeFirst("+"));
+        ambiguousArithmeticExpressionFirstMap.put("E", makeFirst("(", "id"));
+        ambiguousArithmeticExpressionFirstMap.put("id", makeFirst("id"));
 
-        danglingElseProblemFirstMap = danglingElseProblem.first();
+        danglingElseProblemFirstMap = new FirstMap();
+        danglingElseProblemFirstMap.put("(", makeFirst("("));
+        danglingElseProblemFirstMap.put(")", makeFirst(")"));
+        danglingElseProblemFirstMap.put("E", makeFirst("e"));
+        danglingElseProblemFirstMap.put("S", makeFirst("if", "s"));
+        danglingElseProblemFirstMap.put("e", makeFirst("e"));
+        danglingElseProblemFirstMap.put("else", makeFirst("else"));
+        danglingElseProblemFirstMap.put("if", makeFirst("if"));
+        danglingElseProblemFirstMap.put("s", makeFirst("s"));
+
+        tinyAmbiguousExpressionFirstMap = new FirstMap();
+        tinyAmbiguousExpressionFirstMap.put("E", makeFirst("id"));
+        tinyAmbiguousExpressionFirstMap.put("id", makeFirst("id"));
 
         sampleExamProblem3FollowMap = new FollowMap();
         sampleExamProblem3FollowMap.put("S", makeFollow(TERMINATOR));
@@ -221,10 +254,15 @@ class GrammarTest {
         arithmeticExpressionFollowMap.put("F", makeFollow("+", "*", ")", TERMINATOR));
         arithmeticExpressionFollowMap.put("T", makeFollow("+", "*", ")", TERMINATOR));
 
-        ambiguousArithmeticExpressionFollowMap =
-                ambiguousArithmeticExpression.follow(ambiguousArithmeticExpressionFirstMap);
+        ambiguousArithmeticExpressionFollowMap = new FollowMap();
+        ambiguousArithmeticExpressionFollowMap.put("E", makeFollow(TERMINATOR, ")", "*", "+"));
 
-        danglingElseProblemFollowMap = danglingElseProblem.follow(danglingElseProblemFirstMap);
+        danglingElseProblemFollowMap = new FollowMap();
+        danglingElseProblemFollowMap.put("E", makeFollow(")"));
+        danglingElseProblemFollowMap.put("S", makeFollow(TERMINATOR, "else"));
+
+        tinyAmbiguousExpressionFollowMap = new FollowMap();
+        tinyAmbiguousExpressionFollowMap.put("E", makeFollow(TERMINATOR, "id"));
 
         sampleExamProblem3LL1ParseTable = new LL1ParseTable();
         sampleExamProblem3LL1ParseTable.set("S", "a", 5);
@@ -262,12 +300,25 @@ class GrammarTest {
         arithmeticExpressionLL1ParseTable.set("F", "(", 2);
         arithmeticExpressionLL1ParseTable.set("F", "id", 3);
 
-        ambiguousArithmeticExpressionLL1ParseTable =
-                ambiguousArithmeticExpression.generateLL1ParseTable(ambiguousArithmeticExpressionFirstMap, ambiguousArithmeticExpressionFollowMap);
+        ambiguousArithmeticExpressionLL1ParseTable = new LL1ParseTable();
+        ambiguousArithmeticExpressionLL1ParseTable.set("E", "(", 0);
+        ambiguousArithmeticExpressionLL1ParseTable.set("E", "(", 1);
+        ambiguousArithmeticExpressionLL1ParseTable.set("E", "(", 2);
+        ambiguousArithmeticExpressionLL1ParseTable.set("E", "id", 1);
+        ambiguousArithmeticExpressionLL1ParseTable.set("E", "id", 2);
+        ambiguousArithmeticExpressionLL1ParseTable.set("E", "id", 3);
 
-        danglingElseLL1ParseTable =
-                danglingElseProblem.generateLL1ParseTable(danglingElseProblemFirstMap,
-                        danglingElseProblemFollowMap);
+        danglingElseProblemLL1ParseTable = new LL1ParseTable();
+        danglingElseProblemLL1ParseTable.set("E", "e", 0);
+        danglingElseProblemLL1ParseTable.set("S", "if", 1);
+        danglingElseProblemLL1ParseTable.set("S", "if", 2);
+        danglingElseProblemLL1ParseTable.set("S", "s", 3);
+
+        tinyAmbiguousExpressionLL1ParseTable = new LL1ParseTable();
+        tinyAmbiguousExpressionLL1ParseTable.set("E", "id", 0);
+        tinyAmbiguousExpressionLL1ParseTable.set("E", "id", 1);
+        tinyAmbiguousExpressionLL1ParseTable.set("E", "id", 2);
+
 
         s0 = makeItems(
                 "[E' ::= " + MARKER + " E, " + TERMINATOR + "]",
@@ -379,45 +430,125 @@ class GrammarTest {
 
         s21 = makeItems("[F ::= ( E ) " + MARKER + ", +/*/)]");
 
-        arithmeticExpressionTransitions = new Transitions();
-        arithmeticExpressionTransitions.add(makeTransition(s0, "E", s1));
-        arithmeticExpressionTransitions.add(makeTransition(s0, "T", s2));
-        arithmeticExpressionTransitions.add(makeTransition(s0, "F", s3));
-        arithmeticExpressionTransitions.add(makeTransition(s0, "(", s4));
-        arithmeticExpressionTransitions.add(makeTransition(s0, "id", s5));
-        arithmeticExpressionTransitions.add(makeTransition(s1, "+", s6));
-        arithmeticExpressionTransitions.add(makeTransition(s2, "*", s7));
-        arithmeticExpressionTransitions.add(makeTransition(s4, "E", s8));
-        arithmeticExpressionTransitions.add(makeTransition(s4, "T", s9));
-        arithmeticExpressionTransitions.add(makeTransition(s4, "F", s10));
-        arithmeticExpressionTransitions.add(makeTransition(s4, "(", s11));
-        arithmeticExpressionTransitions.add(makeTransition(s4, "id", s12));
-        arithmeticExpressionTransitions.add(makeTransition(s6, "T", s13));
-        arithmeticExpressionTransitions.add(makeTransition(s6, "F", s3));
-        arithmeticExpressionTransitions.add(makeTransition(s6, "(", s4));
-        arithmeticExpressionTransitions.add(makeTransition(s6, "id", s5));
-        arithmeticExpressionTransitions.add(makeTransition(s7, "F", s14));
-        arithmeticExpressionTransitions.add(makeTransition(s7, "(", s4));
-        arithmeticExpressionTransitions.add(makeTransition(s7, "id", s5));
-        arithmeticExpressionTransitions.add(makeTransition(s8, ")", s15));
-        arithmeticExpressionTransitions.add(makeTransition(s8, "+", s16));
-        arithmeticExpressionTransitions.add(makeTransition(s9, "*", s17));
-        arithmeticExpressionTransitions.add(makeTransition(s11, "E", s18));
-        arithmeticExpressionTransitions.add(makeTransition(s11, "T", s9));
-        arithmeticExpressionTransitions.add(makeTransition(s11, "F", s10));
-        arithmeticExpressionTransitions.add(makeTransition(s11, "(", s11));
-        arithmeticExpressionTransitions.add(makeTransition(s11, "id", s12));
-        arithmeticExpressionTransitions.add(makeTransition(s13, "*", s7));
-        arithmeticExpressionTransitions.add(makeTransition(s16, "T", s19));
-        arithmeticExpressionTransitions.add(makeTransition(s16, "F", s10));
-        arithmeticExpressionTransitions.add(makeTransition(s16, "(", s11));
-        arithmeticExpressionTransitions.add(makeTransition(s16, "id", s12));
-        arithmeticExpressionTransitions.add(makeTransition(s17, "F", s20));
-        arithmeticExpressionTransitions.add(makeTransition(s17, "(", s11));
-        arithmeticExpressionTransitions.add(makeTransition(s17, "id", s12));
-        arithmeticExpressionTransitions.add(makeTransition(s18, ")", s21));
-        arithmeticExpressionTransitions.add(makeTransition(s18, "+", s16));
-        arithmeticExpressionTransitions.add(makeTransition(s19, "*", s17));
+        a0 = makeItems(
+                "[E ::= " + MARKER + " E E, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " E id, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " id, " + TERMINATOR + "/id]",
+                "[E' ::= " + MARKER + " E, " + TERMINATOR + "]"
+        );
+
+        a1 = makeItems(
+                "[E ::= E " + MARKER + " E, " + TERMINATOR + "/id]",
+                "[E ::= E " + MARKER + " id, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " E E, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " E id, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " id, " + TERMINATOR + "/id]",
+                "[E' ::= E " + MARKER + ", " + TERMINATOR + "]"
+        );
+
+        a2 = makeItems("[E ::= id " + MARKER + ", " + TERMINATOR + "/id]");
+
+        a3 = makeItems(
+                "[E ::= E E " + MARKER + ", " + TERMINATOR + "/id]",
+                "[E ::= E " + MARKER + " E, " + TERMINATOR + "/id]",
+                "[E ::= E " + MARKER + " id, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " E E, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " E id, " + TERMINATOR + "/id]",
+                "[E ::= " + MARKER + " id, " + TERMINATOR + "/id]"
+        );
+
+        a4 = makeItems(
+                "[E ::= E id ·, #/id]",
+                "[E ::= id ·, #/id]"
+        );
+
+        arithmeticExpressionTransitions = new Transitions(
+                makeTransition(s0, "E", s1),
+                makeTransition(s0, "T", s2),
+                makeTransition(s0, "F", s3),
+                makeTransition(s0, "(", s4),
+                makeTransition(s0, "id", s5),
+                makeTransition(s1, "+", s6),
+                makeTransition(s2, "*", s7),
+                makeTransition(s4, "E", s8),
+                makeTransition(s4, "T", s9),
+                makeTransition(s4, "F", s10),
+                makeTransition(s4, "(", s11),
+                makeTransition(s4, "id", s12),
+                makeTransition(s6, "T", s13),
+                makeTransition(s6, "F", s3),
+                makeTransition(s6, "(", s4),
+                makeTransition(s6, "id", s5),
+                makeTransition(s7, "F", s14),
+                makeTransition(s7, "(", s4),
+                makeTransition(s7, "id", s5),
+                makeTransition(s8, ")", s15),
+                makeTransition(s8, "+", s16),
+                makeTransition(s9, "*", s17),
+                makeTransition(s11, "E", s18),
+                makeTransition(s11, "T", s9),
+                makeTransition(s11, "F", s10),
+                makeTransition(s11, "(", s11),
+                makeTransition(s11, "id", s12),
+                makeTransition(s13, "*", s7),
+                makeTransition(s16, "T", s19),
+                makeTransition(s16, "F", s10),
+                makeTransition(s16, "(", s11),
+                makeTransition(s16, "id", s12),
+                makeTransition(s17, "F", s20),
+                makeTransition(s17, "(", s11),
+                makeTransition(s17, "id", s12),
+                makeTransition(s18, ")", s21),
+                makeTransition(s18, "+", s16),
+                makeTransition(s19, "*", s17)
+        );
+
+        tinyAmbiguousExpressionTransitions = new Transitions(
+                makeTransition(a3, "E", a3),
+                makeTransition(a3, "id", a4),
+                makeTransition(a1, "E", a3),
+                makeTransition(a1, "id", a4),
+                makeTransition(a0, "E", a1),
+                makeTransition(a0, "id", a2)
+        );
+
+        arithmeticExpressionCollection = new LR1Collection(s0, arithmeticExpressionTransitions);
+        arithmeticExpressionCollection.addAll(
+                Arrays.asList(
+                        s0, s1, s2, s3, s4, s5, s6, s7,
+                        s8, s9, s10, s11, s12, s13, s14,
+                        s15, s16, s17, s18, s19, s20, s21
+                )
+        );
+
+        tinyAmbiguousExpressionLR1Collection = new LR1Collection(a0,
+                tinyAmbiguousExpressionTransitions);
+        tinyAmbiguousExpressionLR1Collection.addAll(Arrays.asList(a0, a1, a2, a3, a4));
+
+        // Use indices from sample exam answers rather than try to recompute everything
+        sampleExamProblem4ActionTable = new ActionTable();
+        sampleExamProblem4ActionTable.set(0, "+", makeAction(SHIFT, 4));
+        sampleExamProblem4ActionTable.set(0, "a", makeAction(SHIFT, 5));
+        sampleExamProblem4ActionTable.set(1, TERMINATOR, makeAction(ACCEPT, noSuchState));
+        sampleExamProblem4ActionTable.set(2, "=", makeAction(SHIFT, 6));
+        sampleExamProblem4ActionTable.set(2, TERMINATOR, makeAction(REDUCE, 4));
+        sampleExamProblem4ActionTable.set(3, TERMINATOR, makeAction(REDUCE, 1));
+        sampleExamProblem4ActionTable.set(4, "+", makeAction(SHIFT, 4));
+        sampleExamProblem4ActionTable.set(4, "a", makeAction(SHIFT, 5));
+        sampleExamProblem4ActionTable.set(5, "=", makeAction(REDUCE, 3));
+        sampleExamProblem4ActionTable.set(5, TERMINATOR, makeAction(REDUCE, 3));
+        sampleExamProblem4ActionTable.set(6, "+", makeAction(SHIFT, 11));
+        sampleExamProblem4ActionTable.set(6, "a", makeAction(SHIFT, 12));
+        sampleExamProblem4ActionTable.set(7, "=", makeAction(REDUCE, 4));
+        sampleExamProblem4ActionTable.set(7, TERMINATOR, makeAction(REDUCE, 4));
+        sampleExamProblem4ActionTable.set(8, "=", makeAction(REDUCE, 2));
+        sampleExamProblem4ActionTable.set(8, TERMINATOR, makeAction(REDUCE, 2));
+        sampleExamProblem4ActionTable.set(9, TERMINATOR, makeAction(REDUCE, 4));
+        sampleExamProblem4ActionTable.set(10, TERMINATOR, makeAction(REDUCE, 0));
+        sampleExamProblem4ActionTable.set(11, "+", makeAction(SHIFT, 11));
+        sampleExamProblem4ActionTable.set(11, "a", makeAction(SHIFT, 12));
+        sampleExamProblem4ActionTable.set(12, TERMINATOR, makeAction(REDUCE, 3));
+        sampleExamProblem4ActionTable.set(13, TERMINATOR, makeAction(REDUCE, 2));
 
         arithmeticExpressionActionTable = new ActionTable();
         arithmeticExpressionActionTable.set(9, "(", makeAction(SHIFT, 10));
@@ -477,6 +608,31 @@ class GrammarTest {
         arithmeticExpressionActionTable.set(13, "*", makeAction(REDUCE, 2));
         arithmeticExpressionActionTable.set(13, ")", makeAction(REDUCE, 2));
 
+        tinyAmbiguousExpressionActionTable = new ActionTable();
+        tinyAmbiguousExpressionActionTable.set(0, TERMINATOR, makeAction(REDUCE, 0));
+        tinyAmbiguousExpressionActionTable.set(0, "id", makeAction(SHIFT, 1));
+        tinyAmbiguousExpressionActionTable.set(0, "id", makeAction(REDUCE, 0));
+        tinyAmbiguousExpressionActionTable.set(1, TERMINATOR, makeAction(REDUCE, 1));
+        tinyAmbiguousExpressionActionTable.set(1, TERMINATOR, makeAction(REDUCE, 2));
+        tinyAmbiguousExpressionActionTable.set(1, "id", makeAction(REDUCE, 1));
+        tinyAmbiguousExpressionActionTable.set(1, "id", makeAction(REDUCE, 2));
+        tinyAmbiguousExpressionActionTable.set(2, TERMINATOR, makeAction(ACCEPT, noSuchState));
+        tinyAmbiguousExpressionActionTable.set(2, "id", makeAction(SHIFT, 1));
+        tinyAmbiguousExpressionActionTable.set(3, TERMINATOR, makeAction(REDUCE, 2));
+        tinyAmbiguousExpressionActionTable.set(3, "id", makeAction(REDUCE, 2));
+        tinyAmbiguousExpressionActionTable.set(4, "id", makeAction(SHIFT, 3));
+
+        sampleExamProblem4GotoTable = new GotoTable();
+        sampleExamProblem4GotoTable.set(0, "X", 1);
+        sampleExamProblem4GotoTable.set(0, "Y", 2);
+        sampleExamProblem4GotoTable.set(0, "Z", 3);
+        sampleExamProblem4GotoTable.set(4, "Y", 7);
+        sampleExamProblem4GotoTable.set(4, "Z", 8);
+        sampleExamProblem4GotoTable.set(6, "Y", 9);
+        sampleExamProblem4GotoTable.set(6, "Z", 10);
+        sampleExamProblem4GotoTable.set(11, "Y", 9);
+        sampleExamProblem4GotoTable.set(11, "Z", 13);
+
         arithmeticExpressionGotoTable = new GotoTable();
         arithmeticExpressionGotoTable.set(9, "E", 4);
         arithmeticExpressionGotoTable.set(9, "T", 7);
@@ -494,61 +650,10 @@ class GrammarTest {
         arithmeticExpressionGotoTable.set(3, "F", 19);
         arithmeticExpressionGotoTable.set(17, "F", 21);
 
-        arithmeticExpressionCollection = new LR1Collection(s0, arithmeticExpressionTransitions);
-        arithmeticExpressionCollection.addAll(
-                Arrays.asList(
-                        s0, s1, s2, s3, s4, s5, s6, s7,
-                        s8, s9, s10, s11, s12, s13, s14,
-                        s15, s16, s17, s18, s19, s20, s21
-                )
-        );
-
-        ambiguousArithmeticExpressionLR1Collection =
-                ambiguousArithmeticExpression.computeLR1Collection();
-
-        danglingElseProblemLR1Collection = danglingElseProblem.computeLR1Collection();
-
-        arithmeticExpressionLR1ParseTable = new LR1ParseTable(
-                arithmeticExpressionActionTable,
-                arithmeticExpressionGotoTable,
-                9
-        );
-
-        // Use indices from sample exam answers rather than try to recompute everything
-        sampleExamProblem4ActionTable = new ActionTable();
-        sampleExamProblem4ActionTable.set(0, "+", makeAction(SHIFT, 4));
-        sampleExamProblem4ActionTable.set(0, "a", makeAction(SHIFT, 5));
-        sampleExamProblem4ActionTable.set(1, TERMINATOR, makeAction(ACCEPT, noSuchState));
-        sampleExamProblem4ActionTable.set(2, "=", makeAction(SHIFT, 6));
-        sampleExamProblem4ActionTable.set(2, TERMINATOR, makeAction(REDUCE, 4));
-        sampleExamProblem4ActionTable.set(3, TERMINATOR, makeAction(REDUCE, 1));
-        sampleExamProblem4ActionTable.set(4, "+", makeAction(SHIFT, 4));
-        sampleExamProblem4ActionTable.set(4, "a", makeAction(SHIFT, 5));
-        sampleExamProblem4ActionTable.set(5, "=", makeAction(REDUCE, 3));
-        sampleExamProblem4ActionTable.set(5, TERMINATOR, makeAction(REDUCE, 3));
-        sampleExamProblem4ActionTable.set(6, "+", makeAction(SHIFT, 11));
-        sampleExamProblem4ActionTable.set(6, "a", makeAction(SHIFT, 12));
-        sampleExamProblem4ActionTable.set(7, "=", makeAction(REDUCE, 4));
-        sampleExamProblem4ActionTable.set(7, TERMINATOR, makeAction(REDUCE, 4));
-        sampleExamProblem4ActionTable.set(8, "=", makeAction(REDUCE, 2));
-        sampleExamProblem4ActionTable.set(8, TERMINATOR, makeAction(REDUCE, 2));
-        sampleExamProblem4ActionTable.set(9, TERMINATOR, makeAction(REDUCE, 4));
-        sampleExamProblem4ActionTable.set(10, TERMINATOR, makeAction(REDUCE, 0));
-        sampleExamProblem4ActionTable.set(11, "+", makeAction(SHIFT, 11));
-        sampleExamProblem4ActionTable.set(11, "a", makeAction(SHIFT, 12));
-        sampleExamProblem4ActionTable.set(12, TERMINATOR, makeAction(REDUCE, 3));
-        sampleExamProblem4ActionTable.set(13, TERMINATOR, makeAction(REDUCE, 2));
-
-        sampleExamProblem4GotoTable = new GotoTable();
-        sampleExamProblem4GotoTable.set(0, "X", 1);
-        sampleExamProblem4GotoTable.set(0, "Y", 2);
-        sampleExamProblem4GotoTable.set(0, "Z", 3);
-        sampleExamProblem4GotoTable.set(4, "Y", 7);
-        sampleExamProblem4GotoTable.set(4, "Z", 8);
-        sampleExamProblem4GotoTable.set(6, "Y", 9);
-        sampleExamProblem4GotoTable.set(6, "Z", 10);
-        sampleExamProblem4GotoTable.set(11, "Y", 9);
-        sampleExamProblem4GotoTable.set(11, "Z", 13);
+        tinyAmbiguousExpressionGotoTable = new GotoTable();
+        tinyAmbiguousExpressionGotoTable.set(0, "E", 0);
+        tinyAmbiguousExpressionGotoTable.set(2, "E", 0);
+        tinyAmbiguousExpressionGotoTable.set(4, "E", 2);
 
         sampleExamProblem4LR1ParseTable = new LR1ParseTable(
                 sampleExamProblem4ActionTable,
@@ -556,11 +661,17 @@ class GrammarTest {
                 0
         );
 
-        ambiguousArithmeticExpressionLR1ParseTable =
-                ambiguousArithmeticExpression.generateLR1ParseTable(ambiguousArithmeticExpressionLR1Collection);
+        arithmeticExpressionLR1ParseTable = new LR1ParseTable(
+                arithmeticExpressionActionTable,
+                arithmeticExpressionGotoTable,
+                9
+        );
 
-        danglingElseProblemLR1ParseTable =
-                danglingElseProblem.generateLR1ParseTable(danglingElseProblemLR1Collection);
+        tinyAmbiguousExpressionLR1ParseTable = new LR1ParseTable(
+                tinyAmbiguousExpressionActionTable,
+                tinyAmbiguousExpressionGotoTable,
+                4
+        );
     }
 
     @Test
@@ -589,6 +700,11 @@ class GrammarTest {
                 danglingElseProblemFirstMap,
                 danglingElseProblem.first()
         );
+
+        assertEquals(
+                tinyAmbiguousExpressionFirstMap,
+                tinyAmbiguousExpression.first()
+        );
     }
 
     @Test
@@ -614,6 +730,11 @@ class GrammarTest {
         assertEquals(
                 danglingElseProblemFollowMap,
                 danglingElseProblem.follow(danglingElseProblemFirstMap)
+        );
+
+        assertEquals(
+                tinyAmbiguousExpressionFollowMap,
+                tinyAmbiguousExpression.follow(tinyAmbiguousExpressionFirstMap)
         );
     }
 
@@ -652,10 +773,18 @@ class GrammarTest {
         );
 
         assertEquals(
-                danglingElseLL1ParseTable,
+                danglingElseProblemLL1ParseTable,
                 danglingElseProblem.generateLL1ParseTable(
                         danglingElseProblemFirstMap,
                         danglingElseProblemFollowMap
+                )
+        );
+
+        assertEquals(
+                tinyAmbiguousExpressionLL1ParseTable,
+                tinyAmbiguousExpression.generateLL1ParseTable(
+                        tinyAmbiguousExpressionFirstMap,
+                        tinyAmbiguousExpressionFollowMap
                 )
         );
     }
@@ -837,7 +966,8 @@ class GrammarTest {
         assertTrue(arithmeticExpressionRedux.isLL1(arithmeticExpressionReduxLL1ParseTable));
         assertTrue(sampleExamProblem3.isLL1(sampleExamProblem3LL1ParseTable));
         assertFalse(ambiguousArithmeticExpression.isLL1(ambiguousArithmeticExpressionLL1ParseTable));
-        assertFalse(danglingElseProblem.isLL1(danglingElseLL1ParseTable));
+        assertFalse(danglingElseProblem.isLL1(danglingElseProblemLL1ParseTable));
+        assertFalse(tinyAmbiguousExpression.isLL1(tinyAmbiguousExpressionLL1ParseTable));
     }
 
     @Test
@@ -901,13 +1031,8 @@ class GrammarTest {
         );
 
         assertEquals(
-                ambiguousArithmeticExpressionLR1Collection,
-                ambiguousArithmeticExpression.computeLR1Collection()
-        );
-
-        assertEquals(
-                danglingElseProblemLR1Collection,
-                danglingElseProblem.computeLR1Collection()
+                tinyAmbiguousExpressionLR1Collection,
+                tinyAmbiguousExpression.computeLR1Collection()
         );
     }
 
@@ -919,13 +1044,8 @@ class GrammarTest {
         );
 
         assertEquals(
-                ambiguousArithmeticExpressionLR1ParseTable,
-                ambiguousArithmeticExpression.generateLR1ParseTable(ambiguousArithmeticExpressionLR1Collection)
-        );
-
-        assertEquals(
-                danglingElseProblemLR1ParseTable,
-                danglingElseProblem.generateLR1ParseTable(danglingElseProblemLR1Collection)
+                tinyAmbiguousExpressionLR1ParseTable,
+                tinyAmbiguousExpression.generateLR1ParseTable(tinyAmbiguousExpressionLR1Collection)
         );
     }
 
@@ -1157,8 +1277,7 @@ class GrammarTest {
     void isLR1() {
         assertTrue(arithmeticExpression.isLR1(arithmeticExpressionLR1ParseTable));
         assertTrue(sampleExamProblem4.isLR1(sampleExamProblem4LR1ParseTable));
-        assertFalse(ambiguousArithmeticExpression.isLR1(ambiguousArithmeticExpressionLR1ParseTable));
-        assertFalse(danglingElseProblem.isLR1(danglingElseProblemLR1ParseTable));
+        assertFalse(tinyAmbiguousExpression.isLR1(tinyAmbiguousExpressionLR1ParseTable));
     }
 
     @Test
