@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Item.MARKER;
 import static algorithms.Pair.noSuchSymbol;
-import static algorithms.Utility.getProductionFromLine;
+import static algorithms.Utility.printCollection;
 
 class Grammar {
     static final String EPSILON = Character.toString('\u025B');
@@ -29,97 +29,6 @@ class Grammar {
         this.start = start;
         this.productions = productions;
         nonTerminals.add(start);
-    }
-
-    public static void main(String[] args) throws Exception {
-        String inputFile = args[0]; // supply file or do redirection?
-//        inputFile = "E ::= T E'\n" +
-//                "E' ::= + T E'\n" +
-//                "E' ::= ε\n" +
-//                "T ::= F T'\n" +
-//                "T' ::= ε\n" +
-//                "F ::= ( E )\n" +
-//                "F ::= id\n";
-
-        inputFile = "E ::= E + T\n" +
-                "E ::= T\n" +
-                "T ::= T * F\n" +
-                "T ::= F\n" +
-                "F ::= ( E )\n" +
-                "F ::= id\n";
-
-        Grammar grammar = initializeGrammar(inputFile);
-
-        FirstMap firstMap = grammar.first();
-        FollowMap followMap = grammar.follow(firstMap);
-        LL1ParseTable ll1ParseTable = grammar.generateLL1ParseTable(firstMap, followMap);
-
-        // TODO: take in a grammar and sentence from a text file
-        String w = "id + id * id";
-
-        if (!grammar.isLL1(ll1ParseTable)) {
-            grammar = grammar.removeLeftRecursion();
-
-            firstMap = grammar.first();
-            followMap = grammar.follow(firstMap);
-            ll1ParseTable = grammar.generateLL1ParseTable(firstMap, followMap);
-        }
-
-        LL1ParseOutput output = grammar.parseSentence(ll1ParseTable, w);
-        System.out.println(output);
-    }
-
-    @NotNull
-    private static Grammar initializeGrammar(String grammar) {
-        grammar = grammar.replaceAll(GREEK_EPSILON, EPSILON);
-        String[] lines = grammar.split("\r?\n|\r");
-
-        Symbols nonTerminals = new Symbols();
-        String start = null;
-        Productions productions = new Productions();
-
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
-            Production production = getProductionFromLine(line);
-            productions.add(production);
-            nonTerminals.add(production.getLhs());
-
-            if (i == 0) {
-                start = production.getLhs();
-            }
-        }
-
-        Symbols terminals = productions
-                .stream()
-                .map(production -> production
-                        .getRhs()
-                        .stream()
-                        .filter(symbol -> !nonTerminals.contains(symbol))
-                        .collect(Collectors.toSet()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toCollection(Symbols::new));
-
-        return new Grammar(nonTerminals, terminals, start, productions);
-    }
-
-    FirstMap first() {
-        FirstMap map = new FirstMap();
-        terminals.forEach(map::initializeFirstSetOfTerminal);
-        nonTerminals.forEach(map::initializeFirstSetOfNonTerminal);
-        productions
-                .stream()
-                .filter(Production::beginsWithEpsilon)
-                .forEach(map::addEpsilonToFirstSetOfNonTerminal);
-        FirstMap previous;
-
-        boolean newSymbolsAreBeingAdded = true;
-        while (newSymbolsAreBeingAdded) {
-            previous = map.deepClone();
-            productions.forEach(map::addFirstSetOfSequenceToFirstSetOfSymbol);
-            newSymbolsAreBeingAdded = !map.equals(previous);
-        }
-
-        return map;
     }
 
     FollowMap follow(FirstMap firstMap) {
@@ -513,6 +422,26 @@ class Grammar {
         return collection;
     }
 
+    FirstMap first() {
+        FirstMap map = new FirstMap();
+        terminals.forEach(map::initializeFirstSetOfTerminal);
+        nonTerminals.forEach(map::initializeFirstSetOfNonTerminal);
+        productions
+                .stream()
+                .filter(Production::beginsWithEpsilon)
+                .forEach(map::addEpsilonToFirstSetOfNonTerminal);
+        FirstMap previous;
+
+        boolean newSymbolsAreBeingAdded = true;
+        while (newSymbolsAreBeingAdded) {
+            previous = map.deepClone();
+            productions.forEach(map::addFirstSetOfSequenceToFirstSetOfSymbol);
+            newSymbolsAreBeingAdded = !map.equals(previous);
+        }
+
+        return map;
+    }
+
     @NotNull
     private Consumer<Items> populate(LR1Collection collection, FirstMap firstMap) {
         Symbols symbols = new Symbols(terminals);
@@ -742,6 +671,16 @@ class Grammar {
                 Objects.equals(start, other.start) &&
                 Objects.equals(productions, other.productions);
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"nonTerminals\":" + nonTerminals +
+                ", \"terminals\":" + terminals +
+                ", \"start\":\"" + start + "\"" +
+                ", \"productions\":" + productions +
+                "}";
+    }
 }
 
 class Sequence extends ArrayList<String> implements Comparable<Sequence> {
@@ -804,14 +743,10 @@ class Production implements Comparable<Production> {
 
     @Override
     public String toString() {
-        String symbols = rhs
-                .stream()
-                .map(symbol -> "\"" + symbol + "\"")
-                .collect(Collectors.joining(","));
-
+        String symbols = printCollection(rhs);
         return "{" +
                 "\"lhs\":\"" + lhs + "\"," +
-                "\"rhs\":[" + symbols + "]" +
+                "\"rhs\":" + symbols +
                 "}";
     }
 }
@@ -826,6 +761,11 @@ class Symbols extends TreeSet<String> {
 
     Symbols(String... symbols) {
         super(Arrays.asList(symbols));
+    }
+
+    @Override
+    public String toString() {
+        return printCollection(this);
     }
 }
 

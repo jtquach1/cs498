@@ -1,14 +1,12 @@
 package algorithms;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
+import static algorithms.Utility.printCollection;
 
 class FollowMap extends TreeMap<String, Symbols> {
     FollowMap() {
@@ -35,12 +33,8 @@ class FollowMap extends TreeMap<String, Symbols> {
                 .keySet()
                 .stream()
                 .map(key -> {
-                    String values = this.get(key)
-                            .stream()
-                            .map(value -> "\"" + value + "\"")
-                            .collect(Collectors.joining(","));
-
-                    return "\"" + key + "\":" + "[" + values + "]";
+                    String values = printCollection(this.get(key));
+                    return "\"" + key + "\":" + values;
                 })
                 .collect(Collectors.joining(","));
 
@@ -129,12 +123,8 @@ class FirstMap extends TreeMap<String, Symbols> {
                 .keySet()
                 .stream()
                 .map(key -> {
-                    String values = this.get(key)
-                            .stream()
-                            .map(value -> "\"" + value + "\"")
-                            .collect(Collectors.joining(","));
-
-                    return "\"" + key + "\":" + "[" + values + "]";
+                    String values = printCollection(this.get(key));
+                    return "\"" + key + "\":" + values;
                 })
                 .collect(Collectors.joining(","));
 
@@ -160,5 +150,16 @@ class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> {
      and must have left recursion removed. */
     LL1ParseOutputEntry(Stack<String> stack, Queue<String> input, Integer output, String cursor) {
         super(stack, input, output, cursor);
+    }
+
+    @Override
+    public String toString() {
+        String stack = printCollection(this.stack);
+        String input = printCollection(this.input);
+
+        return "{\"stack\":" + stack +
+                ", \"input\":" + input +
+                ", \"output\":" + output +
+                "}\n";
     }
 }

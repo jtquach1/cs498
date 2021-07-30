@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import static algorithms.Execution.*;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
+import static algorithms.Utility.printCollection;
 
 enum Execution {
     SHIFT, REDUCE, ACCEPT
@@ -141,7 +142,10 @@ class Action implements Comparable<Action> {
 
     @Override
     public String toString() {
-        return "{ \"execution\":\"" + execution + "\", \"index\":\"" + index + "\"}";
+        return "{" +
+                "\"execution\":\"" + execution + "\"" +
+                ", \"index\":\"" + index + "\"" +
+                "}";
     }
 }
 
@@ -161,6 +165,16 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> {
     // Contains states represented as Integers and non-terminals represented as Strings.
     LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action output, String cursor) {
         super(stack, input, output, cursor);
+    }
+
+    @Override
+    public String toString() {
+        String input = printCollection(this.input);
+
+        return "{\"stack\":" + stack +
+                ", \"input\":" + input +
+                ", \"output\":" + output +
+                "}\n";
     }
 }
 
@@ -204,8 +218,9 @@ class Pair implements Comparable<Pair> {
 
     @Override
     public String toString() {
-        String space = symbol.equals(noSuchSymbol) ? "" : " ";
-        return symbol + space + stateIndex;
+        String existingSymbol = symbol.equals(noSuchSymbol) ? "" : "\"symbol\": \"" + symbol +
+                "\",";
+        return "{" + existingSymbol + "\"stateIndex\": " + stateIndex + "}";
     }
 }
 
@@ -313,14 +328,11 @@ class Item extends Production {
 
     @Override
     public String toString() {
-        String symbols = rhs
-                .stream()
-                .map(symbol -> "\"" + symbol + "\"")
-                .collect(Collectors.joining(", "));
+        String symbols = printCollection(rhs);
 
         return "{" +
                 "\"lhs\":\"" + lhs + "\", " +
-                "\"rhs\":[" + symbols + "], " +
+                "\"rhs\":" + symbols + ", " +
                 "\"lookahead\":\"" + lookahead + "\"" +
                 "}";
     }

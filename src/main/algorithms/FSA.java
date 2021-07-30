@@ -3,9 +3,14 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
+
+import static algorithms.Utility.getNonFlag;
 
 class FSA {
     static final char EPSILON = '\u025B';
@@ -26,54 +31,64 @@ class FSA {
     }
 
     public static void main(String[] args) throws IOException {
-        String inputRegex = null;
-        String outputPrefix = null;
+        TreeMap<String, String> arguments = getArguments(args);
+
         try {
-            for (int i = 0; i < args.length; i++) {
-                if (args[i].equals("-i")) {
-                    inputRegex = getNonFlag(args, i + 1);
-                }
-                if (args[i].equals("-o")) {
-                    outputPrefix = getNonFlag(args, i + 1);
-                }
-            }
+            String inputRegex = arguments.get("inputRegex");
+            String outputPrefix = arguments.get("outputPrefix");
+
             if (inputRegex == null) {
                 inputRegex = "";
+                System.out.println("Input regular expression not specified, using empty string by" +
+                        " default");
             }
 
-            NFA nfa = NFA.regexToNFA(inputRegex);
-            DFA dfa = DFA.NFAtoDFA(nfa);
-            DFA minDfa = DFA.DFAtoMinDFA(dfa);
-
-            TreeMap<String, String> FSAToDOT = new TreeMap<>();
-            FSAToDOT.put("nfa", nfa.toString());
-            FSAToDOT.put("dfa", dfa.toString());
-            FSAToDOT.put("minDfa", minDfa.toString());
-
-            PrintWriter writer;
-            for (String fsaType : FSAToDOT.keySet()) {
-                String fileName = outputPrefix + "." + fsaType + ".dot";
-                writer = new PrintWriter(fileName, StandardCharsets.UTF_8);
-                writer.print(FSAToDOT.get(fsaType));
-                writer.close();
-            }
-
-        } catch (NullPointerException e) {
             if (outputPrefix == null) {
                 System.out.println("ERROR: Output filename prefix not specified");
+                return;
             }
+
+            createDOTFiles(inputRegex, outputPrefix);
+
         } catch (Exception e) {
             System.out.println("ERROR: Invalid regular expression");
             throw e;
         }
     }
 
-    private static String getNonFlag(String[] args, int index) {
-        String result = args[index];
-        if (result.startsWith("-")) {
-            return null;
+    private static TreeMap<String, String> getArguments(String[] args) {
+        TreeMap<String, String> arguments = new TreeMap<>();
+
+        for (int i = 0; i < args.length - 1; i++) {
+            String nonFlag = getNonFlag(args, i + 1);
+
+            if (args[i].equals("-i")) {
+                arguments.put("inputRegex", nonFlag);
+            }
+
+            if (args[i].equals("-o")) {
+                arguments.put("outputPrefix", nonFlag);
+            }
         }
-        return result;
+        return arguments;
+    }
+
+    private static void createDOTFiles(String inputRegex, String outputPrefix) throws IOException {
+        NFA nfa = NFA.regexToNFA(inputRegex);
+        DFA dfa = DFA.NFAtoDFA(nfa);
+        DFA minDfa = DFA.DFAtoMinDFA(dfa);
+
+        TreeMap<String, String> FSAToDOT = new TreeMap<>();
+        FSAToDOT.put("nfa", nfa.toString());
+        FSAToDOT.put("dfa", dfa.toString());
+        FSAToDOT.put("minDfa", minDfa.toString());
+
+        for (String fsaType : FSAToDOT.keySet()) {
+            String fileName = outputPrefix + "." + fsaType + ".dot";
+            Path path = Paths.get(fileName);
+            Files.write(path, Collections.singleton(FSAToDOT.get(fsaType)),
+                    StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+        }
     }
 
     void addState(State state) {

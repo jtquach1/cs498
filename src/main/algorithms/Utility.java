@@ -2,8 +2,17 @@ package algorithms;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static algorithms.Grammar.EPSILON;
+import static algorithms.Grammar.GREEK_EPSILON;
 
 class Utility {
     static Alphabet makeAlphabet(Character... symbols) {
@@ -138,7 +147,7 @@ class Utility {
 
         String[] item = Arrays
                 .stream(line.split(","))
-                .map(String::trim)
+                .map(java.lang.String::trim)
                 .toArray(String[]::new);
 
         Production production = getProductionFromLine(item[0]);
@@ -167,6 +176,95 @@ class Utility {
 
     static Symbols makeFollow(String... symbols) {
         return new Symbols(symbols);
+    }
+
+    static TreeMap<String, String> getArguments(String[] args) throws IOException {
+        TreeMap<String, String> arguments = new TreeMap<>();
+
+        for (int i = 0; i < args.length - 1; i++) {
+            String nonFlag = getNonFlag(args, i + 1);
+
+            if (args[i].equals("-i")) {
+                arguments.put("inputFile", nonFlag);
+            }
+
+            if (args[i].equals("-s")) {
+                if (nonFlag != null) {
+                    Path path = Paths.get(nonFlag);
+                    String sentence = Files
+                            .lines(path)
+                            .collect(Collectors.toList())
+                            .get(0);
+                    arguments.put("sentence", sentence);
+                }
+            }
+
+            if (args[i].equals("-o")) {
+                arguments.put("outputPrefix", nonFlag);
+            }
+        }
+
+        return arguments;
+    }
+
+    static String getNonFlag(String[] args, int index) {
+        String result = args[index];
+        boolean seeFlag = result.startsWith("-");
+        return seeFlag ? null : result;
+    }
+
+    static void createJSONFiles(String outputPrefix,
+                                TreeMap<String, Object> structuresToJSON) throws IOException {
+        for (String structure : structuresToJSON.keySet()) {
+            String fileName = outputPrefix + "." + structure + ".json";
+            Path path = Paths.get(fileName);
+            String json = structuresToJSON.get(structure).toString();
+            Files.write(path, Collections.singleton(json), StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE);
+        }
+    }
+
+    @NotNull
+    static Grammar initializeGrammar(String filename) throws IOException {
+        List<String> lines = Files
+                .lines(Paths.get(filename))
+                .map(line -> line.replaceAll(GREEK_EPSILON, EPSILON))
+                .collect(Collectors.toList());
+
+        Symbols nonTerminals = new Symbols();
+        String start = null;
+        Productions productions = new Productions();
+
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            Production production = getProductionFromLine(line);
+            productions.add(production);
+            nonTerminals.add(production.getLhs());
+
+            if (i == 0) {
+                start = production.getLhs();
+            }
+        }
+
+        Symbols terminals = productions
+                .stream()
+                .map(production -> production
+                        .getRhs()
+                        .stream()
+                        .filter(symbol -> !nonTerminals.contains(symbol))
+                        .collect(Collectors.toSet()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(Symbols::new));
+
+        return new Grammar(nonTerminals, terminals, start, productions);
+    }
+
+    static String printCollection(Collection<?> collection) {
+        String items = collection
+                .stream()
+                .map(item -> "\"" + item.toString() + "\"")
+                .collect(Collectors.joining(","));
+        return "[" + items + "]";
     }
 }
 
@@ -333,8 +431,9 @@ class OutputEntry<E1, E2, E3> {
 
     @Override
     public String toString() {
-        return "{\"stack\":\"" + stack + "\"," +
-                "\"input\":\"" + input + "\"," +
-                "\"output\":\"" + output + "\"}\n";
+        return "{\"stack\":" + stack +
+                ", \"input\":" + input +
+                ", \"output\":" + output +
+                "}\n";
     }
 }
