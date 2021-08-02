@@ -2,13 +2,14 @@ package algorithms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Utility.printCollection;
 
-class FollowMap extends TreeMap<String, Symbols> {
+class FollowMap extends TreeMap<String, Symbols> implements DOT {
     FollowMap() {
     }
 
@@ -44,9 +45,26 @@ class FollowMap extends TreeMap<String, Symbols> {
 
         return "{" + entries + "}";
     }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"2\">Follow</td></tr>");
+
+        for (String symbol : this.keySet()) {
+            sb.append("<tr>");
+            sb.append("<td>" + symbol + "</td>");
+            sb.append("<td>" + this.get(symbol).toDOT() + "</td>");
+            sb.append("</tr>");
+        }
+
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class FirstMap extends TreeMap<String, Symbols> {
+class FirstMap extends TreeMap<String, Symbols> implements DOT {
     FirstMap() {
     }
 
@@ -138,21 +156,99 @@ class FirstMap extends TreeMap<String, Symbols> {
 
         return "{" + entries + "}";
     }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"2\">First</td></tr>");
+
+        for (String symbol : this.keySet()) {
+            sb.append("<tr>");
+            sb.append("<td>" + symbol + "</td>");
+            sb.append("<td>" + this.get(symbol).toDOT() + "</td>");
+            sb.append("</tr>");
+        }
+
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class LL1ParseTable extends Table<String, String, Integer> {
+class LL1ParseTable extends Table<String, String, Integer> implements DOT {
+    @Override
+    public String toDOT() {
+        String terminals = this
+                .secondKeySet()
+                .stream()
+                .map(terminal -> "<td>" + terminal + "</td>")
+                .collect(Collectors.joining(""));
+        int headerLength = this.secondKeySet().size() + 1;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"" + headerLength + "\">LL(1) Parse Table</td></tr>");
+
+        sb.append("<tr>");
+        sb.append("<td></td>");
+        sb.append(terminals);
+        sb.append("</tr>");
+
+        for (String nonTerminal : this.firstKeySet()) {
+            StringBuilder indices = new StringBuilder();
+
+            for (String terminal : this.secondKeySet()) {
+                List<Integer> conflicts = this.getConflicts(nonTerminal, terminal);
+                String print;
+                if (conflicts != null) {
+                    print = conflicts
+                            .stream()
+                            .map(Object::toString)
+                            .collect(Collectors.joining(", "));
+                } else {
+                    print = "";
+                }
+                indices.append("<td>" + print + "</td>");
+            }
+
+            sb.append("<tr>");
+            sb.append("<td>" + nonTerminal + "</td>");
+            sb.append(indices);
+            sb.append("</tr>");
+        }
+
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> {
+class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> implements DOT {
     LL1ParseOutput() {
     }
 
     LL1ParseOutput(LL1ParseOutputEntry... entries) {
         super(Arrays.asList(entries));
     }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"3\">LL(1) Parse Output</td></tr>");
+        sb.append("<tr>" +
+                "<td>Stack</td>" +
+                "<td>Input</td>" +
+                "<td>Output</td>" +
+                "</tr>");
+        for (LL1ParseOutputEntry entry : this) {
+            sb.append(entry.toDOT());
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> {
+class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> implements DOT {
     /* We use a list of integers to see whether a parsed grammar was LL1.
      If the list contains more than one index, then the grammar is ambiguous
      and must have left recursion removed. */
@@ -166,12 +262,27 @@ class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> {
     }
 
     private String toJSON() {
-        String stack = printCollection(this.stack);
-        String input = printCollection(this.input);
+        String stack = printCollection(this.getStack());
+        String input = printCollection(this.getInput());
 
         return "{\"stack\":" + stack +
                 ", \"input\":" + input +
-                ", \"output\":" + output +
+                ", \"output\":" + getOutput() +
                 "}";
+    }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        String stack = String.join(" ", this.getStack());
+        String input = String.join(" ", this.getInput());
+        String output = this.getOutput() == null ? "" : this.getOutput().toString();
+        sb.append("<tr>" +
+                "<td>" + stack + "</td>" +
+                "<td>" + input + "</td>" +
+                "<td>" + output + "</td>" +
+                "</tr>");
+
+        return sb.toString();
     }
 }

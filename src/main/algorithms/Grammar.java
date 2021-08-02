@@ -13,7 +13,7 @@ import static algorithms.Item.MARKER;
 import static algorithms.Pair.noSuchSymbol;
 import static algorithms.Utility.printCollection;
 
-class Grammar {
+class Grammar implements DOT {
     static final String EPSILON = Character.toString('\u025B');
     static final String GREEK_EPSILON = Character.toString('\u03B5');
     static final String TERMINATOR = "#";
@@ -685,6 +685,21 @@ class Grammar {
                 ", \"productions\":" + productions +
                 "}";
     }
+
+    @Override
+    public String toDOT() {
+        StringBuilder list = new StringBuilder();
+        for (int i = 0; i < productions.size(); i++) {
+            Production production = productions.get(i);
+            list.append("<tr><td>" + i + "</td>" + production.toDOT() + "</tr>");
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"2\">Grammar</td></tr>");
+        sb.append(list);
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
 class Sequence extends ArrayList<String> implements Comparable<Sequence> {
@@ -707,7 +722,7 @@ class Sequence extends ArrayList<String> implements Comparable<Sequence> {
     }
 }
 
-class Production implements Comparable<Production> {
+class Production implements Comparable<Production>, DOT {
     protected final String lhs;
     protected final Sequence rhs;
 
@@ -757,9 +772,14 @@ class Production implements Comparable<Production> {
                 "\"rhs\":" + symbols +
                 "}";
     }
+
+    @Override
+    public String toDOT() {
+        return "<td>" + lhs + " ::= " + String.join(" ", rhs) + "</td>";
+    }
 }
 
-class Symbols extends TreeSet<String> {
+class Symbols extends TreeSet<String> implements DOT {
     Symbols() {
     }
 
@@ -778,6 +798,11 @@ class Symbols extends TreeSet<String> {
 
     private String toJSON() {
         return printCollection(this);
+    }
+
+    @Override
+    public String toDOT() {
+        return String.join(", ", this);
     }
 }
 

@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.GREEK_EPSILON;
 
+interface DOT {
+    String toDOT();
+}
+
 class Utility {
     static Alphabet makeAlphabet(Character... symbols) {
         return new Alphabet(Arrays.asList(symbols));
@@ -213,7 +217,7 @@ class Utility {
         return seeFlag ? null : result;
     }
 
-    static void createJSONFiles(String outputPrefix, TreeMap<String, Object> structures) throws IOException {
+    static void createJSONFiles(String outputPrefix, TreeMap<String, DOT> structures) throws IOException {
         for (String structure : structures.keySet()) {
             String fileName = outputPrefix + "." + structure + ".json";
             Path path = Paths.get(fileName);
@@ -221,6 +225,30 @@ class Utility {
             Files.write(path, Collections.singleton(json), StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE);
         }
+    }
+
+    static void createDOTFiles(String outputPrefix, TreeMap<String, DOT> structures) throws IOException {
+        for (String structure : structures.keySet()) {
+            String fileName = outputPrefix + "." + structure + ".dot";
+            Path path = Paths.get(fileName);
+            String dot = structures.get(structure).toDOT();
+            Files.write(path, Collections.singleton(createDOTTable(dot)), StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE);
+        }
+    }
+
+    static String createDOTTable(String content) {
+        return "digraph {\n" +
+                "\n" +
+                "  tbl [\n" +
+                "\n" +
+                "    shape=plaintext\n" +
+                "    label=<" +
+                content +
+                "\n" +
+                "    >];\n" +
+                "\n" +
+                "}";
     }
 
     @NotNull
@@ -350,6 +378,21 @@ class ListWithUniques<T> extends ArrayList<T> {
 }
 
 class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
+    Set<K1> firstKeySet() {
+        return new TreeSet<>(this.keySet());
+    }
+
+    Set<K2> secondKeySet() {
+        Collection<TreeMap<K2, List<V>>> values = this.values();
+        TreeSet<K2> set = new TreeSet<>();
+
+        for (TreeMap<K2, List<V>> entry : values) {
+            set.addAll(entry.keySet());
+        }
+
+        return set;
+    }
+
     void set(K1 key1, K2 key2, V value) {
         TreeMap<K2, List<V>> entry = this.computeIfAbsent(key1, k -> new TreeMap<>());
 
@@ -363,6 +406,11 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
     }
 
     V get(K1 key1, K2 key2) {
+        // In case of conflicts, we just want to return one value.
+        return this.getConflicts(key1, key2).get(0);
+    }
+
+    List<V> getConflicts(K1 key1, K2 key2) {
         TreeMap<K2, List<V>> entry = this.get(key1);
         if (entry == null) {
             return null;
@@ -373,8 +421,7 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
             return null;
         }
 
-        // In case of conflicts, we just want to return one value.
-        return values.get(0);
+        return values;
     }
 
     @Override
@@ -403,9 +450,9 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
 }
 
 class OutputEntry<E1, E2, E3> {
-    Stack<E1> stack;
-    Queue<E2> input;
-    E3 output;
+    private final Stack<E1> stack;
+    private final Queue<E2> input;
+    private final E3 output;
 
     OutputEntry(Stack<E1> stack, Queue<E2> input, E3 output, E2 cursor) {
         /* We need to deep clone the parameters because their references are
@@ -430,5 +477,17 @@ class OutputEntry<E1, E2, E3> {
         return Objects.equals(stack, other.stack) &&
                 Objects.equals(input, other.input) &&
                 Objects.equals(output, other.output);
+    }
+
+    public Stack<E1> getStack() {
+        return stack;
+    }
+
+    public Queue<E2> getInput() {
+        return input;
+    }
+
+    public E3 getOutput() {
+        return output;
     }
 }

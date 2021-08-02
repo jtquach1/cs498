@@ -28,9 +28,9 @@ class LL1 {
             }
 
             Grammar grammar = initializeGrammar(inputFile);
-            TreeMap<String, Object> structures = getStructures(sentence, grammar);
-            createJSONFiles(outputPrefix, structures);
-
+            TreeMap<String, DOT> structures = getStructures(sentence, grammar);
+//            createJSONFiles(outputPrefix, structures);
+            createDOTFiles(outputPrefix, structures);
         } catch (Exception e) {
             System.out.println("ERROR: Invalid grammar");
             throw e;
@@ -38,18 +38,18 @@ class LL1 {
     }
 
     @NotNull
-    private static TreeMap<String, Object> getStructures(String sentence, Grammar grammar) throws Exception {
+    private static TreeMap<String, DOT> getStructures(String sentence, Grammar grammar) throws Exception {
         System.out.println("Printing out first sets, follow sets, and LL(1) parse table");
-        TreeMap<String, Object> structures = new TreeMap<>();
+        TreeMap<String, DOT> structures = new TreeMap<>();
 
-        populateStructuresToJSON(structures, grammar);
+        populateStructures(structures, grammar);
         LL1ParseTable table = (LL1ParseTable) structures.get("LL1ParseTable");
 
         if (!grammar.isLL1(table)) {
             System.out.println("Grammar is not LL(1), removing left recursion");
 
             grammar = grammar.removeLeftRecursion();
-            populateStructuresToJSON(structures, grammar);
+            populateStructures(structures, grammar);
         }
 
         if (sentence != null) {
@@ -62,28 +62,29 @@ class LL1 {
             String filename = removedLeftRecursionEarlier ? removalPrefix + "LL1ParseOutput" :
                     "LL1ParseOutput";
 
-            structures.put(filename, output.toString());
+            structures.put(filename, output);
         }
         return structures;
     }
 
-    private static void populateStructuresToJSON(TreeMap<String, Object> structuresToJSON,
-                                                 Grammar grammar) {
-        boolean removedLeftRecursionEarlier = structuresToJSON.size() >= 4;
+    private static void populateStructures(TreeMap<String, DOT> structures, Grammar grammar) {
+        boolean removedLeftRecursionEarlier = structures.size() >= 4;
         FirstMap firstMap = grammar.first();
         FollowMap followMap = grammar.follow(firstMap);
         LL1ParseTable table = grammar.generateLL1ParseTable(firstMap, followMap);
 
         if (removedLeftRecursionEarlier) {
-            structuresToJSON.put(removalPrefix + "grammar", grammar);
-            structuresToJSON.put(removalPrefix + "firstMap", firstMap);
-            structuresToJSON.put(removalPrefix + "followMap", followMap);
-            structuresToJSON.put(removalPrefix + "LL1ParseTable", table);
+            structures.put(removalPrefix + "grammar", grammar);
+            structures.put(removalPrefix + "firstMap", firstMap);
+            structures.put(removalPrefix + "followMap", followMap);
+            structures.put(removalPrefix + "LL1ParseTable", table);
         } else {
-            structuresToJSON.put("grammar", grammar);
-            structuresToJSON.put("firstMap", firstMap);
-            structuresToJSON.put("followMap", followMap);
-            structuresToJSON.put("LL1ParseTable", table);
+            structures.put("grammar", grammar);
+            structures.put("firstMap", firstMap);
+            structures.put("followMap", followMap);
+            structures.put("LL1ParseTable", table);
         }
     }
+
+
 }

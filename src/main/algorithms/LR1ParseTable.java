@@ -13,11 +13,20 @@ import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
 import static algorithms.Utility.printCollection;
 
-enum Execution {
-    SHIFT, REDUCE, ACCEPT
+enum Execution implements DOT {
+    SHIFT, REDUCE, ACCEPT;
+
+    @Override
+    public String toDOT() {
+        return switch (this) {
+            case SHIFT -> "s";
+            case REDUCE -> "r";
+            case ACCEPT -> Character.toString('\u2713');
+        };
+    }
 }
 
-class LR1ParseTable {
+class LR1ParseTable implements DOT {
     private final ActionTable actionTable;
     private final GotoTable gotoTable;
     private final Integer startIndex;
@@ -62,9 +71,20 @@ class LR1ParseTable {
                 ", \"startIndex\": " + startIndex +
                 '}';
     }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"3\">LR(1) Parse Tables</td></tr>");
+        sb.append(actionTable.toDOT());
+        sb.append(gotoTable.toDOT());
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class ActionTable extends Table<Integer, String, Action> {
+class ActionTable extends Table<Integer, String, Action> implements DOT {
     // We don't transition out of an Accept state in the DFA generated from an LR1 collection.
     static final Integer noSuchState = -2;
 
@@ -95,9 +115,54 @@ class ActionTable extends Table<Integer, String, Action> {
         Action action = new Action(SHIFT, toIndex);
         this.set(fromIndex, terminal, action);
     }
+
+    @Override
+    public String toDOT() {
+        String terminals = this
+                .secondKeySet()
+                .stream()
+                .map(terminal -> "<td>" + terminal + "</td>")
+                .collect(Collectors.joining(""));
+        int headerLength = this.secondKeySet().size() + 1;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"" + headerLength + "\">Action</td></tr>");
+
+        sb.append("<tr>");
+        sb.append("<td></td>");
+        sb.append(terminals);
+        sb.append("</tr>");
+
+        for (Integer productionIndex : this.firstKeySet()) {
+            StringBuilder actions = new StringBuilder();
+
+            for (String terminal : this.secondKeySet()) {
+                List<Action> conflicts = this.getConflicts(productionIndex, terminal);
+                String print;
+                if (conflicts != null) {
+                    print = conflicts
+                            .stream()
+                            .map(Action::toDOT)
+                            .collect(Collectors.joining(", "));
+                } else {
+                    print = "";
+                }
+                actions.append("<td>" + print + "</td>");
+            }
+
+            sb.append("<tr>");
+            sb.append("<td>" + productionIndex + "</td>");
+            sb.append(actions);
+            sb.append("</tr>");
+        }
+
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class Action implements Comparable<Action> {
+class Action implements Comparable<Action>, DOT {
     private final Execution execution;
 
     // Refers to an LR1 collection state index when shifting OR a production index when reducing.
@@ -155,21 +220,90 @@ class Action implements Comparable<Action> {
                 ", \"index\":\"" + index + "\"" +
                 "}";
     }
+
+    @Override
+    public String toDOT() {
+        if (execution.equals(ACCEPT)) {
+            return execution.toDOT();
+        }
+        return execution.toDOT() + index;
+    }
 }
 
-class GotoTable extends Table<Integer, String, Integer> {
+class GotoTable extends Table<Integer, String, Integer> implements DOT {
+    @Override
+    public String toDOT() {
+        String nonTerminals = this
+                .secondKeySet()
+                .stream()
+                .map(terminal -> "<td>" + terminal + "</td>")
+                .collect(Collectors.joining(""));
+        int headerLength = this.secondKeySet().size() + 1;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"" + headerLength + "\">Goto</td></tr>");
+
+        sb.append("<tr>");
+        sb.append("<td></td>");
+        sb.append(nonTerminals);
+        sb.append("</tr>");
+
+        for (Integer productionIndex : this.firstKeySet()) {
+            StringBuilder productionIndices = new StringBuilder();
+
+            for (String nonTerminal : this.secondKeySet()) {
+                List<Integer> conflicts = this.getConflicts(productionIndex, nonTerminal);
+                String print;
+                if (conflicts != null) {
+                    print = conflicts
+                            .stream()
+                            .map(Object::toString)
+                            .collect(Collectors.joining(", "));
+                } else {
+                    print = "";
+                }
+                productionIndices.append("<td>" + print + "</td>");
+            }
+
+            sb.append("<tr>");
+            sb.append("<td>" + productionIndex + "</td>");
+            sb.append(productionIndices);
+            sb.append("</tr>");
+        }
+
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> {
+class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> implements DOT {
     LR1ParseOutput() {
     }
 
     LR1ParseOutput(LR1ParseOutputEntry... entries) {
         super(Arrays.asList(entries));
     }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr><td colspan=\"3\">LR(1) Parse Output</td></tr>");
+        sb.append("<tr>" +
+                "<td>Stack</td>" +
+                "<td>Input</td>" +
+                "<td>Action</td>" +
+                "</tr>");
+        for (LR1ParseOutputEntry entry : this) {
+            sb.append(entry.toDOT());
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
 }
 
-class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> {
+class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> implements DOT {
     // Contains states represented as Integers and non-terminals represented as Strings.
     LR1ParseOutputEntry(Stack<Pair> stack, Queue<String> input, Action output, String cursor) {
         super(stack, input, output, cursor);
@@ -181,16 +315,35 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> {
     }
 
     private String toJSON() {
-        String input = printCollection(this.input);
+        String input = printCollection(this.getInput());
 
-        return "{\"stack\":" + stack +
+        return "{\"stack\":" + this.getStack() +
                 ", \"input\":" + input +
-                ", \"output\":" + output +
+                ", \"action\":" + this.getOutput() +
                 "}";
+    }
+
+    @Override
+    public String toDOT() {
+        StringBuilder sb = new StringBuilder();
+        String stack = this
+                .getStack()
+                .stream()
+                .map(Pair::toDOT)
+                .collect(Collectors.joining(" "));
+        String input = String.join(" ", this.getInput());
+        String output = this.getOutput().toDOT();
+        sb.append("<tr>" +
+                "<td>" + stack + "</td>" +
+                "<td>" + input + "</td>" +
+                "<td>" + output + "</td>" +
+                "</tr>");
+
+        return sb.toString();
     }
 }
 
-class Pair implements Comparable<Pair> {
+class Pair implements Comparable<Pair>, DOT {
     /* When initializing the LR1 parse stack, the first state has not transitioned from any
     symbol, hence there is no such symbol we push onto the stack */
     static final String noSuchSymbol = "";
@@ -238,9 +391,15 @@ class Pair implements Comparable<Pair> {
                 "\",";
         return "{" + existingSymbol + "\"stateIndex\": " + stateIndex + "}";
     }
+
+    @Override
+    public String toDOT() {
+        String space = symbol.equals(noSuchSymbol) ? "" : " ";
+        return symbol + space + stateIndex;
+    }
 }
 
-class LR1Collection extends ListWithUniques<Items> {
+class LR1Collection extends ListWithUniques<Items> implements DOT {
     private final Transitions transitions;
 
     /* We store a reference to the starting item set because its index is unstable when the
@@ -302,6 +461,11 @@ class LR1Collection extends ListWithUniques<Items> {
                 ", \"transitions\":" + transitions +
                 ", \"start\":" + start +
                 "}";
+    }
+
+    @Override
+    public String toDOT() {
+        return null;
     }
 }
 
