@@ -75,16 +75,100 @@ class LR1ParseTable implements DOT {
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
+        StringBuilder header = createHeader();
+
         sb.append("<table>");
-        sb.append("<tr><td colspan=\"3\">LR(1) Parse Tables</td></tr>");
-        sb.append(actionTable.toDOT());
-        sb.append(gotoTable.toDOT());
+        sb.append(header);
+
+        for (Integer productionIndex : this.actionTable.firstKeySet()) {
+            StringBuilder actions = createActions(productionIndex);
+            StringBuilder productionIndices = createProductionIndices(productionIndex);
+            sb.append("<tr>");
+            sb.append("<td>" + productionIndex + "</td>");
+            sb.append(actions);
+            sb.append(productionIndices);
+            sb.append("</tr>");
+        }
+
         sb.append("</table>");
         return sb.toString();
     }
+
+    private StringBuilder createHeader() {
+        StringBuilder header = new StringBuilder();
+
+        String terminals = this
+                .actionTable
+                .secondKeySet()
+                .stream()
+                .map(terminal -> "<td>" + terminal + "</td>")
+                .collect(Collectors.joining(""));
+        int actionHeaderLength = this.actionTable.secondKeySet().size() + 1;
+
+        String nonTerminals = this
+                .gotoTable
+                .secondKeySet()
+                .stream()
+                .map(terminal -> "<td>" + terminal + "</td>")
+                .collect(Collectors.joining(""));
+        int gotoHeaderLength = this.gotoTable.secondKeySet().size() + 1;
+
+        int headerLength = actionHeaderLength + gotoHeaderLength;
+
+        header.append("<tr><td colspan=\"" + headerLength + "\">LR(1) Parse Tables</td></tr>");
+
+        header.append("<tr>" +
+                "<td colspan=\"" + actionHeaderLength + "\">Action</td>" +
+                "<td colspan=\"" + gotoHeaderLength + "\">Goto</td>" +
+                "</tr>");
+
+        header.append("<tr>" +
+                "<td></td>" +
+                terminals +
+                nonTerminals +
+                "</tr>");
+
+        return header;
+    }
+
+    private StringBuilder createProductionIndices(Integer productionIndex) {
+        StringBuilder productionIndices = new StringBuilder();
+        for (String nonTerminal : this.gotoTable.secondKeySet()) {
+            List<Integer> conflicts = this.gotoTable.getConflicts(productionIndex, nonTerminal);
+            String print;
+            if (conflicts != null) {
+                print = conflicts
+                        .stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "));
+            } else {
+                print = "";
+            }
+            productionIndices.append("<td>" + print + "</td>");
+        }
+        return productionIndices;
+    }
+
+    private StringBuilder createActions(Integer productionIndex) {
+        StringBuilder actions = new StringBuilder();
+        for (String terminal : this.actionTable.secondKeySet()) {
+            List<Action> conflicts = this.actionTable.getConflicts(productionIndex, terminal);
+            String print;
+            if (conflicts != null) {
+                print = conflicts
+                        .stream()
+                        .map(Action::toDOT)
+                        .collect(Collectors.joining(", "));
+            } else {
+                print = "";
+            }
+            actions.append("<td>" + print + "</td>");
+        }
+        return actions;
+    }
 }
 
-class ActionTable extends Table<Integer, String, Action> implements DOT {
+class ActionTable extends Table<Integer, String, Action> {
     // We don't transition out of an Accept state in the DFA generated from an LR1 collection.
     static final Integer noSuchState = -2;
 
@@ -114,51 +198,6 @@ class ActionTable extends Table<Integer, String, Action> implements DOT {
     void populateWithShift(Integer fromIndex, String terminal, Integer toIndex) {
         Action action = new Action(SHIFT, toIndex);
         this.set(fromIndex, terminal, action);
-    }
-
-    @Override
-    public String toDOT() {
-        String terminals = this
-                .secondKeySet()
-                .stream()
-                .map(terminal -> "<td>" + terminal + "</td>")
-                .collect(Collectors.joining(""));
-        int headerLength = this.secondKeySet().size() + 1;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
-        sb.append("<tr><td colspan=\"" + headerLength + "\">Action</td></tr>");
-
-        sb.append("<tr>");
-        sb.append("<td></td>");
-        sb.append(terminals);
-        sb.append("</tr>");
-
-        for (Integer productionIndex : this.firstKeySet()) {
-            StringBuilder actions = new StringBuilder();
-
-            for (String terminal : this.secondKeySet()) {
-                List<Action> conflicts = this.getConflicts(productionIndex, terminal);
-                String print;
-                if (conflicts != null) {
-                    print = conflicts
-                            .stream()
-                            .map(Action::toDOT)
-                            .collect(Collectors.joining(", "));
-                } else {
-                    print = "";
-                }
-                actions.append("<td>" + print + "</td>");
-            }
-
-            sb.append("<tr>");
-            sb.append("<td>" + productionIndex + "</td>");
-            sb.append(actions);
-            sb.append("</tr>");
-        }
-
-        sb.append("</table>");
-        return sb.toString();
     }
 }
 
@@ -230,51 +269,7 @@ class Action implements Comparable<Action>, DOT {
     }
 }
 
-class GotoTable extends Table<Integer, String, Integer> implements DOT {
-    @Override
-    public String toDOT() {
-        String nonTerminals = this
-                .secondKeySet()
-                .stream()
-                .map(terminal -> "<td>" + terminal + "</td>")
-                .collect(Collectors.joining(""));
-        int headerLength = this.secondKeySet().size() + 1;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
-        sb.append("<tr><td colspan=\"" + headerLength + "\">Goto</td></tr>");
-
-        sb.append("<tr>");
-        sb.append("<td></td>");
-        sb.append(nonTerminals);
-        sb.append("</tr>");
-
-        for (Integer productionIndex : this.firstKeySet()) {
-            StringBuilder productionIndices = new StringBuilder();
-
-            for (String nonTerminal : this.secondKeySet()) {
-                List<Integer> conflicts = this.getConflicts(productionIndex, nonTerminal);
-                String print;
-                if (conflicts != null) {
-                    print = conflicts
-                            .stream()
-                            .map(Object::toString)
-                            .collect(Collectors.joining(", "));
-                } else {
-                    print = "";
-                }
-                productionIndices.append("<td>" + print + "</td>");
-            }
-
-            sb.append("<tr>");
-            sb.append("<td>" + productionIndex + "</td>");
-            sb.append(productionIndices);
-            sb.append("</tr>");
-        }
-
-        sb.append("</table>");
-        return sb.toString();
-    }
+class GotoTable extends Table<Integer, String, Integer> {
 }
 
 class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> implements DOT {
