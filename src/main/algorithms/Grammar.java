@@ -674,16 +674,7 @@ class Grammar implements DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        return "{" +
-                "\"nonTerminals\":" + nonTerminals +
-                ", \"terminals\":" + terminals +
-                ", \"start\":\"" + start + "\"" +
-                ", \"productions\":" + productions +
-                "}";
+        return toDOT();
     }
 
     @Override
@@ -762,15 +753,7 @@ class Production implements Comparable<Production>, DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String symbols = printCollection(rhs);
-        return "{" +
-                "\"lhs\":\"" + lhs + "\"," +
-                "\"rhs\":" + symbols +
-                "}";
+        return toDOT();
     }
 
     @Override
@@ -793,11 +776,7 @@ class Symbols extends TreeSet<String> implements DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        return printCollection(this);
+        return toDOT();
     }
 
     @Override

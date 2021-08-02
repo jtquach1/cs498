@@ -32,20 +32,7 @@ class FollowMap extends TreeMap<String, Symbols> implements DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String entries = this
-                .keySet()
-                .stream()
-                .map(key -> {
-                    String values = printCollection(this.get(key));
-                    return "\"" + key + "\":" + values;
-                })
-                .collect(Collectors.joining(","));
-
-        return "{" + entries + "}";
+        return toDOT();
     }
 
     @Override
@@ -143,20 +130,7 @@ class FirstMap extends TreeMap<String, Symbols> implements DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String entries = this
-                .keySet()
-                .stream()
-                .map(key -> {
-                    String values = printCollection(this.get(key));
-                    return "\"" + key + "\":" + values;
-                })
-                .collect(Collectors.joining(","));
-
-        return "{" + entries + "}";
+        return toDOT();
     }
 
     @Override
@@ -260,17 +234,7 @@ class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> implement
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String stack = printCollection(this.getStack());
-        String input = printCollection(this.getInput());
-
-        return "{\"stack\":" + stack +
-                ", \"input\":" + input +
-                ", \"output\":" + getOutput() +
-                "}";
+        return toDOT();
     }
 
     @Override

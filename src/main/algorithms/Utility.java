@@ -219,16 +219,6 @@ class Utility {
         return seeFlag ? null : result;
     }
 
-    static void createJSONFiles(String outputPrefix, TreeMap<String, DOT> structures) throws IOException {
-        for (String structure : structures.keySet()) {
-            String fileName = outputPrefix + "." + structure + ".json";
-            Path path = Paths.get(fileName);
-            String json = structures.get(structure).toString();
-            Files.write(path, Collections.singleton(json), StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE);
-        }
-    }
-
     static void createDOTFiles(String outputPrefix, TreeMap<String, DOT> structures) throws IOException {
         for (String structure : structures.keySet()) {
             String fileName = outputPrefix + "." + structure + ".dot";
@@ -425,30 +415,6 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
         }
 
         return values;
-    }
-
-    @Override
-    public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String rows = this
-                .keySet()
-                .stream()
-                .map(key1 -> {
-                    TreeMap<K2, List<V>> entry = this.get(key1);
-                    String entries = entry
-                            .keySet()
-                            .stream()
-                            .map(key2 -> "{\"" + key2 + "\":" + entry.get(key2) + "}")
-                            .collect(Collectors.joining(","));
-
-                    return "\"" + key1 + "\":" + "[" + entries + "]";
-                })
-                .collect(Collectors.joining(","));
-
-        return "{" + rows + "}";
     }
 }
 

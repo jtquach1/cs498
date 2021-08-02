@@ -62,15 +62,7 @@ class LR1ParseTable implements DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        return "{" +
-                "\"actionTable\": " + actionTable +
-                ", \"gotoTable\": " + gotoTable +
-                ", \"startIndex\": " + startIndex +
-                '}';
+        return toDOT();
     }
 
     @Override
@@ -248,14 +240,7 @@ class Action implements Comparable<Action>, DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        return "{" +
-                "\"execution\":\"" + execution + "\"" +
-                ", \"index\":\"" + index + "\"" +
-                "}";
+        return toDOT();
     }
 
     @Override
@@ -304,16 +289,7 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> implements D
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String input = printCollection(this.getInput());
-
-        return "{\"stack\":" + this.getStack() +
-                ", \"input\":" + input +
-                ", \"action\":" + this.getOutput() +
-                "}";
+        return toDOT();
     }
 
     @Override
@@ -376,13 +352,7 @@ class Pair implements Comparable<Pair>, DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String existingSymbol = symbol.equals(noSuchSymbol) ? "" : "\"symbol\": \"" + symbol +
-                "\",";
-        return "{" + existingSymbol + "\"stateIndex\": " + stateIndex + "}";
+        return toDOT();
     }
 
     @Override
@@ -443,17 +413,7 @@ class LR1Collection extends ListWithUniques<Items> implements DOT {
 
     @Override
     public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String collection = super.toString();
-
-        return "{" +
-                "\"collection\": " + collection +
-                ", \"transitions\":" + transitions +
-                ", \"start\":" + start +
-                "}";
+        return toDOT();
     }
 
     @Override
@@ -572,21 +532,6 @@ class Item extends Production {
         if (!super.equals(o)) return false;
         Item other = (Item) o;
         return Objects.equals(lookahead, other.lookahead);
-    }
-
-    @Override
-    public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        String symbols = printCollection(rhs);
-
-        return "{" +
-                "\"lhs\":\"" + lhs + "\", " +
-                "\"rhs\":" + symbols + ", " +
-                "\"lookahead\":\"" + lookahead + "\"" +
-                "}";
     }
 }
 
@@ -807,19 +752,6 @@ class Transition implements Comparable<Transition> {
         return Objects.equals(from, other.from) &&
                 Objects.equals(symbol, other.symbol) &&
                 Objects.equals(to, other.to);
-    }
-
-    @Override
-    public String toString() {
-        return toJSON();
-    }
-
-    private String toJSON() {
-        return "{" +
-                "\"from\":" + from +
-                ", \"symbol\": \"" + symbol + "\"" +
-                ", \"to\":" + to +
-                "}";
     }
 }
 

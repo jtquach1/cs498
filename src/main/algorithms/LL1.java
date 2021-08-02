@@ -29,7 +29,6 @@ class LL1 {
 
             Grammar grammar = initializeGrammar(inputFile);
             TreeMap<String, DOT> structures = getStructures(sentence, grammar);
-//            createJSONFiles(outputPrefix, structures);
             createDOTFiles(outputPrefix, structures);
         } catch (Exception e) {
             System.out.println("ERROR: Invalid grammar");
