@@ -19,6 +19,8 @@ interface DOT {
 }
 
 class Utility {
+    static final String CHECKMARK = Character.toString('\u2713');
+
     static Alphabet makeAlphabet(Character... symbols) {
         return new Alphabet(Arrays.asList(symbols));
     }
@@ -407,7 +409,8 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
 
     V get(K1 key1, K2 key2) {
         // In case of conflicts, we just want to return one value.
-        return this.getConflicts(key1, key2).get(0);
+        List<V> conflicts = this.getConflicts(key1, key2);
+        return conflicts != null ? conflicts.get(0) : null;
     }
 
     List<V> getConflicts(K1 key1, K2 key2) {

@@ -7,6 +7,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
+import static algorithms.Grammar.TERMINATOR;
+import static algorithms.Utility.CHECKMARK;
 import static algorithms.Utility.printCollection;
 
 class FollowMap extends TreeMap<String, Symbols> implements DOT {
@@ -54,8 +56,8 @@ class FollowMap extends TreeMap<String, Symbols> implements DOT {
 
         for (String symbol : this.keySet()) {
             sb.append("<tr>");
-            sb.append("<td>" + symbol + "</td>");
-            sb.append("<td>" + this.get(symbol).toDOT() + "</td>");
+            sb.append("<td align=\"left\">" + symbol + "</td>");
+            sb.append("<td align=\"left\">" + this.get(symbol).toDOT() + "</td>");
             sb.append("</tr>");
         }
 
@@ -165,8 +167,8 @@ class FirstMap extends TreeMap<String, Symbols> implements DOT {
 
         for (String symbol : this.keySet()) {
             sb.append("<tr>");
-            sb.append("<td>" + symbol + "</td>");
-            sb.append("<td>" + this.get(symbol).toDOT() + "</td>");
+            sb.append("<td align=\"left\">" + symbol + "</td>");
+            sb.append("<td align=\"left\">" + this.get(symbol).toDOT() + "</td>");
             sb.append("</tr>");
         }
 
@@ -208,7 +210,7 @@ class LL1ParseTable extends Table<String, String, Integer> implements DOT {
                 } else {
                     print = "";
                 }
-                indices.append("<td>" + print + "</td>");
+                indices.append("<td align=\"left\">" + print + "</td>");
             }
 
             sb.append("<tr>");
@@ -277,12 +279,23 @@ class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> implement
         String stack = String.join(" ", this.getStack());
         String input = String.join(" ", this.getInput());
         String output = this.getOutput() == null ? "" : this.getOutput().toString();
+
+        if (isFinalEntry()) {
+            output = CHECKMARK;
+        }
+
         sb.append("<tr>" +
-                "<td>" + stack + "</td>" +
-                "<td>" + input + "</td>" +
+                "<td align=\"left\">" + stack + "</td>" +
+                "<td align=\"left\">" + input + "</td>" +
                 "<td>" + output + "</td>" +
                 "</tr>");
 
         return sb.toString();
+    }
+
+    private boolean isFinalEntry() {
+        return this.getStack().peek().equals(TERMINATOR) &&
+                this.getInput().get(0).equals(TERMINATOR) &&
+                this.getOutput() == null;
     }
 }

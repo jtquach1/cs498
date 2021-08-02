@@ -85,6 +85,4 @@ class LL1 {
             structures.put("LL1ParseTable", table);
         }
     }
-
-
 }

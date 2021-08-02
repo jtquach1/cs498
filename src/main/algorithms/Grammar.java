@@ -691,7 +691,7 @@ class Grammar implements DOT {
         StringBuilder list = new StringBuilder();
         for (int i = 0; i < productions.size(); i++) {
             Production production = productions.get(i);
-            list.append("<tr><td>" + i + "</td>" + production.toDOT() + "</tr>");
+            list.append("<tr><td align=\"left\">" + i + "</td>" + production.toDOT() + "</tr>");
         }
         StringBuilder sb = new StringBuilder();
         sb.append("<table>");
@@ -775,7 +775,7 @@ class Production implements Comparable<Production>, DOT {
 
     @Override
     public String toDOT() {
-        return "<td>" + lhs + " ::= " + String.join(" ", rhs) + "</td>";
+        return "<td align=\"left\">" + lhs + " ::= " + String.join(" ", rhs) + "</td>";
     }
 }
 

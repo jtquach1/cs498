@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import static algorithms.Execution.*;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
+import static algorithms.Utility.CHECKMARK;
 import static algorithms.Utility.printCollection;
 
 enum Execution implements DOT {
@@ -21,7 +22,7 @@ enum Execution implements DOT {
         return switch (this) {
             case SHIFT -> "s";
             case REDUCE -> "r";
-            case ACCEPT -> Character.toString('\u2713');
+            case ACCEPT -> CHECKMARK;
         };
     }
 }
@@ -75,14 +76,14 @@ class LR1ParseTable implements DOT {
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
-        StringBuilder header = createHeader();
+        StringBuilder header = printHeader();
 
         sb.append("<table>");
         sb.append(header);
 
         for (Integer productionIndex : this.actionTable.firstKeySet()) {
-            StringBuilder actions = createActions(productionIndex);
-            StringBuilder productionIndices = createProductionIndices(productionIndex);
+            StringBuilder actions = printActions(productionIndex);
+            StringBuilder productionIndices = printProductionIndices(productionIndex);
             sb.append("<tr>");
             sb.append("<td>" + productionIndex + "</td>");
             sb.append(actions);
@@ -94,7 +95,7 @@ class LR1ParseTable implements DOT {
         return sb.toString();
     }
 
-    private StringBuilder createHeader() {
+    private StringBuilder printHeader() {
         StringBuilder header = new StringBuilder();
 
         String terminals = this
@@ -103,35 +104,32 @@ class LR1ParseTable implements DOT {
                 .stream()
                 .map(terminal -> "<td>" + terminal + "</td>")
                 .collect(Collectors.joining(""));
-        int actionHeaderLength = this.actionTable.secondKeySet().size() + 1;
+        int actionHeaderLength = this.actionTable.secondKeySet().size();
 
         String nonTerminals = this
                 .gotoTable
                 .secondKeySet()
                 .stream()
-                .map(terminal -> "<td>" + terminal + "</td>")
+                .map(nonTerminal -> "<td>" + nonTerminal + "</td>")
                 .collect(Collectors.joining(""));
-        int gotoHeaderLength = this.gotoTable.secondKeySet().size() + 1;
+        int gotoHeaderLength = this.gotoTable.secondKeySet().size();
 
-        int headerLength = actionHeaderLength + gotoHeaderLength;
+        int headerLength = actionHeaderLength + gotoHeaderLength + 1;
 
         header.append("<tr><td colspan=\"" + headerLength + "\">LR(1) Parse Tables</td></tr>");
 
         header.append("<tr>" +
+                "<td rowspan=\"2\">States</td>" +
                 "<td colspan=\"" + actionHeaderLength + "\">Action</td>" +
                 "<td colspan=\"" + gotoHeaderLength + "\">Goto</td>" +
                 "</tr>");
 
-        header.append("<tr>" +
-                "<td></td>" +
-                terminals +
-                nonTerminals +
-                "</tr>");
+        header.append("<tr>" + terminals + nonTerminals + "</tr>");
 
         return header;
     }
 
-    private StringBuilder createProductionIndices(Integer productionIndex) {
+    private StringBuilder printProductionIndices(Integer productionIndex) {
         StringBuilder productionIndices = new StringBuilder();
         for (String nonTerminal : this.gotoTable.secondKeySet()) {
             List<Integer> conflicts = this.gotoTable.getConflicts(productionIndex, nonTerminal);
@@ -144,12 +142,12 @@ class LR1ParseTable implements DOT {
             } else {
                 print = "";
             }
-            productionIndices.append("<td>" + print + "</td>");
+            productionIndices.append("<td align=\"left\">" + print + "</td>");
         }
         return productionIndices;
     }
 
-    private StringBuilder createActions(Integer productionIndex) {
+    private StringBuilder printActions(Integer productionIndex) {
         StringBuilder actions = new StringBuilder();
         for (String terminal : this.actionTable.secondKeySet()) {
             List<Action> conflicts = this.actionTable.getConflicts(productionIndex, terminal);
@@ -162,7 +160,7 @@ class LR1ParseTable implements DOT {
             } else {
                 print = "";
             }
-            actions.append("<td>" + print + "</td>");
+            actions.append("<td align=\"left\">" + print + "</td>");
         }
         return actions;
     }
@@ -329,8 +327,8 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> implements D
         String input = String.join(" ", this.getInput());
         String output = this.getOutput().toDOT();
         sb.append("<tr>" +
-                "<td>" + stack + "</td>" +
-                "<td>" + input + "</td>" +
+                "<td align=\"left\">" + stack + "</td>" +
+                "<td align=\"left\">" + input + "</td>" +
                 "<td>" + output + "</td>" +
                 "</tr>");
 
@@ -460,7 +458,78 @@ class LR1Collection extends ListWithUniques<Items> implements DOT {
 
     @Override
     public String toDOT() {
-        return null;
+        TreeSet<String> symbols = transitions
+                .stream()
+                .map(Transition::getSymbol)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        return "<table>" +
+                printHeader(symbols) +
+                printRows(symbols) +
+                "</table>";
+    }
+
+    private StringBuilder printRows(TreeSet<String> symbols) {
+        StringBuilder rows = new StringBuilder();
+        Table<Integer, String, Integer> transitionsTable = getTransitionsTable();
+
+        for (int i = 0; i < this.size(); i++) {
+            Items items = this.get(i);
+            rows.append("<tr>");
+            rows.append("<td>" + i + "</td>");
+            rows.append("<td align=\"left\">" + items.toDOT() + "</td>");
+
+            for (String symbol : symbols) {
+                List<Integer> conflicts = transitionsTable.getConflicts(i, symbol);
+                String print;
+                if (conflicts != null) {
+                    print = conflicts
+                            .stream()
+                            .map(Object::toString)
+                            .collect(Collectors.joining(", "));
+                } else {
+                    print = "";
+                }
+                rows.append("<td align=\"left\">" + print + "</td>");
+            }
+
+            rows.append("</tr>");
+        }
+        return rows;
+    }
+
+    @NotNull
+    private Table<Integer, String, Integer> getTransitionsTable() {
+        Table<Integer, String, Integer> transitionsTable = new Table<>();
+        for (Transition transition : transitions) {
+            Items from = transition.getFrom();
+            String symbol = transition.getSymbol();
+            Items to = transition.getTo();
+            transitionsTable.set(this.indexOf(from), symbol, this.indexOf(to));
+        }
+        return transitionsTable;
+    }
+
+    private StringBuilder printHeader(TreeSet<String> symbols) {
+        StringBuilder header = new StringBuilder();
+        String symbolsColumns = symbols
+                .stream()
+                .map(symbol -> "<td>" + symbol + "</td>")
+                .collect(Collectors.joining(""));
+
+        header.append("<tr>" +
+                "<td colspan=\"" + (symbols.size() + 2) + "\">LR(1) Canonical Collection</td>" +
+                "</tr>");
+
+        header.append("<tr>" +
+                "<td rowspan=\"2\">States</td>" +
+                "<td rowspan=\"2\">Item sets</td>" +
+                "<td colspan=\"" + symbols.size() + "\">Transitions</td>" +
+                "</tr>");
+
+        header.append("<tr>" + symbolsColumns + "</tr>");
+
+        return header;
     }
 }
 
@@ -521,7 +590,7 @@ class Item extends Production {
     }
 }
 
-class Items extends TreeSet<Item> implements Comparable<Items> {
+class Items extends TreeSet<Item> implements Comparable<Items>, DOT {
     Items(@NotNull Collection<? extends Item> items) {
         super(items);
     }
@@ -660,6 +729,41 @@ class Items extends TreeSet<Item> implements Comparable<Items> {
         return Comparator
                 .comparing(Items::toString)
                 .compare(this, other);
+    }
+
+    @Override
+    public String toDOT() {
+        TreeMap<Production, List<String>> abbreviatedItems = getAbbreviatedItems();
+
+        String items = abbreviatedItems
+                .keySet()
+                .stream()
+                .map(key -> {
+                    String production = key.getLhs() + " ::= " + String.join(" ", key.getRhs());
+                    String lookaheads = String.join("/", abbreviatedItems.get(key));
+                    return "[" + production + ", " + lookaheads + "]";
+                })
+                .collect(Collectors.joining(", "));
+
+        return "{" + items + "}";
+    }
+
+    @NotNull
+    private TreeMap<Production, List<String>> getAbbreviatedItems() {
+        TreeMap<Production, List<String>> abbreviatedItems = new TreeMap<>();
+        for (Item item : this) {
+            Production key = new Production(item.getLhs(), item.getRhs().toArray(new String[0]));
+            List<String> lookaheads = abbreviatedItems.get(key);
+            String lookahead = item.getLookahead();
+
+            if (lookaheads != null) {
+                lookaheads.add(lookahead);
+            } else {
+                lookaheads = new Sequence(Collections.singleton(lookahead));
+                abbreviatedItems.put(key, lookaheads);
+            }
+        }
+        return abbreviatedItems;
     }
 }
 

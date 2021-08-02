@@ -12,7 +12,7 @@ import java.util.*;
 
 import static algorithms.Utility.getNonFlag;
 
-class FSA {
+class FSA implements DOT {
     static final char EPSILON = '\u025B';
     static final char PHI = '\u03C6';
 
@@ -124,7 +124,8 @@ class FSA {
         return toDOT();
     }
 
-    private String toDOT() {
+    @Override
+    public String toDOT() {
         StringBuilder sb = new StringBuilder();
         printHeader(sb);
         printFinalStates(sb);
