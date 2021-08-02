@@ -213,12 +213,11 @@ class Utility {
         return seeFlag ? null : result;
     }
 
-    static void createJSONFiles(String outputPrefix,
-                                TreeMap<String, Object> structuresToJSON) throws IOException {
-        for (String structure : structuresToJSON.keySet()) {
+    static void createJSONFiles(String outputPrefix, TreeMap<String, Object> structures) throws IOException {
+        for (String structure : structures.keySet()) {
             String fileName = outputPrefix + "." + structure + ".json";
             Path path = Paths.get(fileName);
-            String json = structuresToJSON.get(structure).toString();
+            String json = structures.get(structure).toString();
             Files.write(path, Collections.singleton(json), StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE);
         }
@@ -380,6 +379,10 @@ class Table<K1, K2, V> extends TreeMap<K1, TreeMap<K2, List<V>>> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String rows = this
                 .keySet()
                 .stream()
@@ -427,13 +430,5 @@ class OutputEntry<E1, E2, E3> {
         return Objects.equals(stack, other.stack) &&
                 Objects.equals(input, other.input) &&
                 Objects.equals(output, other.output);
-    }
-
-    @Override
-    public String toString() {
-        return "{\"stack\":" + stack +
-                ", \"input\":" + input +
-                ", \"output\":" + output +
-                "}\n";
     }
 }

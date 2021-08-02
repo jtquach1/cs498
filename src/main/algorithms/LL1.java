@@ -28,8 +28,8 @@ class LL1 {
             }
 
             Grammar grammar = initializeGrammar(inputFile);
-            TreeMap<String, Object> structuresToJSON = getStructuresToJSON(sentence, grammar);
-            createJSONFiles(outputPrefix, structuresToJSON);
+            TreeMap<String, Object> structures = getStructures(sentence, grammar);
+            createJSONFiles(outputPrefix, structures);
 
         } catch (Exception e) {
             System.out.println("ERROR: Invalid grammar");
@@ -38,33 +38,33 @@ class LL1 {
     }
 
     @NotNull
-    private static TreeMap<String, Object> getStructuresToJSON(String sentence, Grammar grammar) throws Exception {
+    private static TreeMap<String, Object> getStructures(String sentence, Grammar grammar) throws Exception {
         System.out.println("Printing out first sets, follow sets, and LL(1) parse table");
-        TreeMap<String, Object> structuresToJSON = new TreeMap<>();
+        TreeMap<String, Object> structures = new TreeMap<>();
 
-        populateStructuresToJSON(structuresToJSON, grammar);
-        LL1ParseTable table = (LL1ParseTable) structuresToJSON.get("LL1ParseTable");
+        populateStructuresToJSON(structures, grammar);
+        LL1ParseTable table = (LL1ParseTable) structures.get("LL1ParseTable");
 
         if (!grammar.isLL1(table)) {
             System.out.println("Grammar is not LL(1), removing left recursion");
 
             grammar = grammar.removeLeftRecursion();
-            populateStructuresToJSON(structuresToJSON, grammar);
+            populateStructuresToJSON(structures, grammar);
         }
 
         if (sentence != null) {
             System.out.println("Printing sentence parse with LL(1) grammar");
 
-            boolean removedLeftRecursionEarlier = structuresToJSON.size() >= 4;
-            table = (LL1ParseTable) structuresToJSON.get(removedLeftRecursionEarlier ?
+            boolean removedLeftRecursionEarlier = structures.size() >= 4;
+            table = (LL1ParseTable) structures.get(removedLeftRecursionEarlier ?
                     removalPrefix + "LL1ParseTable" : "LL1ParseTable");
             LL1ParseOutput output = grammar.parseSentence(table, sentence);
             String filename = removedLeftRecursionEarlier ? removalPrefix + "LL1ParseOutput" :
                     "LL1ParseOutput";
 
-            structuresToJSON.put(filename, output.toString());
+            structures.put(filename, output.toString());
         }
-        return structuresToJSON;
+        return structures;
     }
 
     private static void populateStructuresToJSON(TreeMap<String, Object> structuresToJSON,

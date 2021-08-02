@@ -52,6 +52,10 @@ class LR1ParseTable {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         return "{" +
                 "\"actionTable\": " + actionTable +
                 ", \"gotoTable\": " + gotoTable +
@@ -142,6 +146,10 @@ class Action implements Comparable<Action> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         return "{" +
                 "\"execution\":\"" + execution + "\"" +
                 ", \"index\":\"" + index + "\"" +
@@ -169,12 +177,16 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String input = printCollection(this.input);
 
         return "{\"stack\":" + stack +
                 ", \"input\":" + input +
                 ", \"output\":" + output +
-                "}\n";
+                "}";
     }
 }
 
@@ -218,6 +230,10 @@ class Pair implements Comparable<Pair> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String existingSymbol = symbol.equals(noSuchSymbol) ? "" : "\"symbol\": \"" + symbol +
                 "\",";
         return "{" + existingSymbol + "\"stateIndex\": " + stateIndex + "}";
@@ -275,13 +291,17 @@ class LR1Collection extends ListWithUniques<Items> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String collection = super.toString();
 
         return "{" +
                 "\"collection\": " + collection +
                 ", \"transitions\":" + transitions +
                 ", \"start\":" + start +
-                '}';
+                "}";
     }
 }
 
@@ -328,6 +348,10 @@ class Item extends Production {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String symbols = printCollection(rhs);
 
         return "{" +
@@ -524,11 +548,15 @@ class Transition implements Comparable<Transition> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         return "{" +
                 "\"from\":" + from +
                 ", \"symbol\": \"" + symbol + "\"" +
                 ", \"to\":" + to +
-                '}';
+                "}";
     }
 }
 

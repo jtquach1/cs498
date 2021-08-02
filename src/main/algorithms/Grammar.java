@@ -674,6 +674,10 @@ class Grammar {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         return "{" +
                 "\"nonTerminals\":" + nonTerminals +
                 ", \"terminals\":" + terminals +
@@ -743,6 +747,10 @@ class Production implements Comparable<Production> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String symbols = printCollection(rhs);
         return "{" +
                 "\"lhs\":\"" + lhs + "\"," +
@@ -765,6 +773,10 @@ class Symbols extends TreeSet<String> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         return printCollection(this);
     }
 }

@@ -29,6 +29,10 @@ class FollowMap extends TreeMap<String, Symbols> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String entries = this
                 .keySet()
                 .stream()
@@ -119,6 +123,10 @@ class FirstMap extends TreeMap<String, Symbols> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String entries = this
                 .keySet()
                 .stream()
@@ -154,12 +162,16 @@ class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> {
 
     @Override
     public String toString() {
+        return toJSON();
+    }
+
+    private String toJSON() {
         String stack = printCollection(this.stack);
         String input = printCollection(this.input);
 
         return "{\"stack\":" + stack +
                 ", \"input\":" + input +
                 ", \"output\":" + output +
-                "}\n";
+                "}";
     }
 }
