@@ -12,7 +12,6 @@ import static algorithms.Execution.*;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
 import static algorithms.Utility.CHECKMARK;
-import static algorithms.Utility.printCollection;
 
 enum Execution implements DOT {
     SHIFT, REDUCE, ACCEPT;
@@ -218,14 +217,6 @@ class Action implements Comparable<Action>, DOT {
         return index;
     }
 
-    boolean executesAccept() {
-        return execution.equals(ACCEPT);
-    }
-
-    boolean executesReduce() {
-        return execution.equals(REDUCE);
-    }
-
     boolean executesShift() {
         return execution.equals(SHIFT);
     }
@@ -248,7 +239,22 @@ class Action implements Comparable<Action>, DOT {
         if (execution.equals(ACCEPT)) {
             return execution.toDOT();
         }
+
+        Integer index = this.index;
+
+        // Production indices are 1-indexed in the DOT representation of a Grammar.
+        if (execution.equals(REDUCE)) {
+            index += 1;
+        }
         return execution.toDOT() + index;
+    }
+
+    boolean executesAccept() {
+        return execution.equals(ACCEPT);
+    }
+
+    boolean executesReduce() {
+        return execution.equals(REDUCE);
     }
 }
 

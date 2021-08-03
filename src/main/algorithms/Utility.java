@@ -277,14 +277,6 @@ class Utility {
 
         return new Grammar(nonTerminals, terminals, start, productions);
     }
-
-    static String printCollection(Collection<?> collection) {
-        String items = collection
-                .stream()
-                .map(item -> "\"" + item.toString() + "\"")
-                .collect(Collectors.joining(","));
-        return "[" + items + "]";
-    }
 }
 
 class Queue<T> extends ArrayList<T> {

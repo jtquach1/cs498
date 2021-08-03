@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Utility.CHECKMARK;
-import static algorithms.Utility.printCollection;
 
 class FollowMap extends TreeMap<String, Symbols> implements DOT {
     FollowMap() {
@@ -177,9 +176,10 @@ class LL1ParseTable extends Table<String, String, Integer> implements DOT {
                 List<Integer> conflicts = this.getConflicts(nonTerminal, terminal);
                 String print;
                 if (conflicts != null) {
+                    // Production indices are 1-indexed in the DOT representation of a Grammar.
                     print = conflicts
                             .stream()
-                            .map(Object::toString)
+                            .map(conflict -> Integer.toString(conflict + 1))
                             .collect(Collectors.joining(", "));
                 } else {
                     print = "";

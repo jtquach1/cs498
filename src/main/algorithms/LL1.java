@@ -73,12 +73,12 @@ class LL1 {
         LL1ParseTable table = grammar.generateLL1ParseTable(firstMap, followMap);
 
         if (removedLeftRecursionEarlier) {
-            structures.put(removalPrefix + "grammar", grammar);
+            structures.put(removalPrefix + "grammarLL1", grammar);
             structures.put(removalPrefix + "firstMap", firstMap);
             structures.put(removalPrefix + "followMap", followMap);
             structures.put(removalPrefix + "LL1ParseTable", table);
         } else {
-            structures.put("grammar", grammar);
+            structures.put("grammarLL1", grammar);
             structures.put("firstMap", firstMap);
             structures.put("followMap", followMap);
             structures.put("LL1ParseTable", table);

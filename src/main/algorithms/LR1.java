@@ -61,6 +61,8 @@ class LR1 {
         LR1Collection collection = grammar.computeLR1Collection();
         LR1ParseTable table = grammar.generateLR1ParseTable(collection);
 
+        structures.put("grammarLR1", grammar);
+        structures.put("grammarLR1.augmented", grammar.augment());
         structures.put("LR1ParseTable", table);
         structures.put("LR1Collection", collection);
     }

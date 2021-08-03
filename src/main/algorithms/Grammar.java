@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Item.MARKER;
 import static algorithms.Pair.noSuchSymbol;
-import static algorithms.Utility.printCollection;
 
 class Grammar implements DOT {
     static final String EPSILON = Character.toString('\u025B');
@@ -22,12 +21,24 @@ class Grammar implements DOT {
     private final Symbols terminals;
     private final String start;
     private final Productions productions;
+    private final boolean isAugmented;
+
+    Grammar(Symbols nonTerminals, Symbols terminals, String start, Productions productions,
+            boolean isAugmented) {
+        this.nonTerminals = nonTerminals;
+        this.terminals = terminals;
+        this.start = start;
+        this.productions = productions;
+        this.isAugmented = isAugmented;
+        nonTerminals.add(start);
+    }
 
     Grammar(Symbols nonTerminals, Symbols terminals, String start, Productions productions) {
         this.nonTerminals = nonTerminals;
         this.terminals = terminals;
         this.start = start;
         this.productions = productions;
+        this.isAugmented = false;
         nonTerminals.add(start);
     }
 
@@ -401,7 +412,7 @@ class Grammar implements DOT {
         Symbols nonTerminals = new Symbols(this.nonTerminals);
         Symbols terminals = new Symbols(this.terminals);
         Productions productions = new Productions(this.productions);
-        return new Grammar(nonTerminals, terminals, start, productions);
+        return new Grammar(nonTerminals, terminals, start, productions, isAugmented);
     }
 
     LR1Collection computeLR1Collection() {
@@ -488,7 +499,7 @@ class Grammar implements DOT {
 
         String newStart = getNewStart();
         productions.add(new Production(newStart, start));
-        return new Grammar(nonTerminals, terminals, newStart, productions);
+        return new Grammar(nonTerminals, terminals, newStart, productions, true);
     }
 
     @NotNull
@@ -680,13 +691,26 @@ class Grammar implements DOT {
     @Override
     public String toDOT() {
         StringBuilder list = new StringBuilder();
+        List<Production> productions = new ArrayList<>(this.productions);
+
+        Optional<Production> start = productions
+                .stream()
+                .filter(production -> production.getLhs().equals(this.start))
+                .findFirst();
+
+        if (isAugmented && start.isPresent()) {
+            productions.remove(start.get());
+            productions.add(0, start.get());
+        }
+
         for (int i = 0; i < productions.size(); i++) {
             Production production = productions.get(i);
-            list.append("<tr><td align=\"left\">" + i + "</td>" + production.toDOT() + "</tr>");
+            int index = isAugmented ? i : i + 1;
+            list.append("<tr><td align=\"left\">" + index + ". " + production.toDOT() + "</tr>");
         }
         StringBuilder sb = new StringBuilder();
         sb.append("<table>");
-        sb.append("<tr><td colspan=\"2\">Grammar</td></tr>");
+        sb.append("<tr><td>Grammar</td></tr>");
         sb.append(list);
         sb.append("</table>");
         return sb.toString();
@@ -758,7 +782,7 @@ class Production implements Comparable<Production>, DOT {
 
     @Override
     public String toDOT() {
-        return "<td align=\"left\">" + lhs + " ::= " + String.join(" ", rhs) + "</td>";
+        return lhs + " ::= " + String.join(" ", rhs) + "</td>";
     }
 }
 
