@@ -788,7 +788,7 @@ class DFATest {
     }
 
     @Test
-    void toStringDFA() {
+    void toDOT() {
         String expected = "digraph finite_state_machine {\n" +
                 "\trankdir=LR;\n" +
                 "\tsize=\"8,5\";\n" +
@@ -847,7 +847,7 @@ class DFATest {
                 new State(5)
         );
 
-        String actual = dfa.toString();
+        String actual = dfa.toDOT();
 
         assertEquals(expected, actual);
     }

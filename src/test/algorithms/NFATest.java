@@ -261,7 +261,7 @@ class NFATest {
     }
 
     @Test
-    void toStringNFA() {
+    void toDOT() {
         String expected = "digraph finite_state_machine {\n" +
                 "\trankdir=LR;\n" +
                 "\tsize=\"8,5\";\n" +
@@ -311,7 +311,7 @@ class NFATest {
                         makeMove(9, EPSILON, 10),
                         makeMove(10, 'b', 11))
         );
-        String actual = nfa.toString();
+        String actual = nfa.toDOT();
 
         assertEquals(expected, actual);
     }

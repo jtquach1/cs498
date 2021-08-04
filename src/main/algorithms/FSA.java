@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static algorithms.Utility.getNonFlag;
 
@@ -79,9 +80,9 @@ class FSA implements DOT {
         DFA minDfa = DFA.DFAtoMinDFA(dfa);
 
         TreeMap<String, String> FSAToDOT = new TreeMap<>();
-        FSAToDOT.put("nfa", nfa.toString());
-        FSAToDOT.put("dfa", dfa.toString());
-        FSAToDOT.put("minDfa", minDfa.toString());
+        FSAToDOT.put("nfa", nfa.toDOT());
+        FSAToDOT.put("dfa", dfa.toDOT());
+        FSAToDOT.put("minDfa", minDfa.toDOT());
 
         for (String fsaType : FSAToDOT.keySet()) {
             String fileName = outputPrefix + "." + fsaType + ".dot";
@@ -89,39 +90,6 @@ class FSA implements DOT {
             Files.write(path, Collections.singleton(FSAToDOT.get(fsaType)),
                     StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         }
-    }
-
-    void addState(State state) {
-        states.add(state);
-    }
-
-    void addFinalState(State state) {
-        finalStates.add(state);
-    }
-
-    void removeFinalStates() {
-        finalStates.clear();
-    }
-
-    void addMove(State from, Character consumed, State to) {
-        moves.add(new Move(from, consumed, to));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FSA other = (FSA) o;
-        return Objects.equals(alphabet, other.alphabet)
-                && Objects.equals(states, other.states)
-                && Objects.equals(finalStates, other.finalStates)
-                && Objects.equals(moves, other.moves)
-                && Objects.equals(start, other.start);
-    }
-
-    @Override
-    public String toString() {
-        return toDOT();
     }
 
     @Override
@@ -224,6 +192,34 @@ class FSA implements DOT {
                 "\tENTRY -> " + start.getId() + ";\n");
     }
 
+    void addState(State state) {
+        states.add(state);
+    }
+
+    void addFinalState(State state) {
+        finalStates.add(state);
+    }
+
+    void removeFinalStates() {
+        finalStates.clear();
+    }
+
+    void addMove(State from, Character consumed, State to) {
+        moves.add(new Move(from, consumed, to));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FSA other = (FSA) o;
+        return Objects.equals(alphabet, other.alphabet)
+                && Objects.equals(states, other.states)
+                && Objects.equals(finalStates, other.finalStates)
+                && Objects.equals(moves, other.moves)
+                && Objects.equals(start, other.start);
+    }
+
     States getStates() {
         return states;
     }
@@ -261,9 +257,11 @@ class State implements Comparable<State> {
 
     State(int id, States states) {
         this.id = id;
-        String oldLabel = states.toString();
-        oldLabel = oldLabel.substring(1, oldLabel.length() - 1);
-        this.alternativeLabel = "{" + oldLabel + "}";
+        String intermediate = states
+                .stream()
+                .map(State::toString)
+                .collect(Collectors.joining(", "));
+        alternativeLabel = "{" + intermediate + "}";
     }
 
     static void setIdCounter(int idCounter) {

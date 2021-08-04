@@ -3,8 +3,6 @@ package algorithms;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

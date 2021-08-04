@@ -3,8 +3,6 @@ package algorithms;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static algorithms.Utility.makeStates;
 import static org.junit.jupiter.api.Assertions.*;

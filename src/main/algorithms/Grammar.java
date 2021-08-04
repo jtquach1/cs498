@@ -684,11 +684,6 @@ class Grammar implements DOT {
     }
 
     @Override
-    public String toString() {
-        return toDOT();
-    }
-
-    @Override
     public String toDOT() {
         StringBuilder list = new StringBuilder();
         List<Production> productions = new ArrayList<>(this.productions);
@@ -776,11 +771,6 @@ class Production implements Comparable<Production>, DOT {
     }
 
     @Override
-    public String toString() {
-        return toDOT();
-    }
-
-    @Override
     public String toDOT() {
         return lhs + " ::= " + String.join(" ", rhs) + "</td>";
     }
@@ -796,11 +786,6 @@ class Symbols extends TreeSet<String> implements DOT {
 
     Symbols(String... symbols) {
         super(Arrays.asList(symbols));
-    }
-
-    @Override
-    public String toString() {
-        return toDOT();
     }
 
     @Override

@@ -29,10 +29,6 @@ class FollowMap extends TreeMap<String, Symbols> implements DOT {
         this.put(symbol, set);
     }
 
-    @Override
-    public String toString() {
-        return toDOT();
-    }
 
     @Override
     public String toDOT() {
@@ -125,11 +121,6 @@ class FirstMap extends TreeMap<String, Symbols> implements DOT {
         }
 
         return F;
-    }
-
-    @Override
-    public String toString() {
-        return toDOT();
     }
 
     @Override
@@ -233,16 +224,20 @@ class LL1ParseOutputEntry extends OutputEntry<String, String, Integer> implement
     }
 
     @Override
-    public String toString() {
-        return toDOT();
-    }
-
-    @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
         String stack = String.join(" ", this.getStack());
         String input = String.join(" ", this.getInput());
-        String output = this.getOutput() == null ? "" : this.getOutput().toString();
+
+        // Production indices are 1-indexed in the DOT representation of a Grammar.
+        Integer index = this.getOutput();
+        String output;
+        if (index == null) {
+            output = "";
+        } else {
+            index += 1;
+            output = index.toString();
+        }
 
         if (isFinalEntry()) {
             output = CHECKMARK;

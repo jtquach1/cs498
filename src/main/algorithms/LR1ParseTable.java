@@ -59,10 +59,6 @@ class LR1ParseTable implements DOT {
                 startIndex.equals(other.startIndex);
     }
 
-    @Override
-    public String toString() {
-        return toDOT();
-    }
 
     @Override
     public String toDOT() {
@@ -229,10 +225,6 @@ class Action implements Comparable<Action>, DOT {
         return execution == other.execution && index.equals(other.index);
     }
 
-    @Override
-    public String toString() {
-        return toDOT();
-    }
 
     @Override
     public String toDOT() {
@@ -293,10 +285,6 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> implements D
         super(stack, input, output, cursor);
     }
 
-    @Override
-    public String toString() {
-        return toDOT();
-    }
 
     @Override
     public String toDOT() {
@@ -356,10 +344,6 @@ class Pair implements Comparable<Pair>, DOT {
         return Objects.equals(stateIndex, other.stateIndex) && Objects.equals(symbol, other.symbol);
     }
 
-    @Override
-    public String toString() {
-        return toDOT();
-    }
 
     @Override
     public String toDOT() {
@@ -417,10 +401,6 @@ class LR1Collection extends ListWithUniques<Items> implements DOT {
         return start;
     }
 
-    @Override
-    public String toString() {
-        return toDOT();
-    }
 
     @Override
     public String toDOT() {
@@ -678,7 +658,7 @@ class Items extends TreeSet<Item> implements Comparable<Items>, DOT {
     @Override
     public int compareTo(@NotNull Items other) {
         return Comparator
-                .comparing(Items::toString)
+                .comparing(DOT::toDOT)
                 .compare(this, other);
     }
 

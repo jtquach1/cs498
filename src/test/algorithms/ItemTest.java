@@ -2,9 +2,7 @@ package algorithms;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static algorithms.Grammar.TERMINATOR;
 import static algorithms.Item.MARKER;
