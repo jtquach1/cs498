@@ -3,14 +3,10 @@ package algorithms;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static algorithms.Utility.createDOTFiles;
 import static algorithms.Utility.getNonFlag;
 
 class FSA implements DOT {
@@ -49,12 +45,26 @@ class FSA implements DOT {
                 return;
             }
 
-            createDOTFiles(inputRegex, outputPrefix);
+            TreeMap<String, DOT> structures = getStructures(inputRegex);
+            createDOTFiles(outputPrefix, structures);
 
         } catch (Exception e) {
             System.out.println("ERROR: Invalid regular expression");
             throw e;
         }
+    }
+
+    @NotNull
+    private static TreeMap<String, DOT> getStructures(String inputRegex) {
+        NFA nfa = NFA.regexToNFA(inputRegex);
+        DFA dfa = DFA.NFAtoDFA(nfa);
+        DFA minDfa = DFA.DFAtoMinDFA(dfa);
+
+        TreeMap<String, DOT> structures = new TreeMap<>();
+        structures.put("nfa", nfa);
+        structures.put("dfa", dfa);
+        structures.put("minDfa", minDfa);
+        return structures;
     }
 
     private static TreeMap<String, String> getArguments(String[] args) {
@@ -74,58 +84,31 @@ class FSA implements DOT {
         return arguments;
     }
 
-    private static void createDOTFiles(String inputRegex, String outputPrefix) throws IOException {
-        NFA nfa = NFA.regexToNFA(inputRegex);
-        DFA dfa = DFA.NFAtoDFA(nfa);
-        DFA minDfa = DFA.DFAtoMinDFA(dfa);
-
-        TreeMap<String, String> FSAToDOT = new TreeMap<>();
-        FSAToDOT.put("nfa", nfa.toDOT());
-        FSAToDOT.put("dfa", dfa.toDOT());
-        FSAToDOT.put("minDfa", minDfa.toDOT());
-
-        for (String fsaType : FSAToDOT.keySet()) {
-            String fileName = outputPrefix + "." + fsaType + ".dot";
-            Path path = Paths.get(fileName);
-            Files.write(path, Collections.singleton(FSAToDOT.get(fsaType)),
-                    StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-        }
-    }
-
     @Override
     public String toDOT() {
+        return String.valueOf(printFinalStates()) +
+                printStates() +
+                printMoves() +
+                printStartState();
+    }
+
+    private StringBuilder printFinalStates() {
+        String finalStates = this.finalStates
+                .stream()
+                .map(state -> Integer.toString(state.getId()))
+                .collect(Collectors.joining(" "));
+
         StringBuilder sb = new StringBuilder();
-        printHeader(sb);
-        printFinalStates(sb);
-        printStates(sb);
-        printMoves(sb);
-        printStartState(sb);
-        printFooter(sb);
-
-        return sb.toString();
-    }
-
-    private static void printFooter(StringBuilder sb) {
-        sb.append("}\n");
-    }
-
-    private static void printHeader(StringBuilder sb) {
-        sb.append("digraph finite_state_machine {\n" +
-                "\trankdir=LR;\n" +
-                "\tsize=\"8,5\";\n" +
-                "\n");
-    }
-
-    private void printFinalStates(StringBuilder sb) {
         sb.append("\tnode [shape = doublecircle];\n\t");
-        for (State finalState : finalStates) {
-            sb.append(finalState.getId() + " ");
-        }
+        sb.append(finalStates);
         sb.append(";\n\n");
+        return sb;
     }
 
-    private void printStates(StringBuilder sb) {
+    private StringBuilder printStates() {
+        StringBuilder sb = new StringBuilder();
         sb.append("\tnode [shape = circle];\n");
+
         for (State state : states) {
             String alternativeLabel = state.getAlternativeLabel();
             boolean generatedFromClosureOrPartition = alternativeLabel != null;
@@ -135,7 +118,9 @@ class FSA implements DOT {
                         "\"];\n");
             }
         }
+
         sb.append("\n");
+        return sb;
     }
 
     private String getStateLabel(State state) {
@@ -153,8 +138,10 @@ class FSA implements DOT {
         return Integer.toString(stateId);
     }
 
-    private void printMoves(StringBuilder sb) {
+    private StringBuilder printMoves() {
+        StringBuilder sb = new StringBuilder();
         Map<Move, Set<Character>> moveToLabel = getMoveToLabel();
+
         for (Move move : moveToLabel.keySet()) {
             String originalLabel = moveToLabel.get(move).toString();
             String label = originalLabel.substring(1, originalLabel.length() - 1);
@@ -164,7 +151,9 @@ class FSA implements DOT {
 
             sb.append("\t" + from + " -> " + to + " [label = \"" + label + "\"];\n");
         }
+
         sb.append("\n");
+        return sb;
     }
 
     private Map<Move, Set<Character>> getMoveToLabel() {
@@ -187,9 +176,11 @@ class FSA implements DOT {
         return moveToLabel;
     }
 
-    private void printStartState(StringBuilder sb) {
+    private StringBuilder printStartState() {
+        StringBuilder sb = new StringBuilder();
         sb.append("\tnode [shape = none, label =\"\"];\n" +
                 "\tENTRY -> " + start.getId() + ";\n");
+        return sb;
     }
 
     void addState(State state) {

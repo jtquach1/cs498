@@ -33,7 +33,6 @@ class FollowMap extends TreeMap<String, Symbols> implements DOT {
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
         sb.append("<tr><td colspan=\"2\">Follow</td></tr>");
 
         for (String symbol : this.keySet()) {
@@ -43,7 +42,6 @@ class FollowMap extends TreeMap<String, Symbols> implements DOT {
             sb.append("</tr>");
         }
 
-        sb.append("</table>");
         return sb.toString();
     }
 }
@@ -126,7 +124,6 @@ class FirstMap extends TreeMap<String, Symbols> implements DOT {
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
         sb.append("<tr><td colspan=\"2\">First</td></tr>");
 
         for (String symbol : this.keySet()) {
@@ -136,7 +133,6 @@ class FirstMap extends TreeMap<String, Symbols> implements DOT {
             sb.append("</tr>");
         }
 
-        sb.append("</table>");
         return sb.toString();
     }
 }
@@ -152,7 +148,6 @@ class LL1ParseTable extends Table<String, String, Integer> implements DOT {
         int headerLength = this.secondKeySet().size() + 1;
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
         sb.append("<tr><td colspan=\"" + headerLength + "\">LL(1) Parse Table</td></tr>");
 
         sb.append("<tr>");
@@ -184,7 +179,6 @@ class LL1ParseTable extends Table<String, String, Integer> implements DOT {
             sb.append("</tr>");
         }
 
-        sb.append("</table>");
         return sb.toString();
     }
 }
@@ -200,7 +194,6 @@ class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> implements DOT {
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
         sb.append("<tr><td colspan=\"3\">LL(1) Parse Output</td></tr>");
         sb.append("<tr>" +
                 "<td>Stack</td>" +
@@ -210,7 +203,6 @@ class LL1ParseOutput extends ArrayList<LL1ParseOutputEntry> implements DOT {
         for (LL1ParseOutputEntry entry : this) {
             sb.append(entry.toDOT());
         }
-        sb.append("</table>");
         return sb.toString();
     }
 }

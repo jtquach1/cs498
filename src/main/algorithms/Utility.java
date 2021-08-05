@@ -220,27 +220,40 @@ class Utility {
     }
 
     static void createDOTFiles(String outputPrefix, TreeMap<String, DOT> structures) throws IOException {
-        for (String structure : structures.keySet()) {
-            String fileName = outputPrefix + "." + structure + ".dot";
+        for (String entry : structures.keySet()) {
+            String fileName = outputPrefix + "." + entry + ".dot";
             Path path = Paths.get(fileName);
-            String dot = structures.get(structure).toDOT();
-            Files.write(path, Collections.singleton(createDOTTable(dot)), StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE);
+            Collection<String> dot = createDOT(structures, entry);
+            Files.write(path, dot, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         }
     }
 
-    static String createDOTTable(String content) {
-        return "digraph {\n" +
-                "\n" +
-                "  tbl [\n" +
-                "\n" +
-                "    shape=plaintext\n" +
-                "    label=<" +
-                content +
-                "\n" +
-                "    >];\n" +
-                "\n" +
-                "}";
+    private static Collection<String> createDOT(TreeMap<String, DOT> structures, String entry) {
+        DOT structure = structures.get(entry);
+        String content = structure.toDOT();
+
+        if (structure instanceof FSA) {
+            return Arrays.asList("digraph finite_state_machine {",
+                    "\trankdir=LR;",
+                    "\tsize=\"8,5\";",
+                    content,
+                    "}"
+            );
+        }
+
+        if (structure instanceof Grammar && entry.contains("augmented")) {
+            content = ((Grammar) structure).augmentedGrammarToDOT();
+        }
+
+        return Arrays.asList("digraph {",
+                "\ttbl [",
+                "\tshape=plaintext",
+                "\tlabel=<",
+                "\t\t<table>",
+                "\t\t" + content,
+                "\t\t</table>",
+                "\t>];",
+                "}");
     }
 
     @NotNull

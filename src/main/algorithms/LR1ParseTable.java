@@ -65,7 +65,6 @@ class LR1ParseTable implements DOT {
         StringBuilder sb = new StringBuilder();
         StringBuilder header = printHeader();
 
-        sb.append("<table>");
         sb.append(header);
 
         for (Integer productionIndex : this.actionTable.firstKeySet()) {
@@ -78,7 +77,6 @@ class LR1ParseTable implements DOT {
             sb.append("</tr>");
         }
 
-        sb.append("</table>");
         return sb.toString();
     }
 
@@ -264,7 +262,6 @@ class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> implements DOT {
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
         sb.append("<tr><td colspan=\"3\">LR(1) Parse Output</td></tr>");
         sb.append("<tr>" +
                 "<td>Stack</td>" +
@@ -274,7 +271,6 @@ class LR1ParseOutput extends ArrayList<LR1ParseOutputEntry> implements DOT {
         for (LR1ParseOutputEntry entry : this) {
             sb.append(entry.toDOT());
         }
-        sb.append("</table>");
         return sb.toString();
     }
 }
@@ -409,10 +405,7 @@ class LR1Collection extends ListWithUniques<Items> implements DOT {
                 .map(Transition::getSymbol)
                 .collect(Collectors.toCollection(TreeSet::new));
 
-        return "<table>" +
-                printHeader(symbols) +
-                printRows(symbols) +
-                "</table>";
+        return String.valueOf(printHeader(symbols)) + printRows(symbols);
     }
 
     private StringBuilder printRows(TreeSet<String> symbols) {
