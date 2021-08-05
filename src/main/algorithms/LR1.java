@@ -26,6 +26,13 @@ class LR1 {
             }
 
             Grammar grammar = initializeGrammar(inputFile);
+
+            if (grammar.containsEpsilonProductions()) {
+                System.out.println("ERROR: Grammars containing epsilon productions are not " +
+                        "supported");
+                return;
+            }
+
             TreeMap<String, DOT> structures = getStructures(sentence, grammar);
             createDOTFiles(outputPrefix, structures);
 

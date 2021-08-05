@@ -42,19 +42,21 @@ class LL1 {
         TreeMap<String, DOT> structures = new TreeMap<>();
 
         populateStructures(structures, grammar);
-        LL1ParseTable table = (LL1ParseTable) structures.get("LL1ParseTable");
+        String oldPrefix = "LL1ParseTable";
+        LL1ParseTable table = (LL1ParseTable) structures.get(oldPrefix);
+        Grammar newGrammar;
 
         if (!grammar.isLL1(table)) {
             System.out.println("Grammar is not LL(1), removing left recursion");
 
-            grammar = grammar.removeLeftRecursion();
-            populateStructures(structures, grammar);
+            newGrammar = grammar.removeLeftRecursion();
+            populateStructures(structures, newGrammar);
         }
 
         if (sentence != null) {
             System.out.println("Printing sentence parse with LL(1) grammar");
 
-            boolean removedLeftRecursionEarlier = structures.size() >= 4;
+            boolean removedLeftRecursionEarlier = !grammar.isLL1(table);
             table = (LL1ParseTable) structures.get(removedLeftRecursionEarlier ?
                     removalPrefix + "LL1ParseTable" : "LL1ParseTable");
             LL1ParseOutput output = grammar.parseSentence(table, sentence);
