@@ -35,15 +35,15 @@ class FSA implements DOT {
 
             if (inputRegex == null) {
                 inputRegex = "";
-                System.out.println("Input regular expression not specified, using empty string by" +
-                        " default");
+                System.out.println("Input regular expression not specified, using empty " +
+                        "string by default");
             }
 
             checkCondition(
                     outputPrefix == null,
                     "ERROR: Output filename prefix not specified");
 
-            TreeMap<String, DOT> structures = getStructures(inputRegex);
+            TreeMap<Label, DOT> structures = getStructures(inputRegex);
             createDOTFiles(outputPrefix, structures);
 
         } catch (Exception e) {
@@ -53,15 +53,15 @@ class FSA implements DOT {
     }
 
     @NotNull
-    private static TreeMap<String, DOT> getStructures(String inputRegex) {
+    private static TreeMap<Label, DOT> getStructures(String inputRegex) {
         NFA nfa = NFA.regexToNFA(inputRegex);
         DFA dfa = DFA.NFAtoDFA(nfa);
         DFA minDfa = DFA.DFAtoMinDFA(dfa);
 
-        TreeMap<String, DOT> structures = new TreeMap<>();
-        structures.put("nfa", nfa);
-        structures.put("dfa", dfa);
-        structures.put("minDfa", minDfa);
+        TreeMap<Label, DOT> structures = new TreeMap<>();
+        structures.put(Label.nfa, nfa);
+        structures.put(Label.dfa, dfa);
+        structures.put(Label.minDfa, minDfa);
         return structures;
     }
 

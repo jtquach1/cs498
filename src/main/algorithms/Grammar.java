@@ -446,15 +446,15 @@ class Grammar implements DOT {
         Symbols symbols = new Symbols(terminals);
         symbols.addAll(nonTerminals);
 
-        return from -> {
-            symbols.forEach(symbol -> {
-                Items to = from.computeGoto(symbol, firstMap, productions);
-                Transition transition = new Transition(from, symbol, to);
-                if (!to.isEmpty() && !collection.contains(transition)) {
-                    collection.add(transition);
+        return from -> symbols.forEach(
+                symbol -> {
+                    Items to = from.computeGoto(symbol, firstMap, productions);
+                    Transition transition = new Transition(from, symbol, to);
+                    if (!to.isEmpty() && !collection.contains(transition)) {
+                        collection.add(transition);
+                    }
                 }
-            });
-        };
+        );
     }
 
     private Items getStartState(FirstMap firstMap) {
@@ -681,10 +681,7 @@ class Grammar implements DOT {
             i++;
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<tr><td>Grammar, start: " + start + "</td></tr>");
-        sb.append(list);
-        return sb.toString();
+        return "<tr><td>Grammar, start: " + start + "</td></tr>" + list;
     }
 
     public String augmentedGrammarToDOT() {
@@ -706,10 +703,7 @@ class Grammar implements DOT {
             list.append("<tr><td align=\"left\">" + i + ". " + production.toDOT() + "</tr>");
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<tr><td>Grammar, start: " + start + "</td></tr>");
-        sb.append(list);
-        return sb.toString();
+        return "<tr><td>Grammar, start: " + start + "</td></tr>" + list;
     }
 }
 

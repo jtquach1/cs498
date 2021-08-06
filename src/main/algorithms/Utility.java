@@ -13,6 +13,19 @@ import java.util.stream.Collectors;
 
 import static algorithms.Grammar.EPSILON;
 import static algorithms.Grammar.GREEK_EPSILON;
+import static algorithms.Label.*;
+
+enum Label {
+    nfa, dfa, minDfa,
+
+    grammar,
+
+    ll1ParseTable, ll1ParseOutput, leftRecursionRemoved, first, follow,
+    leftRecursionRemovedGrammar, leftRecursionRemovedTable, leftRecursionRemovedOutput,
+    leftRecursionRemovedFirst, leftRecursionRemovedFollow,
+
+    lr1ParseTable, lr1ParseOutput, augmented, collection
+}
 
 interface DOT {
     String toDOT();
@@ -219,16 +232,30 @@ class Utility {
         return seeFlag ? null : result;
     }
 
-    static void createDOTFiles(String outputPrefix, TreeMap<String, DOT> structures) throws IOException {
-        for (String entry : structures.keySet()) {
-            String fileName = outputPrefix + "." + entry + ".dot";
+    static void createDOTFiles(String outputPrefix, TreeMap<Label, DOT> structures) throws IOException {
+        for (Label entry : structures.keySet()) {
+            String name = switch (entry) {
+                case leftRecursionRemovedGrammar -> getAlternativeName(Label.grammar);
+                case leftRecursionRemovedTable -> getAlternativeName(ll1ParseTable);
+                case leftRecursionRemovedFirst -> getAlternativeName(first);
+                case leftRecursionRemovedFollow -> getAlternativeName(follow);
+                case leftRecursionRemovedOutput -> getAlternativeName(ll1ParseOutput);
+                default -> entry.name();
+            };
+
+            String fileName = outputPrefix + "." + name + ".dot";
             Path path = Paths.get(fileName);
             Collection<String> dot = createDOT(structures, entry);
             Files.write(path, dot, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         }
     }
 
-    private static Collection<String> createDOT(TreeMap<String, DOT> structures, String entry) {
+    @NotNull
+    private static String getAlternativeName(Label original) {
+        return Label.leftRecursionRemoved.name() + "." + original.name();
+    }
+
+    private static Collection<String> createDOT(TreeMap<Label, DOT> structures, Label entry) {
         DOT structure = structures.get(entry);
         String content = structure.toDOT();
 
@@ -241,7 +268,7 @@ class Utility {
             );
         }
 
-        if (structure instanceof Grammar && entry.contains("augmented")) {
+        if (structure instanceof Grammar && entry.equals(augmented)) {
             content = ((Grammar) structure).augmentedGrammarToDOT();
         }
         return Arrays.asList("digraph {",

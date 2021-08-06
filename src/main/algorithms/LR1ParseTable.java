@@ -101,7 +101,8 @@ class LR1ParseTable implements DOT {
 
         int headerLength = actionHeaderLength + gotoHeaderLength + 1;
 
-        header.append("<tr><td colspan=\"" + headerLength + "\">LR(1) Parse Tables</td></tr>");
+        header.append("<tr><td colspan=\"" + headerLength + "\">" +
+                "LR(1) Parse Tables, start: " + startIndex + "</td></tr>");
 
         header.append("<tr>" +
                 "<td rowspan=\"2\">States</td>" +
@@ -456,9 +457,9 @@ class LR1Collection extends ListWithUniques<Items> implements DOT {
                 .map(symbol -> "<td>" + symbol + "</td>")
                 .collect(Collectors.joining(""));
 
-        header.append("<tr>" +
-                "<td colspan=\"" + (symbols.size() + 2) + "\">LR(1) Canonical Collection</td>" +
-                "</tr>");
+        int index = indexOf(start);
+        header.append("<tr><td colspan=\"" + (symbols.size() + 2) + "\">" +
+                "LR(1) Canonical Collection, start: " + index + "</td></tr>");
 
         header.append("<tr>" +
                 "<td rowspan=\"2\">States</td>" +

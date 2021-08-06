@@ -4,14 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.TreeMap;
 
+import static algorithms.Label.lr1ParseOutput;
+import static algorithms.Label.lr1ParseTable;
 import static algorithms.Utility.*;
 
 class LR1 {
-    private static final String table = "LR1ParseTable";
-    private static final String output = "LR1ParseOutput";
-    private static final String augmentedSuffix = ".augmented";
-    private static final String grammar = "grammar";
-    private static final String collection = "LR1Collection";
 
     public static void main(String[] args) throws Exception {
         TreeMap<String, String> arguments = getArguments(args);
@@ -35,7 +32,7 @@ class LR1 {
                     grammar.containsEpsilonProductions(),
                     "ERROR: Grammars containing epsilon productions are not supported");
 
-            TreeMap<String, DOT> structures = getStructures(sentence, grammar);
+            TreeMap<Label, DOT> structures = getStructures(sentence, grammar);
             createDOTFiles(outputPrefix, structures);
 
         } catch (Exception e) {
@@ -45,20 +42,20 @@ class LR1 {
     }
 
     @NotNull
-    private static TreeMap<String, DOT> getStructures(String sentence, Grammar grammar) throws Exception {
+    private static TreeMap<Label, DOT> getStructures(String sentence, Grammar grammar) throws Exception {
         System.out.println("Printing out LR(1) canonical collection, Action table, and Goto table");
-        TreeMap<String, DOT> structures = new TreeMap<>();
+        TreeMap<Label, DOT> structures = new TreeMap<>();
 
         populateStructures(structures, grammar);
-        LR1ParseTable parseTable = (LR1ParseTable) structures.get(table);
+        LR1ParseTable table = (LR1ParseTable) structures.get(lr1ParseTable);
 
-        boolean canParseWithNoConflicts = grammar.isLR1(parseTable);
+        boolean canParseWithNoConflicts = grammar.isLR1(table);
 
         if (sentence != null && canParseWithNoConflicts) {
             System.out.println("Printing sentence parse with LR(1) grammar");
-            parseTable = (LR1ParseTable) structures.get(table);
-            LR1ParseOutput parseOutput = grammar.parseSentence(parseTable, sentence);
-            structures.put(output, parseOutput);
+            table = (LR1ParseTable) structures.get(lr1ParseTable);
+            LR1ParseOutput output = grammar.parseSentence(table, sentence);
+            structures.put(lr1ParseOutput, output);
 
         } else {
             String message = "Grammar is not LR(1)";
@@ -71,13 +68,14 @@ class LR1 {
         return structures;
     }
 
-    private static void populateStructures(TreeMap<String, DOT> structures, Grammar grammar) {
+    private static void populateStructures(TreeMap<Label, DOT> structures, Grammar grammar) {
+        Grammar augmented = grammar.augment();
         LR1Collection collection = grammar.computeLR1Collection();
         LR1ParseTable table = grammar.generateLR1ParseTable(collection);
 
-        structures.put(LR1.grammar, grammar);
-        structures.put(LR1.grammar + augmentedSuffix, grammar.augment());
-        structures.put(LR1.table, table);
-        structures.put(LR1.collection, collection);
+        structures.put(Label.grammar, grammar);
+        structures.put(Label.augmented, augmented);
+        structures.put(Label.collection, collection);
+        structures.put(lr1ParseTable, table);
     }
 }
