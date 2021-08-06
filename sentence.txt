@@ -1,1 +1,1 @@
-id * id + id
+if ( e ) if ( e ) s else s
