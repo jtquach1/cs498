@@ -1,4 +1,8 @@
-S ::= if ( E ) S
-S ::= if ( E ) S else S
-S ::= s
-E ::= e
+E ::= T E'
+E' ::= + T E'
+E' ::= ɛ
+T ::= F T'
+T' ::= * F T'
+T' ::= ɛ
+F ::= ( E )
+F ::= id

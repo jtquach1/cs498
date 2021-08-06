@@ -56,7 +56,7 @@ class LL1 {
         LL1ParseTable newTable = (LL1ParseTable) structures.get(leftRecursionRemovedTable);
 
         boolean oldGrammarAlreadyLL1 = oldGrammar.isLL1(oldTable);
-        boolean newGrammarAlreadyLL1 = newGrammar.isLL1(newTable);
+        boolean newGrammarAlreadyLL1 = newGrammar != null && newGrammar.isLL1(newTable);
         boolean canParseWithNoConflicts = oldGrammarAlreadyLL1 || newGrammarAlreadyLL1;
 
         if (sentence != null && canParseWithNoConflicts) {
