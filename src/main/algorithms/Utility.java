@@ -244,7 +244,6 @@ class Utility {
         if (structure instanceof Grammar && entry.contains("augmented")) {
             content = ((Grammar) structure).augmentedGrammarToDOT();
         }
-
         return Arrays.asList("digraph {",
                 "\ttbl [",
                 "\tshape=plaintext",
@@ -289,6 +288,13 @@ class Utility {
                 .collect(Collectors.toCollection(Symbols::new));
 
         return new Grammar(nonTerminals, terminals, start, productions);
+    }
+
+    static void checkCondition(boolean condition, String message) {
+        if (condition) {
+            System.out.println(message);
+            System.exit(1);
+        }
     }
 }
 

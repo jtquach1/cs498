@@ -10,6 +10,11 @@ import static algorithms.Utility.*;
 
 class LL1 {
     private static final String removalPrefix = "leftRecursionRemoved.";
+    private static final String grammar = "grammar";
+    private static final String table = "LL1ParseTable";
+    private static final String output = "LL1ParseOutput";
+    private static final String first = "first";
+    private static final String follow = "follow";
 
     public static void main(String[] args) throws Exception {
         TreeMap<String, String> arguments = getArguments(args);
@@ -19,19 +24,18 @@ class LL1 {
             String sentence = arguments.get("sentence");
             String outputPrefix = arguments.get("outputPrefix");
 
-            if (inputFile == null) {
-                System.out.println("ERROR: Input filename not specified");
-                return;
-            }
+            checkCondition(
+                    inputFile == null,
+                    "ERROR: Input filename not specified");
 
-            if (outputPrefix == null) {
-                System.out.println("ERROR: Output filename prefix not specified");
-                return;
-            }
+            checkCondition(
+                    outputPrefix == null,
+                    "ERROR: Output filename prefix not specified");
 
             Grammar grammar = initializeGrammar(inputFile);
             TreeMap<String, DOT> structures = getStructures(sentence, grammar);
             createDOTFiles(outputPrefix, structures);
+
         } catch (Exception e) {
             System.out.println("ERROR: Invalid grammar");
             throw e;
@@ -51,34 +55,33 @@ class LL1 {
 
     private static void tryToPopulateStructuresWithParse(String sentence,
                                                          TreeMap<String, DOT> structures) throws Exception {
-        Grammar oldGrammar = (Grammar) structures.get("grammarLL1");
-        Grammar newGrammar = (Grammar) structures.get(removalPrefix + "grammarLL1");
-        LL1ParseTable oldTable = (LL1ParseTable) structures.get("LL1ParseTable");
-        LL1ParseTable newTable = (LL1ParseTable) structures.get(removalPrefix + "LL1ParseTable");
+        Grammar oldGrammar = (Grammar) structures.get(grammar);
+        Grammar newGrammar = (Grammar) structures.get(removalPrefix + grammar);
+        LL1ParseTable oldTable = (LL1ParseTable) structures.get(table);
+        LL1ParseTable newTable = (LL1ParseTable) structures.get(removalPrefix + table);
 
         boolean oldGrammarAlreadyLL1 = oldGrammar.isLL1(oldTable);
         boolean newGrammarAlreadyLL1 = newGrammar.isLL1(newTable);
         boolean canParseWithNoConflicts = oldGrammarAlreadyLL1 || newGrammarAlreadyLL1;
 
-        // What if both LL(1) parse tables have conflicts after attempting left recursion removal?
         if (sentence != null && canParseWithNoConflicts) {
             System.out.println("Printing sentence parse with LL(1) grammar");
 
-            String filename;
-            LL1ParseOutput output;
-
             if (oldGrammarAlreadyLL1) {
-                filename = "LL1ParseOutput";
-                output = oldGrammar.parseSentence(oldTable, sentence);
+                LL1ParseOutput output = oldGrammar.parseSentence(oldTable, sentence);
+                structures.put(LL1.output, output);
             } else {
-                filename = removalPrefix + "LL1ParseOutput";
-                output = newGrammar.parseSentence(newTable, sentence);
+                LL1ParseOutput output = newGrammar.parseSentence(newTable, sentence);
+                structures.put(removalPrefix + LL1.output, output);
             }
-            structures.put(filename, output);
 
-        } else if (!canParseWithNoConflicts) {
+        } else {
             removeLeftRecursionAttempts(structures);
-            System.out.println("Grammar cannot be converted to LL(1)");
+            String message = "Grammar cannot be converted to LL(1)";
+            if (sentence != null) {
+                message += ", cannot parse sentence";
+            }
+            System.out.println(message);
         }
     }
 
@@ -94,7 +97,7 @@ class LL1 {
     private static void tryToPopulateStructuresWithLL1Grammar(Grammar grammar,
                                                               TreeMap<String, DOT> structures) {
         populateStructures(structures, grammar);
-        LL1ParseTable table = (LL1ParseTable) structures.get("LL1ParseTable");
+        LL1ParseTable table = (LL1ParseTable) structures.get(LL1.table);
 
         if (!grammar.isLL1(table)) {
             System.out.println("Grammar is not LL(1), attempting to remove left recursion");
@@ -111,15 +114,15 @@ class LL1 {
         LL1ParseTable table = grammar.generateLL1ParseTable(firstMap, followMap);
 
         if (removedLeftRecursionEarlier) {
-            structures.put(removalPrefix + "grammarLL1", grammar);
-            structures.put(removalPrefix + "firstMap", firstMap);
-            structures.put(removalPrefix + "followMap", followMap);
-            structures.put(removalPrefix + "LL1ParseTable", table);
+            structures.put(removalPrefix + LL1.grammar, grammar);
+            structures.put(removalPrefix + first, firstMap);
+            structures.put(removalPrefix + follow, followMap);
+            structures.put(removalPrefix + LL1.table, table);
         } else {
-            structures.put("grammarLL1", grammar);
-            structures.put("firstMap", firstMap);
-            structures.put("followMap", followMap);
-            structures.put("LL1ParseTable", table);
+            structures.put(LL1.grammar, grammar);
+            structures.put(first, firstMap);
+            structures.put(follow, followMap);
+            structures.put(LL1.table, table);
         }
     }
 }

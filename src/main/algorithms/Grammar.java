@@ -682,7 +682,7 @@ class Grammar implements DOT {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<tr><td>Grammar</td></tr>");
+        sb.append("<tr><td>Grammar, start: " + start + "</td></tr>");
         sb.append(list);
         return sb.toString();
     }
@@ -691,14 +691,14 @@ class Grammar implements DOT {
         StringBuilder list = new StringBuilder();
         List<Production> productions = new ArrayList<>(this.productions);
 
-        Optional<Production> start = productions
+        Optional<Production> startProduction = productions
                 .stream()
                 .filter(production -> production.getLhs().equals(this.start))
                 .findFirst();
 
-        if (start.isPresent()) {
-            productions.remove(start.get());
-            productions.add(0, start.get());
+        if (startProduction.isPresent()) {
+            productions.remove(startProduction.get());
+            productions.add(0, startProduction.get());
         }
 
         for (int i = 0; i < productions.size(); i++) {
@@ -707,7 +707,7 @@ class Grammar implements DOT {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<tr><td>Grammar</td></tr>");
+        sb.append("<tr><td>Grammar, start: " + start + "</td></tr>");
         sb.append(list);
         return sb.toString();
     }

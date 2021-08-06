@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static algorithms.Utility.createDOTFiles;
-import static algorithms.Utility.getNonFlag;
+import static algorithms.Utility.*;
 
 class FSA implements DOT {
     static final char EPSILON = '\u025B';
@@ -40,10 +39,9 @@ class FSA implements DOT {
                         " default");
             }
 
-            if (outputPrefix == null) {
-                System.out.println("ERROR: Output filename prefix not specified");
-                return;
-            }
+            checkCondition(
+                    outputPrefix == null,
+                    "ERROR: Output filename prefix not specified");
 
             TreeMap<String, DOT> structures = getStructures(inputRegex);
             createDOTFiles(outputPrefix, structures);
