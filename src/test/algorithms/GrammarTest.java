@@ -1011,14 +1011,6 @@ class GrammarTest {
     }
 
     @Test
-    void deepClone() {
-        Grammar expected = arithmeticExpressionRedux;
-        Grammar actual = expected.deepClone();
-        assertEquals(expected, actual);
-        assertNotSame(expected, actual);
-    }
-
-    @Test
     void augment() {
         assertEquals(augmentedArithmeticExpression, arithmeticExpression.augment());
     }

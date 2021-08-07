@@ -396,7 +396,7 @@ class Grammar implements DOT {
         return enumerations;
     }
 
-    Grammar deepClone() {
+    private Grammar deepClone() {
         Symbols nonTerminals = new Symbols(this.nonTerminals);
         Symbols terminals = new Symbols(this.terminals);
         Productions productions = new Productions(this.productions);
