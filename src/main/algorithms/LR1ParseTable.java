@@ -59,7 +59,6 @@ class LR1ParseTable implements DOT {
                 startIndex.equals(other.startIndex);
     }
 
-
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
@@ -282,7 +281,6 @@ class LR1ParseOutputEntry extends OutputEntry<Pair, String, Action> implements D
         super(stack, input, output, cursor);
     }
 
-
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();
@@ -340,7 +338,6 @@ class Pair implements Comparable<Pair>, DOT {
         Pair other = (Pair) o;
         return Objects.equals(stateIndex, other.stateIndex) && Objects.equals(symbol, other.symbol);
     }
-
 
     @Override
     public String toDOT() {

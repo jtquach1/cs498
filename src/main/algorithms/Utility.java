@@ -279,6 +279,7 @@ class Utility {
                 "\t\t" + content,
                 "\t\t</table>",
                 "\t>];",
+                "margin=0",
                 "}");
     }
 

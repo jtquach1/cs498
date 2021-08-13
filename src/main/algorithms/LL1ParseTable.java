@@ -29,7 +29,6 @@ class FollowMap extends TreeMap<String, Symbols> implements DOT {
         this.put(symbol, set);
     }
 
-
     @Override
     public String toDOT() {
         StringBuilder sb = new StringBuilder();

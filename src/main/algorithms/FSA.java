@@ -54,6 +54,7 @@ class FSA implements DOT {
 
     @NotNull
     private static TreeMap<Label, DOT> getStructures(String inputRegex) {
+        System.out.println("Printing out NFA, DFA, and minimal DFA");
         NFA nfa = NFA.regexToNFA(inputRegex);
         DFA dfa = DFA.NFAtoDFA(nfa);
         DFA minDfa = DFA.DFAtoMinDFA(dfa);
