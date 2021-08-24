@@ -39,7 +39,7 @@ class LL1 {
 
     @NotNull
     private static TreeMap<Label, DOT> getStructures(String sentence, Grammar grammar) throws Exception {
-        System.out.println("Printing out first sets, follow sets, and LL(1) parse table");
+        System.out.println("Printing out grammar, first sets, follow sets, and LL(1) parse table");
         TreeMap<Label, DOT> structures = new TreeMap<>();
 
         tryToPopulateStructuresWithLL1Grammar(grammar, structures);
@@ -70,7 +70,7 @@ class LL1 {
                 structures.put(leftRecursionRemovedOutput, output);
             }
 
-        } else {
+        } else if (!canParseWithNoConflicts) {
             removeLeftRecursionAttempts(structures);
             String message = "Grammar cannot be converted to LL(1)";
             if (sentence != null) {

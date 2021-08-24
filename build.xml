@@ -1,10 +1,6 @@
-<!--
-can keep in algorithms package, then pull into jminusminus
-future meeting: talk about what kind of standalone programs we want
--->
 <project default="jar">
 
-    <property name="APP_FULL_NAME" value="Algorithms from Introduction to Compiler Construction in a Java World (ICCJW)" />
+    <property name="APP_FULL_NAME" value="Implementation of Algorithms from Introduction to Compiler Construction in a Java World" />
     <property name="SRC_DIR" value="src/main" />
     <property name="CLASS_DIR" value="out" />
     <property name="LIB_DIR" value="lib" />

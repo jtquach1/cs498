@@ -43,7 +43,8 @@ class LR1 {
 
     @NotNull
     private static TreeMap<Label, DOT> getStructures(String sentence, Grammar grammar) throws Exception {
-        System.out.println("Printing out LR(1) canonical collection, Action table, and Goto table");
+        System.out.println("Printing out grammar, augmented grammar, LR(1) canonical collection, " +
+                "Action table, and Goto table");
         TreeMap<Label, DOT> structures = new TreeMap<>();
 
         populateStructures(structures, grammar);
@@ -57,7 +58,7 @@ class LR1 {
             LR1ParseOutput output = grammar.parseSentence(table, sentence);
             structures.put(lr1ParseOutput, output);
 
-        } else {
+        } else if (!canParseWithNoConflicts) {
             String message = "Grammar is not LR(1)";
             if (sentence != null) {
                 message += ", cannot parse sentence";
