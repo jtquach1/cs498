@@ -101,7 +101,7 @@ OpenJDK 64-Bit Server VM (build 14.0.2+12-Ubuntu-120.04, mixed mode, sharing)
 
 ### Download and install Maven
 
-This step is required for development. At the time of this writing, the current version
+This step is required if you want to develop and build the project. At the time of this writing, the current version
 of [Maven](https://maven.apache.org/download.cgi) is 3.8.2.
 
 ### Download and build the project
@@ -113,19 +113,27 @@ git clone https://github.com/jtquach1/cs498.git
 cd cs498
 ```
 
-#### Build a runnable jar:
+Then, you can proceed to run any of the Maven commands.
+
+#### Compile classes:
 
 ```shell
-mvn package
+mvn compile
 ```
-
-The package should be found in `./target/algorithms.jar`.
 
 #### Run unit tests:
 
 ```shell
 mvn test
 ```
+
+#### Build a runnable jar (also compiles classes and runs unit tests):
+
+```shell
+mvn package
+```
+
+The package should be found in `./target/algorithms.jar`.
 
 #### Cleanup produced files:
 
@@ -163,60 +171,22 @@ java algorithms.FSA -i inputRegex -o outputPrefix
 
 Where `inputRegex` is a regular expression using `.`, `|`, `(`, `)`, `*` operators and `outputPrefix` is a prefix added
 to the generated DOT files. `inputRegex` must be surrounded by `""` because `(`, `)`, `|` are special characters
-in [Bash](https://www.gnu.org/software/bash/manual/html_node/index.html). Only `outputPrefix` is
-required. This program generates the DOT files for the NFA, DFA, and minimal DFA from `inputRegex`. If `inputRegex` is not specified, then it is set to the empty string by default.
+in [Bash](https://www.gnu.org/software/bash/manual/html_node/index.html).
+
+See [this flowchart](./fsa_flowchart.pdf) for more details on running the program.
 
 #### On Windows
-
-##### With `inputRegex` surrounded by `""`
 
 ```shell
 PS C:\Users\jtqua> java algorithms.FSA -i "(a|b)a*b" -o example
 Printing out NFA, DFA, and minimal DFA
-PS C:\Users\jtqua> java algorithms.FSA -i "a|b" -o example
-Printing out NFA, DFA, and minimal DFA
-```
-
-##### Without `""`
-
-```shell
-PS C:\Users\jtqua> java algorithms.FSA -i (a|b)a*b -o example
-a : The term 'a' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
-spelling of the name, or if a path was included, verify that the path is correct and try again.
-At line:1 char:25
-+ java algorithms.FSA -i (a|b)a*b -o example
-+                         ~
-    + CategoryInfo          : ObjectNotFound: (a:String) [], CommandNotFoundException
-    + FullyQualifiedErrorId : CommandNotFoundException
-
-PS C:\Users\jtqua> java algorithms.FSA -i a|b -o example
-b : The term 'b' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the
-spelling of the name, or if a path was included, verify that the path is correct and try again.
-At line:1 char:26
-+ java algorithms.FSA -i a|b -o example
-+                          ~
-    + CategoryInfo          : ObjectNotFound: (b:String) [], CommandNotFoundException
-    + FullyQualifiedErrorId : CommandNotFoundException
 ```
 
 #### On Linux
 
-##### With `inputRegex` surrounded by `""`
-
 ```shell
 jtquach@DESKTOP-4LLQMM3:~$ java algorithms.FSA -i "(a|b)a*b" -o example
 Printing out NFA, DFA, and minimal DFA
-jtquach@DESKTOP-4LLQMM3:~$ java algorithms.FSA -i "a|b" -o example
-Printing out NFA, DFA, and minimal DFA
-```
-
-##### Without `""`
-
-```shell
-jtquach@DESKTOP-4LLQMM3:~$ java algorithms.FSA -i (a|b)a*b -o example
--bash: syntax error near unexpected token `('
-jtquach@DESKTOP-4LLQMM3:~$ java algorithms.FSA -i a|b -o example
-b: command not found
 ```
 
 ### LL(1) parsing program
@@ -228,12 +198,8 @@ java algorithms.LL1 -i inputFile -o outputPrefix
 java algorithms.LL1 -i inputFile -s sentence -o outputPrefix
 ```
 
-Where `inputFile` is file containing a BNF-grammar, `sentence` is a file containing the space-delimited program to
-parse, and `outputPrefix` is a prefix added to the generated DOT files. Only `inputFile` and `outputPrefix` are
-required.
-
-If the grammar is already LL(1), then left-recursion removal will not be performed. If it is not already LL(1) and its
-equivalent grammar with any left-recursion removed is not LL(1), then no `sentence` parsing is performed.
+Where `inputFile` is a file containing a BNF-grammar, `sentence` is a file containing the space-delimited program to
+parse, and `outputPrefix` is a prefix added to the generated DOT files.
 
 Each line of `inputFile` is a production defined by the following grammar:
 
@@ -246,11 +212,8 @@ Each line of `inputFile` is a production defined by the following grammar:
 <delimiter> ::= ::=
 ```
 
-This program generates the DOT files for the input grammar, first sets, follow sets, LL(1) parse table, equivalent
-grammar with any left recursion removed, and LL(1) sentence parse if either grammar is LL(1) and `sentence` is
-specified.
-
-See [grammar.txt](./grammar.txt) for an example of an `inputFile` and [sentence.txt](./sentence.txt) as an example of
+See [this flowchart](./ll1_flowchart.pdf) for more details on running the program. Additionally,
+see [grammar.txt](./grammar.txt) for an example of an `inputFile` and [sentence.txt](./sentence.txt) as an example of
 a `sentence`.
 
 #### On Windows
@@ -280,11 +243,10 @@ java algorithms.LR1 -i inputFile -o outputPrefix
 java algorithms.LR1 -i inputFile -s sentence -o outputPrefix
 ```
 
-The parameters `inputFile`, `outputPrefix`, and `sentence` are defined the same as those in
-the [LL(1) parsing program commands](#commands).
-
-This program generates the DOT files for the input grammar, augmented grammar, LR(1) collection, LR(1) parse table (
-containing Action and Goto tables), and LR(1) sentence parse if the grammar is LR(1) and `sentence` is specified. However, this program does not handle grammars with epsilon productions.
+The parameters `inputFile`, `sentence`, and `outputPrefix` are defined the same as those in
+the [LL(1) parsing program commands](#commands). See [this flowchart](./lr1_flowchart.pdf) for more details on running
+the program. Additionally, see [grammar.txt](./grammar.txt) for an example of an `inputFile`
+and [sentence.txt](./sentence.txt) as an example of a `sentence`.
 
 #### On Windows
 
