@@ -1,9 +1,10 @@
 <project default="jar">
 
-    <property name="APP_FULL_NAME" value="Implementation of Algorithms from Introduction to Compiler Construction in a Java World" />
-    <property name="SRC_DIR" value="src/main" />
-    <property name="CLASS_DIR" value="out" />
-    <property name="LIB_DIR" value="lib" />
+    <property name="APP_FULL_NAME"
+              value="Implementation of Algorithms from Introduction to Compiler Construction in a Java World"/>
+    <property name="SRC_DIR" value="src/main"/>
+    <property name="CLASS_DIR" value="out"/>
+    <property name="LIB_DIR" value="lib"/>
 
     <!-- help: Lists algorithms targets -->
     <target name="help">
@@ -17,11 +18,13 @@
     <!-- compile: Compiles the algorithms source files. -->
     <target name="compile" depends="clean">
         <echo message="Compiling algorithms source files..."/>
-        <mkdir dir="${CLASS_DIR}" />
-        <javac srcdir="${SRC_DIR}" destdir="${CLASS_DIR}" includes="algorithms/**"
-               includeantruntime="false" debug="on">
+        <mkdir dir="${CLASS_DIR}"/>
+        <javac srcdir="${SRC_DIR}" destdir="${CLASS_DIR}" includes="algorithms/**" includeantruntime="false" debug="on">
             <!-- Uncomment the following to see compiler warnings. -->
             <!-- <compilerarg value="-Xlint" />                    -->
+            <compilerarg value="--enable-preview"/>
+            <compilerarg value="--release"/>
+            <compilerarg value="14"/>
         </javac>
     </target>
 
@@ -34,14 +37,14 @@
     </target>
 
     <!--
-       package: Makes a distributable package for the compiler which includes the sources
+       package: Makes a distributable package which includes the sources
     -->
     <target name="package" depends="jar">
         <echo message="Making a distributable algorithms.zip..."/>
         <zip destfile="algorithms.zip"
              basedir="../"
              includes="algorithms/**"
-             excludes="algorithms/${CLASS_DIR}/**,algorithms/*.zip" />
+             excludes="algorithms/${CLASS_DIR}/**,algorithms/*.zip"/>
     </target>
 
     <!-- clean: Removes generated files and folders. -->
@@ -50,9 +53,9 @@
         <delete>
             <fileset dir="${basedir}" includes="**/*.class"/>
         </delete>
-        <delete file="algorithms.zip" />
-        <delete file="${LIB_DIR}/algorithms.jar" />
-        <delete dir="${CLASS_DIR}" />
+        <delete file="algorithms.zip"/>
+        <delete file="${LIB_DIR}/algorithms.jar"/>
+        <delete dir="${CLASS_DIR}"/>
     </target>
 
 </project>
