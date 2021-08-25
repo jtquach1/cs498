@@ -173,7 +173,7 @@ Where `inputRegex` is a regular expression using `.`, `|`, `(`, `)`, `*` operato
 to the generated DOT files. `inputRegex` must be surrounded by `""` because `(`, `)`, `|` are special characters
 in [Bash](https://www.gnu.org/software/bash/manual/html_node/index.html).
 
-See [this flowchart](./fsa_flowchart.pdf) for more details on running the program.
+See [this flowchart](pdf/fsa_flowchart.pdf) for more details on running the program.
 
 #### On Windows
 
@@ -212,7 +212,7 @@ Each line of `inputFile` is a production defined by the following grammar:
 <delimiter> ::= ::=
 ```
 
-See [this flowchart](./ll1_flowchart.pdf) for more details on running the program. Additionally,
+See [this flowchart](pdf/ll1_flowchart.pdf) for more details on running the program. Additionally,
 see [grammar.txt](./grammar.txt) for an example of an `inputFile` and [sentence.txt](./sentence.txt) as an example of
 a `sentence`.
 
@@ -244,7 +244,7 @@ java algorithms.LR1 -i inputFile -s sentence -o outputPrefix
 ```
 
 The parameters `inputFile`, `sentence`, and `outputPrefix` are defined the same as those in
-the [LL(1) parsing program commands](#commands). See [this flowchart](./lr1_flowchart.pdf) for more details on running
+the [LL(1) parsing program commands](#commands). See [this flowchart](pdf/lr1_flowchart.pdf) for more details on running
 the program. Additionally, see [grammar.txt](./grammar.txt) for an example of an `inputFile`
 and [sentence.txt](./sentence.txt) as an example of a `sentence`.
 
