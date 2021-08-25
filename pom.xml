@@ -7,7 +7,11 @@
     <artifactId>algorithms</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <name>Implementation of Algorithms from Introduction to Compiler Construction in a Java World</name>
+    <url>https://github.com/jtquach1/cs498</url>
+
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
     </properties>
@@ -22,9 +26,15 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>20.1.0</version>
+            <version>22.0.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <sourceDirectory>src/main</sourceDirectory>
+        <testSourceDirectory>src/test</testSourceDirectory>
+    </build>
 
 </project>
